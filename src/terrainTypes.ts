@@ -8,4 +8,8 @@ export class TerrainTypeMap {
   rowCount() {
     return this.tileTypesByRow.length
   }
+
+  columnCount() {
+    return this.tileTypesByRow[0].length
+  }
 }
