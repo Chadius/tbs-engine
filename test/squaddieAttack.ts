@@ -24,7 +24,7 @@ describe('Squaddie creation', () => {
   })
 })
 
-describe('Squaddie is attacked', () => {
+describe('Squaddie takes damage', () => {
   it('Knows the squaddie is alive if it has positive health', () => {
     const target = new Squaddie(5)
     expect(target.isAlive()).to.equal(true)
@@ -34,5 +34,11 @@ describe('Squaddie is attacked', () => {
     const target = new Squaddie(5)
     target.takeDamage(2)
     expect(target.getCurrentHealth()).to.equal(3)
+  })
+
+  it('Knows when the squaddie is dead from taking more damage than health', () => {
+    const target = new Squaddie(5)
+    target.takeDamage(5)
+    expect(target.isAlive()).to.equal(false)
   })
 })
