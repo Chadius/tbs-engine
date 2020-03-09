@@ -1,10 +1,17 @@
+const squaddieStatQualifier = [
+  "current",
+  "base"
+]
+
 export class Squaddie {
   maxHealth: number
   strength: number
   armor: number
+  health: number
 
   constructor(maxHealth, strength = 0, armor = 0) {
     this.maxHealth = maxHealth
+    this.health = this.getMaxHealth()
     this.strength = strength
     this.armor = armor
   }
@@ -22,7 +29,7 @@ export class Squaddie {
   }
 
   getHealth() {
-    return this.maxHealth
+    return this.health
   }
 
   getBaseStrength() {
@@ -39,5 +46,13 @@ export class Squaddie {
 
   getCurrentArmor() {
     return this.getBaseArmor()
+  }
+
+  isAlive() {
+    return this.getCurrentHealth() > 0
+  }
+
+  takeDamage(damageTaken) {
+    this.health -= damageTaken
   }
 }

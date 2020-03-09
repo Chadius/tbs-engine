@@ -23,3 +23,16 @@ describe('Squaddie creation', () => {
     expect(soldier.getCurrentArmor()).to.equal(1)
   })
 })
+
+describe('Squaddie is attacked', () => {
+  it('Knows the squaddie is alive if it has positive health', () => {
+    const target = new Squaddie(5)
+    expect(target.isAlive()).to.equal(true)
+  })
+
+  it('Knows how to deal damage to Squaddie', () => {
+    const target = new Squaddie(5)
+    target.takeDamage(2)
+    expect(target.getCurrentHealth()).to.equal(3)
+  })
+})
