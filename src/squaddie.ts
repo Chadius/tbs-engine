@@ -1,10 +1,12 @@
 export class Squaddie {
   maxHealth: number
   strength: number
+  armor: number
 
-  constructor(maxHealth, strength = 0) {
+  constructor(maxHealth, strength = 0, armor = 0) {
     this.maxHealth = maxHealth
     this.strength = strength
+    this.armor = armor
   }
 
   getBaseMaxHealth() {
@@ -29,5 +31,13 @@ export class Squaddie {
 
   getCurrentStrength() {
     return this.getBaseStrength()
+  }
+
+  getBaseArmor() {
+    return this.armor
+  }
+
+  getCurrentArmor() {
+    return this.getBaseArmor()
   }
 }

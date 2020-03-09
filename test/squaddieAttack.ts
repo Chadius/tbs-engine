@@ -16,4 +16,10 @@ describe('Squaddie creation', () => {
     expect(soldier.getBaseStrength()).to.equal(3)
     expect(soldier.getCurrentStrength()).to.equal(3)
   })
+
+  it('Has Armor', () => {
+    const soldier = new Squaddie(5, 3, 1)
+    expect(soldier.getBaseArmor()).to.equal(1)
+    expect(soldier.getCurrentArmor()).to.equal(1)
+  })
 })
