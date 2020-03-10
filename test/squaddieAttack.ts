@@ -13,25 +13,25 @@ describe('Squaddie creation', () => {
   })
 
   it('Has Strength', () => {
-    const soldier = new Squaddie(5, 3)
+    const soldier = new Squaddie(5, {strength:3})
     expect(soldier.getBaseStrength()).to.equal(3)
     expect(soldier.getCurrentStrength()).to.equal(3)
   })
 
   it('Has Armor', () => {
-    const soldier = new Squaddie(5, 3, 1)
+    const soldier = new Squaddie(5, {strength:3, armor:1})
     expect(soldier.getBaseArmor()).to.equal(1)
     expect(soldier.getCurrentArmor()).to.equal(1)
   })
 
   it('Has Aim', () => {
-    const soldier = new Squaddie(5, 3, 1, 2)
-    expect(soldier.getBaseAim()).to.equal(2 )
+    const soldier = new Squaddie(5, {strength:3, armor:1, aim:2})
+    expect(soldier.getBaseAim()).to.equal(2)
     expect(soldier.getCurrentAim()).to.equal(2)
   })
 
   it('Has Dodge', () => {
-    const soldier = new Squaddie(5, 3, 1, 2, 4)
+    const soldier = new Squaddie(5, {strength:3, armor:1, aim:2, dodge:4})
     expect(soldier.getBaseDodge()).to.equal(4)
     expect(soldier.getCurrentDodge()).to.equal(4)
   })
@@ -58,8 +58,8 @@ describe('Squaddie takes damage', () => {
 
 describe('Attacker can deal damage to Target Squaddie', () => {
   it('Allows attacker to strike target', () => {
-    const attacker = new Squaddie(5, 5, 0)
-    const target = new Squaddie(5, 1, 1)
+    const attacker = new Squaddie(5, {strength:5, armor:0})
+    const target = new Squaddie(5, {strength:1, armor:1})
 
     const resolver = new AttackResolver(target, attacker)
 
@@ -70,8 +70,8 @@ describe('Attacker can deal damage to Target Squaddie', () => {
   })
 
   it('Allows counterattacks', () => {
-    const attacker = new Squaddie(5, 5, 0)
-    const target = new Squaddie(5, 8, 1)
+    const attacker = new Squaddie(5, {strength:5, armor:0})
+    const target = new Squaddie(5, {strength:8, armor:1})
 
     const resolver = new AttackResolver(target, attacker)
 
@@ -82,8 +82,8 @@ describe('Attacker can deal damage to Target Squaddie', () => {
   })
 
   it('Can resolve a round of attacks', () => {
-    const attacker = new Squaddie(5, 5, 0)
-    const target = new Squaddie(5, 8, 1)
+    const attacker = new Squaddie(5, {strength:5, armor:0})
+    const target = new Squaddie(5, {strength:8, armor:1})
 
     const resolver = new AttackResolver(target, attacker)
     const allResults = resolver.resolveRoundOfAttacks()
