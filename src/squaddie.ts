@@ -3,12 +3,16 @@ export class Squaddie {
   strength: number
   armor: number
   health: number
+  aim: number
+  dodge: number
 
-  constructor(maxHealth, strength = 0, armor = 0) {
+  constructor(maxHealth, strength = 0, armor = 0, aim = 0, dodge = 0) {
     this.maxHealth = maxHealth
     this.health = this.getMaxHealth()
     this.strength = strength
     this.armor = armor
+    this.aim = aim
+    this.dodge = dodge
   }
 
   getBaseMaxHealth() {
@@ -49,5 +53,21 @@ export class Squaddie {
 
   takeDamage(damageTaken) {
     this.health -= damageTaken
+  }
+
+  getBaseAim() {
+    return this.aim
+  }
+
+  getCurrentAim() {
+    return this.getBaseAim()
+  }
+
+  getBaseDodge() {
+    return this.dodge
+  }
+
+  getCurrentDodge() {
+    return this.getBaseDodge()
   }
 }

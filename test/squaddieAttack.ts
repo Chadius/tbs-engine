@@ -23,6 +23,18 @@ describe('Squaddie creation', () => {
     expect(soldier.getBaseArmor()).to.equal(1)
     expect(soldier.getCurrentArmor()).to.equal(1)
   })
+
+  it('Has Aim', () => {
+    const soldier = new Squaddie(5, 3, 1, 2)
+    expect(soldier.getBaseAim()).to.equal(2 )
+    expect(soldier.getCurrentAim()).to.equal(2)
+  })
+
+  it('Has Dodge', () => {
+    const soldier = new Squaddie(5, 3, 1, 2, 4)
+    expect(soldier.getBaseDodge()).to.equal(4)
+    expect(soldier.getCurrentDodge()).to.equal(4)
+  })
 })
 
 describe('Squaddie takes damage', () => {
