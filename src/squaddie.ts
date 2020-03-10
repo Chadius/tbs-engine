@@ -1,8 +1,3 @@
-const squaddieStatQualifier = [
-  "current",
-  "base"
-]
-
 export class Squaddie {
   maxHealth: number
   strength: number

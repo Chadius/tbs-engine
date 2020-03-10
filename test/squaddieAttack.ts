@@ -1,5 +1,6 @@
 import {expect} from 'chai'
 import {Squaddie} from "../src/squaddie";
+import {AttackResolver} from "../src/attackResolver";
 
 describe('Squaddie creation', () => {
   it('Has health', () => {
@@ -40,5 +41,19 @@ describe('Squaddie takes damage', () => {
     const target = new Squaddie(5)
     target.takeDamage(5)
     expect(target.isAlive()).to.equal(false)
+  })
+})
+
+describe('Attacker can deal damage to Target Squaddie', () => {
+  it('Can track attacks', () => {
+    const attacker = new Squaddie(5, 5, 0)
+    const target = new Squaddie(5, 1, 1)
+
+    const resolver = new AttackResolver(target, attacker)
+
+    const attackResults = resolver.resolveAttack()
+
+    expect(attackResults.getDamage()).to.equal(4)
+    expect(target.isAlive()).to.equal(true)
   })
 })
