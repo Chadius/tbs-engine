@@ -56,4 +56,17 @@ describe('Attacker can deal damage to Target Squaddie', () => {
     expect(attackResults.getDamage()).to.equal(4)
     expect(target.isAlive()).to.equal(true)
   })
+
+  it('Allows counterattacks', () => {
+    const attacker = new Squaddie(5, 5, 0)
+    const target = new Squaddie(5, 8, 1)
+
+    const resolver = new AttackResolver(target, attacker)
+
+    const attackResults = resolver.resolveAttack()
+    const counterResults = resolver.resolveCounter()
+
+    expect(counterResults.getDamage()).to.equal(8)
+    expect(attacker.isAlive()).to.equal(false)
+  })
 })

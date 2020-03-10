@@ -19,6 +19,7 @@ export class AttackResolver {
   attacker: Squaddie
 
   damageDealt: number
+  counterDamageDealt: number
 
   constructor(target, attacker) {
     this.target = target
@@ -37,6 +38,21 @@ export class AttackResolver {
     return new AttackResolution(
       rawDamage,
       this.damageDealt
+    )
+  }
+
+  resolveCounter() {
+    const rawDamage = this.target.getCurrentStrength()
+    this.counterDamageDealt = Math.max(
+      rawDamage - this.attacker.getCurrentArmor(),
+      0
+    )
+
+    this.attacker.takeDamage(this.counterDamageDealt)
+
+    return new AttackResolution(
+      rawDamage,
+      this.counterDamageDealt
     )
   }
 }
