@@ -26,7 +26,7 @@ export class AttackResolver {
     this.attacker = attacker
   }
 
-  resolveAttack() {
+  resolveAttackerAttack() {
     const rawDamage = this.attacker.getCurrentStrength()
     this.damageDealt = Math.max(
       rawDamage - this.target.getCurrentArmor(),
@@ -41,7 +41,7 @@ export class AttackResolver {
     )
   }
 
-  resolveCounter() {
+  resolveTargetCounterattack() {
     const rawDamage = this.target.getCurrentStrength()
     this.counterDamageDealt = Math.max(
       rawDamage - this.attacker.getCurrentArmor(),
@@ -54,5 +54,22 @@ export class AttackResolver {
       rawDamage,
       this.counterDamageDealt
     )
+  }
+
+  resolveRoundOfAttacks() {
+    const allResolutions = []
+    if (this.attacker.isAlive()) {
+      allResolutions.push(
+        this.resolveAttackerAttack()
+      )
+    }
+
+    if (this.target.isAlive()) {
+      allResolutions.push(
+        this.resolveTargetCounterattack()
+      )
+    }
+
+    return allResolutions
   }
 }

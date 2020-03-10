@@ -45,13 +45,13 @@ describe('Squaddie takes damage', () => {
 })
 
 describe('Attacker can deal damage to Target Squaddie', () => {
-  it('Can track attacks', () => {
+  it('Allows attacker to strike target', () => {
     const attacker = new Squaddie(5, 5, 0)
     const target = new Squaddie(5, 1, 1)
 
     const resolver = new AttackResolver(target, attacker)
 
-    const attackResults = resolver.resolveAttack()
+    const attackResults = resolver.resolveAttackerAttack()
 
     expect(attackResults.getDamage()).to.equal(4)
     expect(target.isAlive()).to.equal(true)
@@ -63,9 +63,26 @@ describe('Attacker can deal damage to Target Squaddie', () => {
 
     const resolver = new AttackResolver(target, attacker)
 
-    const attackResults = resolver.resolveAttack()
-    const counterResults = resolver.resolveCounter()
+    const counterResults = resolver.resolveTargetCounterattack()
 
+    expect(counterResults.getDamage()).to.equal(8)
+    expect(attacker.isAlive()).to.equal(false)
+  })
+
+  it('Can resolve a round of attacks', () => {
+    const attacker = new Squaddie(5, 5, 0)
+    const target = new Squaddie(5, 8, 1)
+
+    const resolver = new AttackResolver(target, attacker)
+    const allResults = resolver.resolveRoundOfAttacks()
+
+    expect(allResults.length).to.equal(2)
+
+    const attackResults = allResults[0]
+    expect(attackResults.getDamage()).to.equal(4)
+    expect(target.isAlive()).to.equal(true)
+
+    const counterResults = allResults[1]
     expect(counterResults.getDamage()).to.equal(8)
     expect(attacker.isAlive()).to.equal(false)
   })
