@@ -1,9 +1,14 @@
 import {expect} from 'chai'
 import {Squaddie} from "../src/squaddie";
-import {AttackResolver} from "../src/attackResolver";
+import {
+  AttackerAimStrategyAlwaysHit,
+  AttackerAimStrategyAlwaysMiss,
+  AttackerAimStrategyRollToHit,
+  AttackResolver
+} from "../src/attackResolver";
 
 describe('Squaddie creation', () => {
-  it('Has health', () => {
+  it('Has Health and MaxHealth', () => {
     const soldier = new Squaddie(5)
 
     expect(soldier.getBaseMaxHealth()).to.equal(5)
@@ -65,6 +70,7 @@ describe('Attacker can deal damage to Target Squaddie', () => {
 
     const attackResults = resolver.resolveAttackerAttack()
 
+    expect(attackResults.didItHit()).to.equal(true)
     expect(attackResults.getDamage()).to.equal(4)
     expect(target.isAlive()).to.equal(true)
   })
@@ -77,6 +83,7 @@ describe('Attacker can deal damage to Target Squaddie', () => {
 
     const counterResults = resolver.resolveTargetCounterattack()
 
+    expect(counterResults.didItHit()).to.equal(true)
     expect(counterResults.getDamage()).to.equal(8)
     expect(attacker.isAlive()).to.equal(false)
   })
@@ -97,5 +104,55 @@ describe('Attacker can deal damage to Target Squaddie', () => {
     const counterResults = allResults[1]
     expect(counterResults.getDamage()).to.equal(8)
     expect(attacker.isAlive()).to.equal(false)
+  })
+})
+
+describe('Attacks have a chance to miss', () => {
+  it('Knows it hits if attacks always hit', () => {
+    const attacker = new Squaddie(5, {strength:20, armor:0})
+    const target = new Squaddie(5, {strength:1, armor:1})
+
+    const resolver = new AttackResolver(target, attacker, new AttackerAimStrategyAlwaysHit)
+
+    const attackResults = resolver.resolveAttackerAttack()
+
+    expect(attackResults.didItHit()).to.equal(true)
+    expect(target.isAlive()).to.equal(false)
+  })
+
+  it('Knows it missed if attacks never hits', () => {
+    const attacker = new Squaddie(5, {strength:20, armor:0})
+    const target = new Squaddie(5, {strength:1, armor:1})
+
+    const resolver = new AttackResolver(target, attacker, new AttackerAimStrategyAlwaysMiss)
+
+    const attackResults = resolver.resolveAttackerAttack()
+
+    expect(attackResults.didItHit()).to.equal(false)
+    expect(target.isAlive()).to.equal(true)
+  })
+
+  it('Knows it will hit if attacker aim is too high', () => {
+    const attacker = new Squaddie(5, {strength:20, armor:0, aim: 20})
+    const target = new Squaddie(5, {strength:1, armor:1})
+
+    const resolver = new AttackResolver(target, attacker, new AttackerAimStrategyRollToHit)
+
+    const attackResults = resolver.resolveAttackerAttack()
+
+    expect(attackResults.didItHit()).to.equal(true)
+    expect(target.isAlive()).to.equal(false)
+  })
+
+  it('Knows it will miss if target dodge is too high', () => {
+    const attacker = new Squaddie(5, {strength:20, armor:0})
+    const target = new Squaddie(5, {strength:1, armor:1, dodge: 20})
+
+    const resolver = new AttackResolver(target, attacker, new AttackerAimStrategyRollToHit)
+
+    const attackResults = resolver.resolveAttackerAttack()
+
+    expect(attackResults.didItHit()).to.equal(false)
+    expect(target.isAlive()).to.equal(true)
   })
 })
