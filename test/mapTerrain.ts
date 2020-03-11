@@ -1,4 +1,4 @@
-import {MapTerrain} from '../src/mapTerrain'
+import {MapTerrain} from '../src/battleMap'
 import {expect} from 'chai'
 
 describe ('Map Terrain Dimensions', () => {
@@ -24,7 +24,7 @@ describe ('Map Terrain Dimensions', () => {
 
 describe('Invalid terrain definition throws exceptions', () => {
   it('Throws an error when the rows do not have the same number of tiles', () => {
-    const makeBadTerrain = () => {
+    const makeBadTerrain: () => void = () => {
       new MapTerrain([
         [],
         ['1', '2'],

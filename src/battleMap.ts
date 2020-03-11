@@ -18,3 +18,19 @@ export class MapTerrain{
     return this.tileTypesByRow[0].length
   }
 }
+
+export class BattleMap{
+  terrain: MapTerrain
+
+  constructor(terrain: MapTerrain) {
+    this.terrain = terrain
+  }
+
+  rowCount() {
+    return this.terrain.rowCount()
+  }
+
+  columnCount() {
+    return this.terrain.columnCount()
+  }
+}
