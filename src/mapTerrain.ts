@@ -1,4 +1,4 @@
-export class TerrainTypeMap {
+export class MapTerrain{
   tileTypesByRow: Array<string[]>
 
   constructor(typeTiles: Array<string[]>) {
