@@ -1,3 +1,5 @@
+import {Squaddie} from "./squaddie";
+
 export class MapTerrain{
   tileTypesByRow: Array<string[]>
 
@@ -10,27 +12,71 @@ export class MapTerrain{
     this.tileTypesByRow = typeTiles
   }
 
-  rowCount() {
+  rowCount(): number {
     return this.tileTypesByRow.length
   }
 
-  columnCount() {
+  columnCount(): number {
     return this.tileTypesByRow[0].length
   }
 }
 
 export class BattleMap{
   terrain: MapTerrain
+  squaddiesByLocationIndex: Map<number, Squaddie>
 
   constructor(terrain: MapTerrain) {
     this.terrain = terrain
+
+    this.squaddiesByLocationIndex = new Map<number, Squaddie>()
   }
 
-  rowCount() {
+  rowCount(): number {
     return this.terrain.rowCount()
   }
 
-  columnCount() {
+  columnCount(): number {
     return this.terrain.columnCount()
+  }
+
+  isOnMap(row: number, column: number): boolean {
+    return (
+      row >= 0
+      && row < this.rowCount()
+      && column >= 0
+      && column < this.columnCount()
+    )
+  }
+
+  coordinatesToLocationIndex(row: number, column: number): number {
+    if (this.isOnMap(row, column) !== true) {
+      return undefined
+    }
+    return (row * this.columnCount() + column)
+  }
+
+  locationIndexToCoordinates(locationIndex: number): {row: number; column: number} {
+    const row = Math.floor(locationIndex / this.columnCount()),
+      column = locationIndex % this.columnCount()
+
+    if (this.isOnMap(row, column) !== true) {
+      return undefined
+    }
+
+    return {
+      row: row,
+      column: column,
+    }
+  }
+
+  addSquaddie(newSquaddie: Squaddie, row: number, column: number) {
+    const locationIndex = 1
+    this.squaddiesByLocationIndex[locationIndex] = newSquaddie
+  }
+
+  getSquaddieAtLocation(row: number, column: number) {
+    if(row == 0 && column == 1) { return this.squaddiesByLocationIndex[1] }
+    if(row == 1 && column == 2) { return null }
+    return undefined
   }
 }

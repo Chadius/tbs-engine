@@ -57,7 +57,7 @@ describe('Squaddie takes damage', () => {
   it('Knows when the squaddie is dead from taking more damage than health', () => {
     const target = new Squaddie(5)
     target.takeDamage(5)
-    expect(target.isAlive()).to.equal(false)
+    expect(target.isAlive()).to.be.false
   })
 })
 
@@ -70,9 +70,9 @@ describe('Attacker can deal damage to Target Squaddie', () => {
 
     const attackResults = resolver.resolveAttackerAttack()
 
-    expect(attackResults.didItHit()).to.equal(true)
+    expect(attackResults.didItHit()).to.be.true
     expect(attackResults.getDamage()).to.equal(4)
-    expect(target.isAlive()).to.equal(true)
+    expect(target.isAlive()).to.be.true
   })
 
   it('Allows counterattacks', () => {
@@ -83,9 +83,9 @@ describe('Attacker can deal damage to Target Squaddie', () => {
 
     const counterResults = resolver.resolveTargetCounterattack()
 
-    expect(counterResults.didItHit()).to.equal(true)
+    expect(counterResults.didItHit()).to.be.true
     expect(counterResults.getDamage()).to.equal(8)
-    expect(attacker.isAlive()).to.equal(false)
+    expect(attacker.isAlive()).to.be.false
   })
 
   it('Can resolve a round of attacks', () => {
@@ -99,11 +99,11 @@ describe('Attacker can deal damage to Target Squaddie', () => {
 
     const attackResults = allResults[0]
     expect(attackResults.getDamage()).to.equal(4)
-    expect(target.isAlive()).to.equal(true)
+    expect(target.isAlive()).to.be.true
 
     const counterResults = allResults[1]
     expect(counterResults.getDamage()).to.equal(8)
-    expect(attacker.isAlive()).to.equal(false)
+    expect(attacker.isAlive()).to.be.false
   })
 })
 
@@ -116,8 +116,8 @@ describe('Attacks have a chance to miss', () => {
 
     const attackResults = resolver.resolveAttackerAttack()
 
-    expect(attackResults.didItHit()).to.equal(true)
-    expect(target.isAlive()).to.equal(false)
+    expect(attackResults.didItHit()).to.be.true
+    expect(target.isAlive()).to.be.false
   })
 
   it('Knows it missed if attacks never hits', () => {
@@ -128,8 +128,8 @@ describe('Attacks have a chance to miss', () => {
 
     const attackResults = resolver.resolveAttackerAttack()
 
-    expect(attackResults.didItHit()).to.equal(false)
-    expect(target.isAlive()).to.equal(true)
+    expect(attackResults.didItHit()).to.be.false
+    expect(target.isAlive()).to.be.true
   })
 
   it('Knows it will hit if attacker aim is too high', () => {
@@ -140,8 +140,8 @@ describe('Attacks have a chance to miss', () => {
 
     const attackResults = resolver.resolveAttackerAttack()
 
-    expect(attackResults.didItHit()).to.equal(true)
-    expect(target.isAlive()).to.equal(false)
+    expect(attackResults.didItHit()).to.be.true
+    expect(target.isAlive()).to.be.false
   })
 
   it('Knows it will miss if target dodge is too high', () => {
@@ -152,7 +152,7 @@ describe('Attacks have a chance to miss', () => {
 
     const attackResults = resolver.resolveAttackerAttack()
 
-    expect(attackResults.didItHit()).to.equal(false)
-    expect(target.isAlive()).to.equal(true)
+    expect(attackResults.didItHit()).to.be.false
+    expect(target.isAlive()).to.be.true
   })
 })
