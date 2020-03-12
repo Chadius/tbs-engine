@@ -50,6 +50,7 @@ describe('Map contains the terrain and can query it', () => {
 describe('Map can contain Squaddies',  () => {
   let terrain: MapTerrain
   let soldier: Squaddie
+  let soldier2: Squaddie
 
   beforeEach(() => {
     terrain = new MapTerrain([
@@ -59,15 +60,30 @@ describe('Map can contain Squaddies',  () => {
     ])
 
     soldier = new Squaddie(5)
+    soldier2 = new Squaddie(10)
   })
 
   it('Can add a Squaddie and find its location', () => {
     const battleMap = new BattleMap(terrain)
 
     battleMap.addSquaddie(soldier, 0, 1)
+    battleMap.addSquaddie(soldier2, 2, 1)
 
     expect(battleMap.getSquaddieAtLocation(0,1)).to.equal(soldier)
-    expect(battleMap.getSquaddieAtLocation(1,2)).to.equal(null)
+    expect(battleMap.getSquaddieAtLocation(2,1)).to.equal(soldier2)
+    expect(battleMap.getSquaddieAtLocation(1,1)).to.equal(null)
     expect(battleMap.getSquaddieAtLocation(10,30)).to.equal(undefined)
+  })
+
+  it('Cannot add two Squaddies at the same location', () => {
+    const battleMap = new BattleMap(terrain)
+
+    battleMap.addSquaddie(soldier, 0, 1)
+
+    const stackingSquaddiesThrowsErrors: () => void = () => {
+      battleMap.addSquaddie(soldier2, 0, 1)
+    }
+
+    expect(stackingSquaddiesThrowsErrors).to.throw(Error)
   })
 });

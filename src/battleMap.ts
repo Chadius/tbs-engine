@@ -70,13 +70,20 @@ export class BattleMap{
   }
 
   addSquaddie(newSquaddie: Squaddie, row: number, column: number) {
-    const locationIndex = 1
+    const locationIndex = this.coordinatesToLocationIndex(row, column)
+    if (this.squaddiesByLocationIndex[locationIndex]) {
+      throw Error(`Two squaddies cannot be at the same coordinates (${row}, ${column})`)
+    }
+
     this.squaddiesByLocationIndex[locationIndex] = newSquaddie
   }
 
   getSquaddieAtLocation(row: number, column: number) {
-    if(row == 0 && column == 1) { return this.squaddiesByLocationIndex[1] }
-    if(row == 1 && column == 2) { return null }
-    return undefined
+    const squaddieCoordinate = this.coordinatesToLocationIndex(row, column)
+    if (!squaddieCoordinate) {
+      return undefined
+    }
+
+    return this.squaddiesByLocationIndex[squaddieCoordinate] || null
   }
 }
