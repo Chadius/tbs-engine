@@ -1,19 +1,23 @@
 export class Squaddie {
   maxHealth: number
+
   strength: number
   armor: number
   health: number
   aim: number
   dodge: number
 
-  constructor(maxHealth, attributes = {}  ) {
+  movePerTurn: number
+
+  constructor(maxHealth, attributes = {}, movement = {} ) {
     this.maxHealth = maxHealth
     this.health = this.getMaxHealth()
 
     this.constructAttributes(attributes)
+    this.constructMovement(movement)
   }
 
-  constructAttributes(attributes) {
+  constructAttributes(attributes: object) {
     const defaultAttributes = {
       strength: 0,
       armor: 0,
@@ -21,65 +25,81 @@ export class Squaddie {
       dodge: 0,
     }
 
-    this.strength = attributes.strength || defaultAttributes.strength
-    this.armor = attributes.armor || defaultAttributes.armor
-    this.aim = attributes.aim || defaultAttributes.aim
-    this.dodge = attributes.dodge || defaultAttributes.dodge
+    this.strength = attributes['strength'] || defaultAttributes.strength
+    this.armor = attributes['armor'] || defaultAttributes.armor
+    this.aim = attributes['aim'] || defaultAttributes.aim
+    this.dodge = attributes['dodge'] || defaultAttributes.dodge
   }
 
-  getBaseMaxHealth() {
+  constructMovement(movement: object) {
+    const defaultMovement = {
+      movePerTurn: 0,
+    }
+
+    this.movePerTurn = movement['movePerTurn'] || movement['movement'] || defaultMovement.movePerTurn
+  }
+
+  getBaseMaxHealth(): number {
     return this.maxHealth
   }
 
-  getMaxHealth() {
+  getMaxHealth(): number {
     return this.getBaseMaxHealth()
   }
 
-  getCurrentHealth() {
+  getCurrentHealth(): number {
     return this.getHealth()
   }
 
-  getHealth() {
+  getHealth(): number {
     return this.health
   }
 
-  getBaseStrength() {
+  getBaseStrength(): number {
     return this.strength
   }
 
-  getCurrentStrength() {
+  getCurrentStrength(): number {
     return this.getBaseStrength()
   }
 
-  getBaseArmor() {
+  getBaseArmor(): number {
     return this.armor
   }
 
-  getCurrentArmor() {
+  getCurrentArmor(): number {
     return this.getBaseArmor()
   }
 
-  isAlive() {
+  isAlive(): boolean {
     return this.getCurrentHealth() > 0
   }
 
-  takeDamage(damageTaken) {
+  takeDamage(damageTaken): void {
     this.health -= damageTaken
   }
 
-  getBaseAim() {
+  getBaseAim(): number {
     return this.aim
   }
 
-  getCurrentAim() {
+  getCurrentAim(): number {
     return this.getBaseAim()
   }
 
-  getBaseDodge() {
+  getBaseDodge(): number {
     return this.dodge
   }
 
-  getCurrentDodge() {
+  getCurrentDodge(): number {
     return this.getBaseDodge()
+  }
+
+  getBaseMovePerTurn(): number {
+    return this.movePerTurn
+  }
+
+  getCurrentMovePerTurn(): number {
+    return this.getBaseMovePerTurn()
   }
 }

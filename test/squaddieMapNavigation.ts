@@ -86,4 +86,11 @@ describe('Map can contain Squaddies',  () => {
 
     expect(stackingSquaddiesThrowsErrors).to.throw(Error)
   })
+
+  it('Squaddie has movement', () => {
+    const soldierWithMovement = new Squaddie(5, {}, {movement:6})
+
+    expect(soldierWithMovement.getBaseMovePerTurn()).to.equal(6)
+    expect(soldierWithMovement.getCurrentMovePerTurn()).to.equal(6)
+  })
 });
