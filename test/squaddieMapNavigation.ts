@@ -1,6 +1,7 @@
 import {expect} from 'chai'
 import {BattleMap, MapTerrain} from "../src/battleMap";
 import {Squaddie} from "../src/squaddie";
+import {Coordinate, Path} from "../src/mapMeasurement";
 
 describe('Map contains the terrain and can query it', () => {
   let terrain: MapTerrain
@@ -86,11 +87,70 @@ describe('Map can contain Squaddies',  () => {
 
     expect(stackingSquaddiesThrowsErrors).to.throw(Error)
   })
+});
 
+describe('Map can create Paths and Coordinates', () => {
+  it('Can create and inspect Coordinates', () => {
+    const coord = new Coordinate(2, 0)
+
+    expect(coord.row).to.equal(2)
+    expect(coord.column).to.equal(0)
+
+    expect(coord.getRow()).to.equal(2)
+    expect(coord.getColumn()).to.equal(0)
+  })
+
+  it('Can compare Coordinates', () => {
+    const coord = new Coordinate(2, 0)
+    const coord2 = new Coordinate(2, 0)
+    const coord3 = new Coordinate(0, 2)
+
+    expect(coord.equals(coord2)).to.be.true
+    expect(coord2.equals(coord)).to.be.true
+    expect(coord.equals(coord3)).to.be.false
+  })
+
+  it('Can create and query Paths', () => {
+    const startingCoord = new Coordinate(2, 0)
+    const path = new Path(startingCoord)
+
+    expect(path.getNumberOfCoordinates()).to.equal(1)
+    expect(path.getCurrentCoordinates().row).to.equal(2)
+    expect(path.getCurrentCoordinates().column).to.equal(0)
+    expect(path.getMovementCostSpent()).to.equal(0)
+  })
+
+  it('Can add more Coordinates to a Path and change the movement cost', () => {
+    const startingCoord = new Coordinate(2, 0)
+    const path = new Path(startingCoord)
+    path.addCoordinate(new Coordinate(2, 1), 1)
+    path.addCoordinate(new Coordinate(3, 1), 1)
+    path.addCoordinate(new Coordinate(3, 2), 1)
+    path.addCoordinate(new Coordinate(4, 3), 3)
+
+    expect(path.getNumberOfCoordinates()).to.equal(5)
+    expect(path.getCurrentCoordinates().row).to.equal(4)
+    expect(path.getCurrentCoordinates().column).to.equal(3)
+    expect(path.getMovementCostSpent()).to.equal(6)
+  })
+})
+
+describe('Squaddie has move limits on a map', () => {
   it('Squaddie has movement', () => {
     const soldierWithMovement = new Squaddie(5, {}, {movement:6})
 
     expect(soldierWithMovement.getBaseMovePerTurn()).to.equal(6)
     expect(soldierWithMovement.getCurrentMovePerTurn()).to.equal(6)
   })
-});
+
+  it('Can calculate as the crow flies distance to locations on a map', () => {
+    const terrain = new MapTerrain([
+      ['1', '1', '1'],
+      ['1', '1', '1'],
+      ['1', '1', '1'],
+      ['1', '1', '1'],
+    ])
+
+
+  })
+})

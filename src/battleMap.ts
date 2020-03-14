@@ -1,6 +1,6 @@
 import {Squaddie} from "./squaddie";
 
-export class MapTerrain{
+export class MapTerrain {
   tileTypesByRow: Array<string[]>
 
   constructor(typeTiles: Array<string[]>) {
