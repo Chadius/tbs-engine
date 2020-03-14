@@ -135,22 +135,69 @@ describe('Map can create Paths and Coordinates', () => {
   })
 })
 
+describe('Map can calculate as the crow flies distance between hex tiles', () => {
+  let terrain: MapTerrain
+  let battleMap: BattleMap
+
+  let startCoordEvenRow: Coordinate
+  let startCoordOddRow: Coordinate
+
+  beforeEach(() => {
+    terrain = new MapTerrain([
+      ['1', '1', '1', '1', '1',],
+      ['1', '1', '1', '1', '1',],
+      ['1', '1', '1', '1', '1',],
+      ['1', '1', '1', '1', '1',],
+    ])
+    battleMap = new BattleMap(terrain)
+    startCoordEvenRow = new Coordinate(2, 1)
+    startCoordOddRow = new Coordinate(3, 1)
+  })
+
+  it('Uses no movement if it does not move', () => {
+    expect(battleMap.getDirectDistance(startCoordEvenRow, startCoordEvenRow)).to.equal(0)
+  })
+
+  it('Moving from even to odd row costs 1', () => {
+    expect(battleMap.getDirectDistance(startCoordEvenRow, startCoordOddRow)).to.equal(1)
+  })
+
+  it('Moving along the same column costs 1 per row', () => {
+    const coordSameColumn = new Coordinate(0, 1)
+    expect(battleMap.getDirectDistance(startCoordEvenRow, coordSameColumn)).to.equal(2)
+  })
+
+  it('Moving along the same row costs 1 per column', () => {
+    const coordSameRow = new Coordinate(2, 4)
+    expect(battleMap.getDirectDistance(startCoordEvenRow, coordSameRow)).to.equal(3)
+  })
+
+  it('Moving from Even row to Odd Row diagonally left costs 1', () => {
+    const evenRowCanUseLeftDiagonal = new Coordinate(1, 0)
+    expect(battleMap.getDirectDistance(startCoordEvenRow, evenRowCanUseLeftDiagonal)).to.equal(1)
+  })
+
+  it('Moving from Odd row to Even Row diagonally right costs 1', () => {
+    const oddRowCanUseRightDiagonal = new Coordinate(2, 2)
+    expect(battleMap.getDirectDistance(startCoordOddRow, oddRowCanUseRightDiagonal)).to.equal(1)
+  })
+
+  it('Moving from Even row to Odd Row diagonally right costs 2', () => {
+    const evenRowCannotUseRightDiagonal = new Coordinate(1, 2)
+    expect(battleMap.getDirectDistance(startCoordEvenRow, evenRowCannotUseRightDiagonal)).to.equal(2)
+  })
+
+  it('Moving from Odd row to Even Row diagonally left costs 2', () => {
+    const oddRowCannotUseLeftDiagonal = new Coordinate(2, 0)
+    expect(battleMap.getDirectDistance(startCoordOddRow, oddRowCannotUseLeftDiagonal)).to.equal(2)
+  })
+})
+
 describe('Squaddie has move limits on a map', () => {
   it('Squaddie has movement', () => {
     const soldierWithMovement = new Squaddie(5, {}, {movement:6})
 
     expect(soldierWithMovement.getBaseMovePerTurn()).to.equal(6)
     expect(soldierWithMovement.getCurrentMovePerTurn()).to.equal(6)
-  })
-
-  it('Can calculate as the crow flies distance to locations on a map', () => {
-    const terrain = new MapTerrain([
-      ['1', '1', '1'],
-      ['1', '1', '1'],
-      ['1', '1', '1'],
-      ['1', '1', '1'],
-    ])
-
-
   })
 })

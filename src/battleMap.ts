@@ -1,4 +1,5 @@
 import {Squaddie} from "./squaddie";
+import {Coordinate} from "./mapMeasurement";
 
 export class MapTerrain {
   tileTypesByRow: Array<string[]>
@@ -85,5 +86,24 @@ export class BattleMap{
     }
 
     return this.squaddiesByLocationIndex[squaddieCoordinate] || null
+  }
+
+  getDirectDistance(startCoordinate: Coordinate, endCoordinate: Coordinate): number {
+    const columnDistance = endCoordinate.getColumn() - startCoordinate.getColumn()
+    const rowDistance = endCoordinate.getRow() - startCoordinate.getRow()
+
+    if (columnDistance === 0) {
+      return Math.abs(rowDistance)
+    }
+
+    if (rowDistance === 0) {
+      return Math.abs(columnDistance)
+    }
+
+    const startingRowIsEven = (startCoordinate.getRow() % 2 === 0)
+    const applyDiscountForUsingDiagonals = ((startingRowIsEven && columnDistance < 0) || (!startingRowIsEven && columnDistance > 0))
+    const discountForUsingDiagonals = applyDiscountForUsingDiagonals ? 1 : 0
+
+    return Math.abs(columnDistance) + Math.abs(rowDistance) - discountForUsingDiagonals
   }
 }
