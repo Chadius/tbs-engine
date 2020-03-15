@@ -20,6 +20,7 @@
     "ts-mocha": "^6.0.0"
   },
   "dependencies": {
+    "tinyqueue": "^2.0.3",
     "typescript": "^3.8.3"
   }
 }

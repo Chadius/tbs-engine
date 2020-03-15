@@ -1,5 +1,6 @@
 import {Squaddie} from "./squaddie";
 import {Coordinate} from "./mapMeasurement";
+import type = Mocha.utils.type;
 
 export class MapTerrain {
   tileTypesByRow: Array<string[]>
@@ -40,7 +41,16 @@ export class BattleMap{
     return this.terrain.columnCount()
   }
 
-  isOnMap(row: number, column: number): boolean {
+  isOnMap(rowOrCoordinate: number | Coordinate, column?: number): boolean {
+    let row = 0
+    if (typeof rowOrCoordinate === 'number') {
+      row = rowOrCoordinate
+    }
+    else {
+      row = rowOrCoordinate.getRow()
+      column = rowOrCoordinate.getColumn()
+    }
+
     return (
       row >= 0
       && row < this.rowCount()
@@ -49,7 +59,17 @@ export class BattleMap{
     )
   }
 
-  coordinatesToLocationIndex(row: number, column: number): number {
+  coordinatesToLocationIndex(rowOrCoordinate: number | Coordinate, column?: number): number {
+    let row: number = undefined
+
+    if(typeof rowOrCoordinate === 'number') {
+      row = rowOrCoordinate
+    }
+    else {
+      row = rowOrCoordinate.getRow()
+      column = rowOrCoordinate.getColumn()
+    }
+
     if (this.isOnMap(row, column) !== true) {
       return undefined
     }

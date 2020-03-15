@@ -2,6 +2,7 @@ import {expect} from 'chai'
 import {BattleMap, MapTerrain} from "../src/battleMap";
 import {Squaddie} from "../src/squaddie";
 import {Coordinate, Path} from "../src/mapMeasurement";
+import {MapSearchService} from "../src/MapSearchService";
 
 describe('Map contains the terrain and can query it', () => {
   let terrain: MapTerrain
@@ -190,6 +191,63 @@ describe('Map can calculate as the crow flies distance between hex tiles', () =>
   it('Moving from Odd row to Even Row diagonally left costs 2', () => {
     const oddRowCannotUseLeftDiagonal = new Coordinate(2, 0)
     expect(battleMap.getDirectDistance(startCoordOddRow, oddRowCannotUseLeftDiagonal)).to.equal(2)
+  })
+})
+
+describe('A* Navigation', () => {
+  let invalidStartPoint: Coordinate
+  let invalidEndPoint: Coordinate
+  let zeroZeroStartPoint: Coordinate
+
+  let oneTileMap: BattleMap
+  let oneRowMap: BattleMap
+
+  before(() => {
+    invalidStartPoint = new Coordinate(-1,-1)
+    invalidEndPoint = new Coordinate(-1,-1)
+    oneTileMap = new BattleMap(
+      new MapTerrain([
+        ['1', ],
+      ])
+    )
+    oneRowMap = new BattleMap(
+      new MapTerrain([
+        ['1', '1', '1', '1', ],
+      ])
+    )
+
+    zeroZeroStartPoint = new Coordinate(0,0)
+  })
+
+  it('Produces a 1 step Path when searching', () => {
+    const pathToStartingPoint = MapSearchService.calculatePath(oneTileMap, zeroZeroStartPoint, zeroZeroStartPoint)
+
+    expect(pathToStartingPoint.getNumberOfCoordinates()).to.equal(1)
+    expect(pathToStartingPoint.getCurrentCoordinates().row).to.equal(0)
+    expect(pathToStartingPoint.getCurrentCoordinates().column).to.equal(0)
+    expect(pathToStartingPoint.getMovementCostSpent()).to.equal(0)
+  })
+
+  it('Returns null if the start coordinate is off screen', () => {
+    const pathWithInvalidStartingPoint = MapSearchService.calculatePath(oneTileMap, invalidStartPoint, invalidStartPoint)
+
+    expect(pathWithInvalidStartingPoint).to.be.null
+  })
+
+  it('Returns null if the end coordinate is off screen', () => {
+    const pathWithInvalidStartingPoint = MapSearchService.calculatePath(oneTileMap, zeroZeroStartPoint, invalidEndPoint)
+
+    expect(pathWithInvalidStartingPoint).to.be.null
+  })
+
+  it('Returns a linear path', () => {
+    const endCoordinate = new Coordinate(0, 3)
+    const pathToStartingPoint = MapSearchService.calculatePath(oneRowMap, zeroZeroStartPoint, endCoordinate)
+
+    expect(pathToStartingPoint.getNumberOfCoordinates()).to.equal(4)
+    expect(pathToStartingPoint.getCurrentCoordinates().row).to.equal(0)
+    expect(pathToStartingPoint.getCurrentCoordinates().column).to.equal(3)
+    expect(pathToStartingPoint.getMovementCostSpent()).to.equal(3)
   })
 })
 
