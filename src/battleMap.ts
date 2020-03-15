@@ -126,14 +126,13 @@ export class BattleMap{
     return Math.abs(columnDistance) + Math.abs(rowDistance) - discountForUsingDiagonals
   }
 
-  getNeighbors(originCoordinate: Coordinate): Set<Coordinate> {
-    const newNeighbors = new Set<Coordinate>()
+  getNeighbors(originCoordinate: Coordinate): Array<Coordinate> {
     const originRow = originCoordinate.getRow()
     const originColumn = originCoordinate.getColumn()
     const originRowIsEven = (originRow % 2 === 0)
     const freeDiagonalDirection = originRowIsEven ? -1 : 1
 
-    const potentialNeighbors = [
+    return [
       new Coordinate(originRow, originColumn - 1),
       new Coordinate(originRow, originColumn + 1),
       new Coordinate(originRow - 1 , originColumn),
@@ -142,9 +141,5 @@ export class BattleMap{
       new Coordinate(originRow + 1, originColumn + freeDiagonalDirection),
     ]
       .filter((neighbor) => { return this.isOnMap(neighbor)})
-
-    potentialNeighbors.forEach((neighbor) => newNeighbors.add(neighbor))
-
-    return newNeighbors
   }
 }
