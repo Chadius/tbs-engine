@@ -1,6 +1,5 @@
 import {Squaddie} from "./squaddie";
 import {Coordinate} from "./mapMeasurement";
-import type = Mocha.utils.type;
 
 export class MapTerrain {
   tileTypesByRow: Array<string[]>
@@ -125,5 +124,27 @@ export class BattleMap{
     const discountForUsingDiagonals = applyDiscountForUsingDiagonals ? 1 : 0
 
     return Math.abs(columnDistance) + Math.abs(rowDistance) - discountForUsingDiagonals
+  }
+
+  getNeighbors(originCoordinate: Coordinate): Set<Coordinate> {
+    const newNeighbors = new Set<Coordinate>()
+    const originRow = originCoordinate.getRow()
+    const originColumn = originCoordinate.getColumn()
+    const originRowIsEven = (originRow % 2 === 0)
+    const freeDiagonalDirection = originRowIsEven ? -1 : 1
+
+    const potentialNeighbors = [
+      new Coordinate(originRow, originColumn - 1),
+      new Coordinate(originRow, originColumn + 1),
+      new Coordinate(originRow - 1 , originColumn),
+      new Coordinate(originRow + 1, originColumn),
+      new Coordinate(originRow - 1 , originColumn + freeDiagonalDirection),
+      new Coordinate(originRow + 1, originColumn + freeDiagonalDirection),
+    ]
+      .filter((neighbor) => { return this.isOnMap(neighbor)})
+
+    potentialNeighbors.forEach((neighbor) => newNeighbors.add(neighbor))
+
+    return newNeighbors
   }
 }

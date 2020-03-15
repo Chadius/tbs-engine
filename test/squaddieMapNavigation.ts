@@ -134,6 +134,67 @@ describe('Map can create Paths and Coordinates', () => {
     expect(path.getCurrentCoordinates().column).to.equal(3)
     expect(path.getMovementCostSpent()).to.equal(6)
   })
+
+  it('Can clone Paths', () => {
+    const startingCoord = new Coordinate(2, 0)
+    const firstPath = new Path(startingCoord)
+    const secondPath = firstPath.clone()
+    firstPath.addCoordinate(new Coordinate(2, 1), 1)
+
+    expect(firstPath.getNumberOfCoordinates()).to.equal(2)
+    expect(secondPath.getNumberOfCoordinates()).to.equal(1)
+    expect(secondPath.getCurrentCoordinates().row).to.equal(2)
+    expect(secondPath.getCurrentCoordinates().column).to.equal(0)
+    expect(secondPath.getMovementCostSpent()).to.equal(0)
+  })
+})
+
+describe('Map can generate neighbors based on location', () => {
+  let flatMap: BattleMap
+
+  before(() => {
+    flatMap = new BattleMap(
+      new MapTerrain([
+      ['1', '1', '1', '1', '1',],
+      ['1', '1', '1', '1', '1',],
+      ['1', '1', '1', '1', '1',],
+      ['1', '1', '1', '1', '1',],
+    ]))
+  })
+
+  const convertSetCoordinatesToArrayOfLocationIndecies = (setOfCoordinates: Set<Coordinate>): Array<number> => {
+    return [...setOfCoordinates].map((x) => {return flatMap.coordinatesToLocationIndex(x)})
+  }
+
+  const assertNeighborsInclude = (setOfNeighborCoordinates: Set<Coordinate>, expectedCoordinates: Array<Array<number>>): void => {
+    const locationOfNeighbors = convertSetCoordinatesToArrayOfLocationIndecies(setOfNeighborCoordinates)
+    expectedCoordinates.forEach((rowColumnPair: Array<number>) => {
+      const expectedLocation = flatMap.coordinatesToLocationIndex(rowColumnPair[0],rowColumnPair[1])
+      expect(locationOfNeighbors).to.include(expectedLocation, `Cannot find (${rowColumnPair[0]}, ${rowColumnPair[1]})`)
+    })
+  }
+
+  it('Can generate neighbors based on even row', () => {
+    const neighborsOfEvenRow = flatMap.getNeighbors(new Coordinate(2, 1))
+    expect(neighborsOfEvenRow.size).to.equal(6)
+    assertNeighborsInclude(neighborsOfEvenRow, [[2,0], [2,2], [3,1], [1,1], [3,0], [1,0],])
+  })
+
+  it('Can generate neighbors based on odd row', () => {
+    const neighborsOfOddRow = flatMap.getNeighbors(new Coordinate(1, 1))
+    expect(neighborsOfOddRow.size).to.equal(6)
+    assertNeighborsInclude(neighborsOfOddRow, [[1,0], [1,2], [0,1], [2,1], [0,2], [2,2],])
+  })
+
+  it('Can generate neighbors that are on the map', () => {
+    const neighborsOfLowerLeft = flatMap.getNeighbors(new Coordinate(0, 0))
+    expect(neighborsOfLowerLeft.size).to.equal(2)
+    assertNeighborsInclude(neighborsOfLowerLeft, [[1,0], [0,1]])
+
+    const neighborsOfUpperRight = flatMap.getNeighbors(new Coordinate(3, 4))
+    expect(neighborsOfUpperRight.size).to.equal(2)
+    assertNeighborsInclude(neighborsOfUpperRight, [[3,3], [2,4]])
+  })
 })
 
 describe('Map can calculate as the crow flies distance between hex tiles', () => {
@@ -240,15 +301,15 @@ describe('A* Navigation', () => {
     expect(pathWithInvalidStartingPoint).to.be.null
   })
 
-  it('Returns a linear path', () => {
-    const endCoordinate = new Coordinate(0, 3)
-    const pathToStartingPoint = MapSearchService.calculatePath(oneRowMap, zeroZeroStartPoint, endCoordinate)
-
-    expect(pathToStartingPoint.getNumberOfCoordinates()).to.equal(4)
-    expect(pathToStartingPoint.getCurrentCoordinates().row).to.equal(0)
-    expect(pathToStartingPoint.getCurrentCoordinates().column).to.equal(3)
-    expect(pathToStartingPoint.getMovementCostSpent()).to.equal(3)
-  })
+  // it('Returns a linear path', () => {
+  //   const endCoordinate = new Coordinate(0, 3)
+  //   const pathToStartingPoint = MapSearchService.calculatePath(oneRowMap, zeroZeroStartPoint, endCoordinate)
+  //
+  //   expect(pathToStartingPoint.getNumberOfCoordinates()).to.equal(4)
+  //   expect(pathToStartingPoint.getCurrentCoordinates().row).to.equal(0)
+  //   expect(pathToStartingPoint.getCurrentCoordinates().column).to.equal(3)
+  //   expect(pathToStartingPoint.getMovementCostSpent()).to.equal(3)
+  // })
 })
 
 describe('Squaddie has move limits on a map', () => {

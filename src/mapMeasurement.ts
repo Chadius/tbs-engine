@@ -45,4 +45,11 @@ export class Path {
     this.coordinates.push(newCoordinate)
     this.movementCostSpent = this.movementCostSpent + movementCost
   }
+
+  clone(): Path {
+    const clonedPath = new Path(this.coordinates[0])
+    clonedPath.coordinates = [...this.coordinates]
+    clonedPath.movementCostSpent = this.getMovementCostSpent()
+    return clonedPath
+  }
 }

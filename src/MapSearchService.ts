@@ -1,5 +1,18 @@
 import {Coordinate, Path} from "./mapMeasurement";
 import {BattleMap} from "./battleMap";
+import TinyQueue from "tinyqueue";
+
+function pathCompare (a: Path, b: Path): number {
+  const pathAMovementCost = a.getMovementCostSpent()
+  const pathBMovementCost = b.getMovementCostSpent()
+  if (pathAMovementCost < pathBMovementCost) {
+    return -1
+  }
+  if (pathAMovementCost > pathBMovementCost) {
+    return 1
+  }
+  return 0
+}
 
 export const MapSearchService = {
   calculatePath(battleMap: BattleMap, startCoordinate: Coordinate, endCoordinate: Coordinate): Path {
@@ -8,19 +21,23 @@ export const MapSearchService = {
     }
 
     const pathFromStartToEnd = new Path(startCoordinate)
-    const visitedLocations = new Set()
-    visitedLocations.add(battleMap.coordinatesToLocationIndex(startCoordinate))
-
-    // const pathsToSearch : Queue
+    // const visitedLocations = new Set()
+    // visitedLocations.add(battleMap.coordinatesToLocationIndex(startCoordinate))
     //
-    // let destinationFound = false, destinationUnreachable = false
+    // const pathsToSearch = new TinyQueue ([], pathCompare)
     //
-    // while(visitedLocations.size > 0 || destinationFound || destinationUnreachable) {
+    // while(visitedLocations.size > 0) {
     //   // If queue is empty, destination is unreachable. Stop.
-    //   // Pop the top of the queue
-    //   // Mark location as visited
-    //   // Is this the destination?
+    //   const currentPath = pathsToSearch.pop()
+    //
+    //   visitedLocations.add(battleMap.coordinatesToLocationIndex(currentPath.getCurrentCoordinates()))
+    //
+    //   if (currentPath.getCurrentCoordinates().equals(endCoordinate)) {
+    //     return currentPath
+    //   }
+    //
     //   // Add neighbors as long as they haven't been already visited
+    //   // const neighbors =
     // }
 
     return pathFromStartToEnd
