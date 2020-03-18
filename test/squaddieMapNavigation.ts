@@ -301,7 +301,7 @@ describe('A* Navigation', () => {
     expect(pathWithInvalidStartingPoint).to.be.null
   })
 
-  it.only('Returns a linear path', () => {
+  it('Returns a linear path', () => {
     const endCoordinate = new Coordinate(0, 3)
     const pathToStartingPoint = MapSearchService.calculatePath(oneRowMap, zeroZeroStartPoint, endCoordinate)
 

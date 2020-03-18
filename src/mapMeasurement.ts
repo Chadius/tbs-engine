@@ -23,10 +23,12 @@ export class Coordinate {
 export class Path {
   coordinates: Array<Coordinate>
   movementCostSpent: number
+  estimatedMovementCostToDestination: number
 
   constructor(startingCoordinate: Coordinate) {
     this.coordinates = new Array<Coordinate>(startingCoordinate)
     this.movementCostSpent = 0
+    this.estimatedMovementCostToDestination = 0
   }
 
   getNumberOfCoordinates(): number{
