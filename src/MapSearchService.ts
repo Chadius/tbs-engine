@@ -1,86 +1,42 @@
 import {Coordinate, Path} from "./mapMeasurement";
 import {BattleMap} from "./battleMap";
-import TinyQueue from "tinyqueue";
-
-export const pathCompare = (a: Path, b: Path): number => {
-  const pathAMovementCost = a.getMovementCostSpent()
-  const pathBMovementCost = b.getMovementCostSpent()
-  if (pathAMovementCost < pathBMovementCost) {
-    return -1
-  }
-  if (pathAMovementCost > pathBMovementCost) {
-    return 1
-  }
-  return 0
-}
+import {StraightLineStrategy} from "./searchStrategies/StraightLineStrategy";
+import {SearchHistoryContext, SearchStrategy} from "./searchStrategies/SearchStrategy";
 
 export const MapSearchService = {
-  calculatePath(battleMap: BattleMap, startCoordinate: Coordinate, endCoordinate: Coordinate): Path {
-    if(!MapSearchService.hasValidCoordinates(battleMap, startCoordinate, endCoordinate)) {
-      return null
+  runSearchAlgorithm(searchStrategy: SearchStrategy, searchHistoryContext: SearchHistoryContext) : Path | null{
+    searchStrategy.initalizeSearchHistory(searchHistoryContext)
+
+    const earlyExitCondition = searchStrategy.checkForEarlyExitCondition(searchHistoryContext)
+    if(earlyExitCondition.shouldExitEarly) {
+      return earlyExitCondition.returnVal
     }
 
-    const pathsToSearch = MapSearchService.initializeSearchHistory(startCoordinate)
+    while (searchStrategy.shouldContinueSearching(searchHistoryContext)) {
+      const currentPath = searchStrategy.getNextPath(searchHistoryContext)
 
-    const visitedLocations = new Set<number>()
-    visitedLocations.add(battleMap.coordinatesToLocationIndex(startCoordinate))
+      searchStrategy.markPathAsVisited(searchHistoryContext, currentPath)
 
-    while(pathsToSearch.length > 0) {
-      const currentPath = pathsToSearch.pop()
-
-      MapSearchService.markPathAsVisited(battleMap, currentPath, visitedLocations)
-
-      const pathIsAtDestination = (currentPath.getCurrentCoordinates().equals(endCoordinate))
-      if (pathIsAtDestination) {
-        return currentPath
+      const endSearchQuery = searchStrategy.shouldEndSearchEarly(searchHistoryContext, currentPath)
+      if (endSearchQuery.shouldExitEarly) {
+        return endSearchQuery.returnVal
       }
 
-      const neighbors = MapSearchService.getValidNeighbors(battleMap, currentPath, visitedLocations)
-      MapSearchService.addNeighbors(battleMap, currentPath, pathsToSearch, neighbors)
+      const neighbors = searchStrategy.findNewNeighborsForPath(searchHistoryContext, currentPath)
+      const newPaths = searchStrategy.addNeighborsToPath(searchHistoryContext, neighbors, currentPath)
+      searchStrategy.addNewPathsToSearch(searchHistoryContext, newPaths)
     }
 
-    return null
+    return searchStrategy.noPathsRemain(searchHistoryContext)
   },
 
-  markPathAsVisited(battleMap: BattleMap, currentPath: Path, visitedLocations: Set<number>) {
-    const currentPathLocationIndex = battleMap.coordinatesToLocationIndex(
-      currentPath.getCurrentCoordinates()
+  calculatePath(battleMap: BattleMap, startCoordinate: Coordinate, endCoordinate: Coordinate): Path | null {
+    const searchContext = new SearchHistoryContext (
+      battleMap,
+      startCoordinate,
+      endCoordinate
     )
-
-    visitedLocations.add(currentPathLocationIndex)
-  },
-
-  initializeSearchHistory(startCoordinate: Coordinate) {
-    const pathsToSearch = new TinyQueue<Path> ([], pathCompare)
-    pathsToSearch.push(new Path(startCoordinate))
-    return pathsToSearch
-  },
-
-  getValidNeighbors(battleMap: BattleMap, currentPath: Path, visitedLocations: Set<number>) {
-    const neighbors = battleMap.getNeighbors(currentPath.getCurrentCoordinates())
-      .filter((neighbor) => {
-        const locationIndex = battleMap.coordinatesToLocationIndex(neighbor)
-        return !(visitedLocations.has(locationIndex))
-      })
-    return neighbors
-  },
-
-  addNeighbors(
-    battleMap: BattleMap,
-    currentPath: Path,
-    pathsToSearch: TinyQueue<Path>,
-    neighbors: Array<Coordinate>
-  ): void {
-    // Make new paths using filtered neighbors
-    neighbors.forEach((neighbor) => {
-      const movementCostToNeighbor = 1
-      const newPathToSearch = currentPath.clone()
-      newPathToSearch.addCoordinate(neighbor, movementCostToNeighbor)
-      pathsToSearch.push(newPathToSearch)
-    })
-  },
-
-  hasValidCoordinates(battleMap: BattleMap, startCoordinate: Coordinate, endCoordinate: Coordinate): boolean {
-    return (battleMap.isOnMap(startCoordinate) && battleMap.isOnMap(endCoordinate))
+    const newSearchStrategy = new StraightLineStrategy()
+    return MapSearchService.runSearchAlgorithm(newSearchStrategy, searchContext)
   },
 }
