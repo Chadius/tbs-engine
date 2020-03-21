@@ -30,8 +30,7 @@ export class StraightLineStrategy implements SearchStrategy {
     searchHistoryContext.pathsToSearch.push(new Path(startCoordinate))
     visitedLocations.clear()
     visitedLocations.add(
-      battleMap.coordinatesToLocationIndex
-      (startCoordinate)
+      battleMap.coordinatesToLocationIndex(startCoordinate)
     )
   }
 

@@ -319,4 +319,44 @@ describe('Squaddie has move limits on a map', () => {
     expect(soldierWithMovement.getBaseMovePerTurn()).to.equal(6)
     expect(soldierWithMovement.getCurrentMovePerTurn()).to.equal(6)
   })
+
+  it('Can determine paths to destinations in range', () => {
+    const soldierWithMovement = new Squaddie(5, {}, {movement:4})
+    const oneRowMap = new BattleMap(
+      new MapTerrain([
+        ['1', '1', '1', '1', ],
+      ])
+    )
+
+    const zeroZeroStartPoint = new Coordinate(0,0)
+    const endCoordinate = new Coordinate(0, 3)
+
+    const pathToEndOfRow = MapSearchService.getSquaddiePathToDestination(
+      soldierWithMovement,
+      oneRowMap,
+      zeroZeroStartPoint,
+      endCoordinate
+    )
+    expect(pathToEndOfRow).to.not.be.null
+  })
+
+  it('Cannot find paths to destinations out of range', () => {
+    const soldierWithMovement = new Squaddie(5, {}, {movement:1})
+    const oneRowMap = new BattleMap(
+      new MapTerrain([
+        ['1', '1', '1', '1', ],
+      ])
+    )
+
+    const zeroZeroStartPoint = new Coordinate(0,0)
+    const endCoordinate = new Coordinate(0, 3)
+
+    const pathToEndOfRow = MapSearchService.getSquaddiePathToDestination(
+      soldierWithMovement,
+      oneRowMap,
+      zeroZeroStartPoint,
+      endCoordinate
+    )
+    expect(pathToEndOfRow).to.be.null
+  })
 })

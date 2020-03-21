@@ -1,13 +1,22 @@
 import {Coordinate, Path} from "../mapMeasurement";
 import {BattleMap} from "../battleMap";
 import TinyQueue from "tinyqueue";
+import {Squaddie} from "../squaddie";
 
-export class SearchHistoryContext {
+export interface BaseSearchHistoryContext {
   battleMap: BattleMap;
-  startCoordinate: Coordinate;
   endCoordinate: Coordinate;
-  visitedLocations: Set<number>;
   pathsToSearch: TinyQueue<Path> | null;
+  startCoordinate: Coordinate;
+  visitedLocations: Set<number>;
+}
+
+export class SearchHistoryContext implements BaseSearchHistoryContext{
+  battleMap: BattleMap;
+  endCoordinate: Coordinate;
+  pathsToSearch: TinyQueue<Path> | null;
+  startCoordinate: Coordinate;
+  visitedLocations: Set<number>;
 
   constructor(battleMap: BattleMap, startCoordinate: Coordinate, endCoordinate: Coordinate) {
     this.battleMap = battleMap
@@ -18,15 +27,24 @@ export class SearchHistoryContext {
   }
 }
 
+export class SquaddieSearchHistoryContext extends SearchHistoryContext implements BaseSearchHistoryContext{
+  squaddie: Squaddie | null;
+
+  constructor(battleMap: BattleMap, startCoordinate: Coordinate, endCoordinate: Coordinate, squaddie: Squaddie) {
+    super(battleMap, startCoordinate, endCoordinate)
+    this.squaddie = squaddie
+  }
+}
+
 export interface SearchStrategy {
-  checkForEarlyExitCondition(searchHistoryContext: SearchHistoryContext): {shouldExitEarly: boolean; returnVal: null | undefined};
-  initalizeSearchHistory(searchHistoryContext: SearchHistoryContext): void;
-  shouldContinueSearching(searchHistoryContext: SearchHistoryContext): boolean;
-  getNextPath(searchHistoryContext: SearchHistoryContext): Path;
-  markPathAsVisited(searchHistoryContext: SearchHistoryContext, currentPath: Path): void;
-  shouldEndSearchEarly(searchHistoryContext: SearchHistoryContext, currentPath: Path): {shouldExitEarly: boolean; returnVal: Path | undefined};
-  findNewNeighborsForPath(searchHistoryContext: SearchHistoryContext, currentPath: Path): Array<Coordinate>;
-  addNeighborsToPath(searchHistoryContext: SearchHistoryContext, neighbors: Array<Coordinate>, currentPath: Path): Array<Path>;
-  addNewPathsToSearch(searchHistoryContext: SearchHistoryContext, newPaths: Array<Path>): void;
-  noPathsRemain(searchHistoryContext: SearchHistoryContext): any;
+  checkForEarlyExitCondition(searchHistoryContext: BaseSearchHistoryContext): {shouldExitEarly: boolean; returnVal: null | undefined};
+  initalizeSearchHistory(searchHistoryContext: BaseSearchHistoryContext): void;
+  shouldContinueSearching(searchHistoryContext: BaseSearchHistoryContext): boolean;
+  getNextPath(searchHistoryContext: BaseSearchHistoryContext): Path;
+  markPathAsVisited(searchHistoryContext: BaseSearchHistoryContext, currentPath: Path): void;
+  shouldEndSearchEarly(searchHistoryContext: BaseSearchHistoryContext, currentPath: Path): {shouldExitEarly: boolean; returnVal: Path | undefined};
+  findNewNeighborsForPath(searchHistoryContext: BaseSearchHistoryContext, currentPath: Path): Array<Coordinate>;
+  addNeighborsToPath(searchHistoryContext: BaseSearchHistoryContext, neighbors: Array<Coordinate>, currentPath: Path): Array<Path>;
+  addNewPathsToSearch(searchHistoryContext: BaseSearchHistoryContext, newPaths: Array<Path>): void;
+  noPathsRemain(searchHistoryContext: BaseSearchHistoryContext): any;
 }

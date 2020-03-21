@@ -1,10 +1,12 @@
 import {Coordinate, Path} from "./mapMeasurement";
 import {BattleMap} from "./battleMap";
 import {StraightLineStrategy} from "./searchStrategies/StraightLineStrategy";
-import {SearchHistoryContext, SearchStrategy} from "./searchStrategies/SearchStrategy";
+import {SearchHistoryContext, SearchStrategy, SquaddieSearchHistoryContext} from "./searchStrategies/SearchStrategy";
+import {Squaddie} from "./squaddie";
+import {SquaddieOneTurnMovementStrategy} from "./searchStrategies/SquaddieOneTurnMovementStrategy";
 
 export const MapSearchService = {
-  runSearchAlgorithm(searchStrategy: SearchStrategy, searchHistoryContext: SearchHistoryContext) : Path | null{
+  runSearchAlgorithm(searchStrategy: SearchStrategy, searchHistoryContext: SearchHistoryContext): Path | null{
     searchStrategy.initalizeSearchHistory(searchHistoryContext)
 
     const earlyExitCondition = searchStrategy.checkForEarlyExitCondition(searchHistoryContext)
@@ -37,6 +39,12 @@ export const MapSearchService = {
       endCoordinate
     )
     const newSearchStrategy = new StraightLineStrategy()
+    return MapSearchService.runSearchAlgorithm(newSearchStrategy, searchContext)
+  },
+
+  getSquaddiePathToDestination(squaddie: Squaddie, battleMap: BattleMap, startCoordinate: Coordinate, endCoordinate: Coordinate) {
+    const searchContext = new SquaddieSearchHistoryContext(battleMap, startCoordinate, endCoordinate, squaddie)
+    const newSearchStrategy = new SquaddieOneTurnMovementStrategy()
     return MapSearchService.runSearchAlgorithm(newSearchStrategy, searchContext)
   },
 }
