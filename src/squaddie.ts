@@ -9,12 +9,15 @@ export class Squaddie {
 
   movePerTurn: number
 
+  moveAvailableThisTurn: boolean
+
   constructor(maxHealth, attributes = {}, movement = {} ) {
     this.maxHealth = maxHealth
     this.health = this.getMaxHealth()
 
     this.constructAttributes(attributes)
     this.constructMovement(movement)
+    this.defaultTurnActions()
   }
 
   constructAttributes(attributes: object) {
@@ -37,6 +40,10 @@ export class Squaddie {
     }
 
     this.movePerTurn = movement['movePerTurn'] || movement['movement'] || defaultMovement.movePerTurn
+  }
+
+  defaultTurnActions(): void {
+    this.moveAvailableThisTurn = true
   }
 
   getBaseMaxHealth(): number {
@@ -101,5 +108,17 @@ export class Squaddie {
 
   getCurrentMovePerTurn(): number {
     return this.getBaseMovePerTurn()
+  }
+
+  canMoveThisTurn(): boolean {
+    return this.moveAvailableThisTurn
+  }
+
+  consumeMoveActionForThisTurn(): void {
+    this.moveAvailableThisTurn = false
+  }
+
+  renewActionsAtStartOfTurn(): void {
+    this.moveAvailableThisTurn = true
   }
 }
