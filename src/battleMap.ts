@@ -91,20 +91,28 @@ export class BattleMap{
 
   addSquaddie(newSquaddie: Squaddie, row: number, column: number) {
     const locationIndex = this.coordinatesToLocationIndex(row, column)
-    if (this.squaddiesByLocationIndex[locationIndex]) {
+    if (this.squaddiesByLocationIndex.get(locationIndex)) {
       throw Error(`Two squaddies cannot be at the same coordinates (${row}, ${column})`)
     }
 
-    this.squaddiesByLocationIndex[locationIndex] = newSquaddie
+    this.squaddiesByLocationIndex.set(locationIndex, newSquaddie)
   }
 
-  getSquaddieAtLocation(row: number, column: number) {
+  getSquaddieAtCoordinates(row: number, column: number) {
     const squaddieCoordinate = this.coordinatesToLocationIndex(row, column)
     if (!squaddieCoordinate) {
       return undefined
     }
 
-    return this.squaddiesByLocationIndex[squaddieCoordinate] || null
+    return this.squaddiesByLocationIndex.get(squaddieCoordinate) || null
+  }
+
+  getSquaddieAtLocationIndex(locationIndex: number): Squaddie {
+    if (this.locationIndexToCoordinates(locationIndex) === undefined) {
+      return undefined
+    }
+
+    return this.squaddiesByLocationIndex.get(locationIndex) || null
   }
 
   getDirectDistance(startCoordinate: Coordinate, endCoordinate: Coordinate): number {
@@ -141,5 +149,30 @@ export class BattleMap{
       new Coordinate(originRow + 1, originColumn + freeDiagonalDirection),
     ]
       .filter((neighbor) => { return this.isOnMap(neighbor)})
+  }
+
+  getLocationIndexOfSquaddie(squaddieToFind: Squaddie): number{
+    const squaddieIterator = this.squaddiesByLocationIndex.entries()
+
+    let nextSquaddieKeyValue = squaddieIterator.next()
+    while(!nextSquaddieKeyValue.done) {
+      const locationIndex = nextSquaddieKeyValue.value[0]
+      const squaddie = nextSquaddieKeyValue.value[1]
+      if (squaddie === squaddieToFind) {
+        return locationIndex
+      }
+      nextSquaddieKeyValue = squaddieIterator.next()
+    }
+
+    return null
+  }
+
+  getCoordinateOfSquaddie(squaddie: Squaddie): Coordinate {
+    const locationIndex = this.getLocationIndexOfSquaddie(squaddie)
+    if (!locationIndex) {
+      return null
+    }
+    const rowIndexPair = this.locationIndexToCoordinates(locationIndex)
+    return new Coordinate(rowIndexPair.row, rowIndexPair.column)
   }
 }

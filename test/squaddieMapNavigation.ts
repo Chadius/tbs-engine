@@ -65,16 +65,43 @@ describe('Map can contain Squaddies',  () => {
     soldier2 = new Squaddie(10)
   })
 
-  it('Can add a Squaddie and find its location', () => {
-    const battleMap = new BattleMap(terrain)
 
-    battleMap.addSquaddie(soldier, 0, 1)
-    battleMap.addSquaddie(soldier2, 2, 1)
+  describe('Locate added squaddies', () => {
+    it('by coordinates', () => {
+      const battleMap = new BattleMap(terrain)
 
-    expect(battleMap.getSquaddieAtLocation(0,1)).to.equal(soldier)
-    expect(battleMap.getSquaddieAtLocation(2,1)).to.equal(soldier2)
-    expect(battleMap.getSquaddieAtLocation(1,1)).to.equal(null)
-    expect(battleMap.getSquaddieAtLocation(10,30)).to.equal(undefined)
+      battleMap.addSquaddie(soldier, 0, 1)
+      battleMap.addSquaddie(soldier2, 2, 1)
+
+      expect(battleMap.getSquaddieAtCoordinates(0,1)).to.equal(soldier)
+      expect(battleMap.getSquaddieAtCoordinates(2,1)).to.equal(soldier2)
+      expect(battleMap.getSquaddieAtCoordinates(1,1)).to.equal(null)
+      expect(battleMap.getSquaddieAtCoordinates(10,30)).to.equal(undefined)
+    })
+
+    it('by location', () => {
+      const battleMap = new BattleMap(terrain)
+
+      battleMap.addSquaddie(soldier, 0, 1)
+      battleMap.addSquaddie(soldier2, 2, 1)
+
+      expect(battleMap.getSquaddieAtLocationIndex(1)).to.equal(soldier)
+      expect(battleMap.getSquaddieAtLocationIndex(5)).to.equal(soldier2)
+      expect(battleMap.getSquaddieAtLocationIndex(3)).to.equal(null)
+      expect(battleMap.getSquaddieAtLocationIndex(9001)).to.equal(undefined)
+    })
+
+    it('and get location index of Squaddies', () => {
+      const battleMap = new BattleMap(terrain)
+
+      battleMap.addSquaddie(soldier, 0, 1)
+      battleMap.addSquaddie(soldier2, 2, 1)
+      const soldier3 = new Squaddie(10)
+
+      expect(battleMap.getLocationIndexOfSquaddie(soldier)).to.equal(1)
+      expect(battleMap.getCoordinateOfSquaddie(soldier2)).to.eql(new Coordinate(2, 1))
+      expect(battleMap.getLocationIndexOfSquaddie(soldier3)).to.equal(null)
+    })
   })
 
   it('Cannot add two Squaddies at the same location', () => {
