@@ -175,4 +175,18 @@ export class BattleMap{
     const rowIndexPair = this.locationIndexToCoordinates(locationIndex)
     return new Coordinate(rowIndexPair.row, rowIndexPair.column)
   }
+
+  moveSquaddie(squaddieToMove: Squaddie, destinationRow: number, destinationColumn: number): void {
+    if (!this.isOnMap(destinationRow, destinationColumn)) {
+      throw Error(`Destination is off map: (${destinationRow}, ${destinationColumn})`)
+    }
+
+    const locationIndexOfSquaddie = this.getLocationIndexOfSquaddie(squaddieToMove)
+    if (this.getSquaddieAtCoordinates(destinationRow, destinationColumn)) {
+      throw Error(`Another Squaddie is at the destination, cannot move: (${destinationRow}, ${destinationColumn})`)
+    }
+
+    this.squaddiesByLocationIndex.set(locationIndexOfSquaddie, null)
+    this.addSquaddie(squaddieToMove, destinationRow, destinationColumn)
+  }
 }

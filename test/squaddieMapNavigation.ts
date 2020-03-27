@@ -387,3 +387,72 @@ describe('Squaddie has move limits on a map', () => {
     expect(pathToEndOfRow).to.be.null
   })
 })
+
+describe('Map can move Squaddies on the map', () => {
+  let terrain: MapTerrain
+  let soldier: Squaddie
+
+  beforeEach(() => {
+    terrain = new MapTerrain([
+      ['1', '1'],
+      ['1', 'X'],
+      ['3', '1'],
+    ])
+
+    soldier = new Squaddie(5)
+  })
+
+  it('Will update Squaddie locations', () => {
+    const battleMap = new BattleMap(terrain)
+
+    battleMap.addSquaddie(soldier, 0, 1)
+    battleMap.moveSquaddie(soldier, 2, 0)
+    expect(battleMap.getSquaddieAtCoordinates(0,1)).to.equal(null)
+    expect(battleMap.getSquaddieAtCoordinates(2,0)).to.equal(soldier)
+    expect(battleMap.getSquaddieAtLocationIndex(4)).to.equal(soldier)
+    expect(battleMap.getCoordinateOfSquaddie(soldier)).to.eql(new Coordinate(2, 0))
+  })
+
+  it('Throws an error if destination is off map', () => {
+    const battleMap = new BattleMap(terrain)
+
+    battleMap.addSquaddie(soldier, 0, 1)
+
+    const moveOffLeftEdge: () => void = () => {
+      battleMap.moveSquaddie(soldier, 0, -1)
+    }
+
+    const moveOffRightEdge: () => void = () => {
+      battleMap.moveSquaddie(soldier, 0, 2)
+    }
+
+    const moveOffBottomEdge: () => void = () => {
+      battleMap.moveSquaddie(soldier, -1, 0)
+    }
+
+    const moveOffTopEdge: () => void = () => {
+      battleMap.moveSquaddie(soldier, 3, 0)
+    }
+
+    expect(moveOffLeftEdge).to.throw(Error)
+    expect(moveOffRightEdge).to.throw(Error)
+    expect(moveOffTopEdge).to.throw(Error)
+    expect(moveOffBottomEdge).to.throw(Error)
+  })
+
+  it('Throws an error if destination is occupied by another squaddie and aborts movement', () => {
+    const battleMap = new BattleMap(terrain)
+
+    battleMap.addSquaddie(soldier, 0, 1)
+
+    const soldier2 = new Squaddie(5)
+    battleMap.addSquaddie(soldier2, 1, 0)
+
+    const moveOnOtherSoldier: () => void = () => {
+      battleMap.moveSquaddie(soldier, 1, 0)
+    }
+
+    expect(moveOnOtherSoldier).to.throw(Error)
+    expect(battleMap.getSquaddieAtCoordinates(0,1)).to.equal(soldier)
+  })
+})
