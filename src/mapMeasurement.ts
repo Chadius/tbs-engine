@@ -16,7 +16,11 @@ export class Coordinate {
   }
 
   equals(other: Coordinate): boolean {
-    return this.row === other.row && this.column === other.column
+    return this.getLocationKey() === other.getLocationKey()
+  }
+
+  getLocationKey(): string {
+    return `${this.getRow()}, ${this.getColumn()}`
   }
 }
 
