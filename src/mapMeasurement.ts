@@ -39,7 +39,7 @@ export class Path {
     return this.coordinates.length
   }
 
-  getCurrentCoordinates(): Coordinate{
+  getHeadCoordinate(): Coordinate{
     return this.coordinates[this.coordinates.length - 1]
   }
 

@@ -43,14 +43,14 @@ export const popNextPathFromQueue = (searchHistoryContext: SearchHistoryContext)
 
 export const addPathLocationToVisited = (searchHistoryContext: SearchHistoryContext, currentPath: Path): void => {
   const currentPathLocationIndex = searchHistoryContext.battleMap.coordinatesToLocationIndex(
-    currentPath.getCurrentCoordinates()
+    currentPath.getHeadCoordinate()
   )
 
   searchHistoryContext.visitedLocations.add(currentPathLocationIndex)
 }
 
 export const endIfPathIsAtDestination = (searchHistoryContext: SearchHistoryContext, currentPath: Path): {shouldExitEarly: boolean; returnVal: Path} => {
-  const pathIsAtDestination = (currentPath.getCurrentCoordinates().equals(searchHistoryContext.endCoordinate))
+  const pathIsAtDestination = (currentPath.getHeadCoordinate().equals(searchHistoryContext.endCoordinate))
   if (pathIsAtDestination) {
     return {shouldExitEarly: true, returnVal: currentPath}
   }
@@ -58,7 +58,7 @@ export const endIfPathIsAtDestination = (searchHistoryContext: SearchHistoryCont
 }
 
 export const getUnvisitedCoordinatesNextToPathHead = (searchHistoryContext: SearchHistoryContext, currentPath: Path): Array<Coordinate> => {
-  const neighbors = searchHistoryContext.battleMap.getNeighbors(currentPath.getCurrentCoordinates())
+  const neighbors = searchHistoryContext.battleMap.getNeighbors(currentPath.getHeadCoordinate())
     .filter((neighbor) => {
       const locationIndex = searchHistoryContext.battleMap.coordinatesToLocationIndex(neighbor)
       return !(searchHistoryContext.visitedLocations.has(locationIndex))

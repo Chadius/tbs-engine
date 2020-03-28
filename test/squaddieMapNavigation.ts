@@ -143,8 +143,8 @@ describe('Map can create Paths and Coordinates', () => {
     const path = new Path(startingCoord)
 
     expect(path.getNumberOfCoordinates()).to.equal(1)
-    expect(path.getCurrentCoordinates().row).to.equal(2)
-    expect(path.getCurrentCoordinates().column).to.equal(0)
+    expect(path.getHeadCoordinate().row).to.equal(2)
+    expect(path.getHeadCoordinate().column).to.equal(0)
     expect(path.getMovementCostSpent()).to.equal(0)
   })
 
@@ -157,8 +157,8 @@ describe('Map can create Paths and Coordinates', () => {
     path.addCoordinate(new Coordinate(4, 3), 3)
 
     expect(path.getNumberOfCoordinates()).to.equal(5)
-    expect(path.getCurrentCoordinates().row).to.equal(4)
-    expect(path.getCurrentCoordinates().column).to.equal(3)
+    expect(path.getHeadCoordinate().row).to.equal(4)
+    expect(path.getHeadCoordinate().column).to.equal(3)
     expect(path.getMovementCostSpent()).to.equal(6)
   })
 
@@ -170,8 +170,8 @@ describe('Map can create Paths and Coordinates', () => {
 
     expect(firstPath.getNumberOfCoordinates()).to.equal(2)
     expect(secondPath.getNumberOfCoordinates()).to.equal(1)
-    expect(secondPath.getCurrentCoordinates().row).to.equal(2)
-    expect(secondPath.getCurrentCoordinates().column).to.equal(0)
+    expect(secondPath.getHeadCoordinate().row).to.equal(2)
+    expect(secondPath.getHeadCoordinate().column).to.equal(0)
     expect(secondPath.getMovementCostSpent()).to.equal(0)
   })
 })
@@ -311,8 +311,8 @@ describe('A* Navigation', () => {
     const pathToStartingPoint = MapSearchService.calculatePath(oneTileMap, zeroZeroStartPoint, zeroZeroStartPoint)
 
     expect(pathToStartingPoint.getNumberOfCoordinates()).to.equal(1)
-    expect(pathToStartingPoint.getCurrentCoordinates().row).to.equal(0)
-    expect(pathToStartingPoint.getCurrentCoordinates().column).to.equal(0)
+    expect(pathToStartingPoint.getHeadCoordinate().row).to.equal(0)
+    expect(pathToStartingPoint.getHeadCoordinate().column).to.equal(0)
     expect(pathToStartingPoint.getMovementCostSpent()).to.equal(0)
   })
 
@@ -333,8 +333,8 @@ describe('A* Navigation', () => {
     const pathToStartingPoint = MapSearchService.calculatePath(oneRowMap, zeroZeroStartPoint, endCoordinate)
 
     expect(pathToStartingPoint.getNumberOfCoordinates()).to.equal(4)
-    expect(pathToStartingPoint.getCurrentCoordinates().row).to.equal(0)
-    expect(pathToStartingPoint.getCurrentCoordinates().column).to.equal(3)
+    expect(pathToStartingPoint.getHeadCoordinate().row).to.equal(0)
+    expect(pathToStartingPoint.getHeadCoordinate().column).to.equal(3)
     expect(pathToStartingPoint.getMovementCostSpent()).to.equal(3)
   })
 })

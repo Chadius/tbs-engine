@@ -1,7 +1,7 @@
 import {expect} from 'chai'
 import {Squaddie} from "../src/squaddie";
 
-describe('Suaddie has a turn', () => {
+describe('Squaddie has a turn', () => {
   it('can tell Squaddie can still move.', () => {
     const soldierWithMovement = new Squaddie(5, {}, {movement:1})
     expect(soldierWithMovement.canMoveThisTurn()).to.be.true;

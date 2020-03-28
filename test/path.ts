@@ -34,8 +34,8 @@ describe('Paths', () => {
   })
 
   it('have a starting coordinate at no cost', () => {
-    expect(newPath.getCurrentCoordinates().getRow()).to.equal(1)
-    expect(newPath.getCurrentCoordinates().getColumn()).to.equal(3)
+    expect(newPath.getHeadCoordinate().getRow()).to.equal(1)
+    expect(newPath.getHeadCoordinate().getColumn()).to.equal(3)
     expect(newPath.getMovementCostSpent()).to.equal(0)
   })
 
