@@ -18,27 +18,72 @@ describe('PathMaps are created', () => {
     expect(pathMapWithPaths.isEmpty()).to.be.false
   })
 
-  // it('by cloning another PathMap', () => {})
+  it('by cloning another PathMap', () => {
+    const pathsToInclude = new Array<Path> (
+      new Path (new Coordinate(0, 0)),
+      new Path (new Coordinate(0, 1)),
+    )
+
+    const pathMapWithPaths = PathMap.newPathMapByArrayOfPaths(pathsToInclude)
+
+    const clonedPathMap = pathMapWithPaths.clone()
+    expect(clonedPathMap.isEmpty()).to.be.false
+    expect(clonedPathMap.getNumberOfPaths()).to.equal(pathMapWithPaths.getNumberOfPaths())
+    expect(clonedPathMap.getAllCoordinates().length).to.equal(pathMapWithPaths.getAllCoordinates().length)
+    expect(clonedPathMap).to.not.equal(pathMapWithPaths)
+  })
+
   // it('from multiple PathMaps', () => {})
 })
 
 describe('PathMaps can introspect', () => {
   let tiltedSquarePathMap: PathMap
+  let donutPathMap: PathMap
+  let twoRowPathMap: PathMap
 
   beforeEach(() => {
     const pathsToInclude = new Array<Path> (
       new Path (new Coordinate(0, 0)),
       new Path (new Coordinate(0, 1)),
       new Path (new Coordinate(0, 2)),
+
       new Path (new Coordinate(1, 0)),
       new Path (new Coordinate(1, 1)),
       new Path (new Coordinate(1, 2)),
+
       new Path (new Coordinate(2, 1)),
       new Path (new Coordinate(2, 2)),
       new Path (new Coordinate(2, 3)),
     )
 
     tiltedSquarePathMap = PathMap.newPathMapByArrayOfPaths(pathsToInclude)
+
+    const holeInTheMiddle = new Array<Path> (
+      new Path (new Coordinate(0, 0)),
+      new Path (new Coordinate(0, 1)),
+      new Path (new Coordinate(0, 2)),
+
+      new Path (new Coordinate(1, 0)),
+      new Path (new Coordinate(1, 2)),
+
+      new Path (new Coordinate(2, 1)),
+      new Path (new Coordinate(2, 2)),
+      new Path (new Coordinate(2, 3)),
+    )
+
+    donutPathMap = PathMap.newPathMapByArrayOfPaths(holeInTheMiddle)
+
+    const topTwoRowsOfPaths = new Array<Path> (
+      new Path (new Coordinate(1, 0)),
+      new Path (new Coordinate(1, 1)),
+      new Path (new Coordinate(1, 2)),
+
+      new Path (new Coordinate(2, 1)),
+      new Path (new Coordinate(2, 2)),
+      new Path (new Coordinate(2, 3)),
+    )
+
+    twoRowPathMap = PathMap.newPathMapByArrayOfPaths(topTwoRowsOfPaths)
   })
 
   it ('and indicate the number of Paths', () => {
@@ -57,11 +102,123 @@ describe('PathMaps can introspect', () => {
     expect(uprightPath.getMovementCostSpent()).to.equal(0)
   })
 
-  // it('can indicate all of the coordinates in the PathMap', () => {})
-  // it('can indicate the smallest sized bounding box that can contain it', () => {})
-  // it('can indicate the smallest sized map that can contain it', () => {})
-  // it('can return the coordinates that form a contour, including holes', () => {})
-  // it('can indicate all neighbors of a given distance from the outline Paths', () => {})
+  it('can indicate all of the coordinates in the PathMap', () => {
+    const allCoordinatesInPathMap: Array<Coordinate> = tiltedSquarePathMap.getAllCoordinates()
+    expect(allCoordinatesInPathMap.length).to.equal(9)
+    expect(allCoordinatesInPathMap.some((coordinate) => {
+      return coordinate.equals(new Coordinate(2, 1))
+      })
+    ).to.be.true
+  })
+
+  it('can indicate the smallest sized bounding box that can contain it', () => {
+    const boundingBox = twoRowPathMap.getBoundingBox()
+    const downLeftCorner: Coordinate = boundingBox[0]
+    const upRightCorner: Coordinate = boundingBox[1]
+
+    expect(downLeftCorner.getRow()).to.equal(1)
+    expect(downLeftCorner.getColumn()).to.equal(0)
+
+    expect(upRightCorner.getRow()).to.equal(2)
+    expect(upRightCorner.getColumn()).to.equal(3)
+  })
+
+  it('returns undefined bounding box if there are no Paths in PathMap', () => {
+    const blankPathMap = new PathMap()
+    expect(blankPathMap.getBoundingBox()).to.be.undefined
+  })
+
+  it('can indicate the smallest sized map that can contain it', () => {
+    const dimensions = twoRowPathMap.getSmallestMapDimensions()
+    expect(dimensions['row']).to.equal(2)
+    expect(dimensions['column']).to.equal(3)
+  })
+
+  it('returns undefined map size if there are no Paths in PathMap', () => {
+    const blankPathMap = new PathMap()
+    expect(blankPathMap.getSmallestMapDimensions()).to.be.undefined
+  })
+
+  it('can return the coordinates that form a contour, including holes', () => {
+    const donutOutline: Array<Coordinate> = donutPathMap.getOutlineCoordinates()
+    expect(donutOutline.length).to.equal(8)
+    const donutOutlineKeys = donutOutline.map((coordinate) => {return coordinate.getLocationKey()})
+    const expectedDonutOutline = [
+      "0, 0",
+      "0, 1",
+      "0, 2",
+
+      "1, 0",
+      "1, 2",
+
+      "2, 1",
+      "2, 2",
+      "2, 3",
+    ]
+    expect(donutOutlineKeys).to.have.members(expectedDonutOutline)
+
+    const tiltedSquareOutline: Array<Coordinate> = tiltedSquarePathMap.getOutlineCoordinates()
+    expect(tiltedSquareOutline.length).to.equal(8)
+    const tiltedSquareOutlineKeys = tiltedSquareOutline.map((coordinate) => {return coordinate.getLocationKey()})
+    expect(tiltedSquareOutlineKeys).to.have.members(expectedDonutOutline)
+
+    const blankPathMap = new PathMap()
+    const blankOutline: Array<Coordinate> = blankPathMap.getOutlineCoordinates()
+    expect(blankOutline.length).to.equal(0)
+  })
+
+  // it('can generate a new PathMap by expanding a given distance beyond the outline', () => {
+  //   const expandDonutByOne: PathMap = donutPathMap.expandBorder(1)
+  //   expect(expandDonutByOne.getNumberOfPaths()).to.equal(15)
+  //
+  //   const expandedDonutCoordinates = expandDonutByOne.getAllCoordinates()
+  //   const expandedDonutCoordinateKeys = expandedDonutCoordinates.map((coordinate) => {return coordinate.getLocationKey()})
+  //
+  //   const expectedExpandedDonutCoordinates = [
+  //     "-1, -1",
+  //     "-1, 0",
+  //     "-1, 1",
+  //     "-1, 2",
+  //
+  //     "0, -1",
+  //     "0, 3",
+  //
+  //     "1, -1",
+  //     "1, 1",
+  //     "1, 3",
+  //
+  //     "2, -1",
+  //     "2, 3",
+  //
+  //     "3, 0",
+  //     "3, 1",
+  //     "3, 2",
+  //     "3, 3",
+  //   ]
+  //   expect(expandedDonutCoordinateKeys).to.have.members(expectedExpandedDonutCoordinates)
+  //
+  //   const upperLeftPath = donutPathMap.getPathForCoordinate(new Coordinate(2, 0))
+  //   const expandedPath = expandDonutByOne.getPathForCoordinate(new Coordinate(2, 0))
+  //
+  //   expect(upperLeftPath.getNumberOfCoordinates() + 1).to.equal(expandedPath.getNumberOfCoordinates())
+  //
+  //   const expandDonutByTwo: PathMap = donutPathMap.expandBorder(2)
+  //   expect(expandDonutByTwo.getNumberOfPaths()).to.equal(35)
+  // })
+
+  it('returns undefined if tries to expand by a negative number', () => {
+    const expandDonutByInvalidRange: PathMap = donutPathMap.expandBorder(-1)
+    expect(expandDonutByInvalidRange).to.be.undefined
+  })
+
+  it('returns a cloned PathMap if tries to expand by 0', () => {
+    const expandDonutByZero: PathMap = donutPathMap.expandBorder(0)
+
+    expect(expandDonutByZero.isEmpty()).to.be.false
+    expect(expandDonutByZero.getNumberOfPaths()).to.equal(donutPathMap.getNumberOfPaths())
+    expect(expandDonutByZero.getAllCoordinates().length).to.equal(donutPathMap.getAllCoordinates().length)
+    expect(expandDonutByZero).to.not.equal(donutPathMap)
+  })
 })
 
 describe('PathMaps can change info after creation', () => {

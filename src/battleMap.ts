@@ -1,6 +1,24 @@
 import {Squaddie} from "./squaddie";
 import {Coordinate} from "./mapMeasurement";
 
+export const BattleMapFunctions = {
+  getNeighborCoordinates: (originCoordinate: Coordinate) => {
+    const originRow = originCoordinate.getRow()
+    const originColumn = originCoordinate.getColumn()
+    const originRowIsEven = (originRow % 2 === 0)
+    const freeDiagonalDirection = originRowIsEven ? -1 : 1
+
+    return [
+      new Coordinate(originRow, originColumn - 1),
+      new Coordinate(originRow, originColumn + 1),
+      new Coordinate(originRow - 1, originColumn),
+      new Coordinate(originRow + 1, originColumn),
+      new Coordinate(originRow - 1, originColumn + freeDiagonalDirection),
+      new Coordinate(originRow + 1, originColumn + freeDiagonalDirection),
+    ]
+  }
+}
+
 export class MapTerrain {
   tileTypesByRow: Array<string[]>
 
@@ -134,21 +152,11 @@ export class BattleMap{
     return Math.abs(columnDistance) + Math.abs(rowDistance) - discountForUsingDiagonals
   }
 
-  getNeighbors(originCoordinate: Coordinate): Array<Coordinate> {
-    const originRow = originCoordinate.getRow()
-    const originColumn = originCoordinate.getColumn()
-    const originRowIsEven = (originRow % 2 === 0)
-    const freeDiagonalDirection = originRowIsEven ? -1 : 1
-
-    return [
-      new Coordinate(originRow, originColumn - 1),
-      new Coordinate(originRow, originColumn + 1),
-      new Coordinate(originRow - 1 , originColumn),
-      new Coordinate(originRow + 1, originColumn),
-      new Coordinate(originRow - 1 , originColumn + freeDiagonalDirection),
-      new Coordinate(originRow + 1, originColumn + freeDiagonalDirection),
-    ]
-      .filter((neighbor) => { return this.isOnMap(neighbor)})
+  getOnMapNeighbors(originCoordinate: Coordinate): Array<Coordinate> {
+    return BattleMapFunctions.getNeighborCoordinates(originCoordinate)
+      .filter((neighbor) => {
+      return this.isOnMap(neighbor)
+    });
   }
 
   getLocationIndexOfSquaddie(squaddieToFind: Squaddie): number{

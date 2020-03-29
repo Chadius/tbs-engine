@@ -58,7 +58,7 @@ export const endIfPathIsAtDestination = (searchHistoryContext: SearchHistoryCont
 }
 
 export const getUnvisitedCoordinatesNextToPathHead = (searchHistoryContext: SearchHistoryContext, currentPath: Path): Array<Coordinate> => {
-  const neighbors = searchHistoryContext.battleMap.getNeighbors(currentPath.getHeadCoordinate())
+  const neighbors = searchHistoryContext.battleMap.getOnMapNeighbors(currentPath.getHeadCoordinate())
     .filter((neighbor) => {
       const locationIndex = searchHistoryContext.battleMap.coordinatesToLocationIndex(neighbor)
       return !(searchHistoryContext.visitedLocations.has(locationIndex))

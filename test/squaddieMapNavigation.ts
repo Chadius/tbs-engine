@@ -202,23 +202,23 @@ describe('Map can generate neighbors based on location', () => {
   }
 
   it('Can generate neighbors based on even row', () => {
-    const neighborsOfEvenRow = flatMap.getNeighbors(new Coordinate(2, 1))
+    const neighborsOfEvenRow = flatMap.getOnMapNeighbors(new Coordinate(2, 1))
     expect(neighborsOfEvenRow.length).to.equal(6)
     assertNeighborsInclude(neighborsOfEvenRow, [[2,0], [2,2], [3,1], [1,1], [3,0], [1,0],])
   })
 
   it('Can generate neighbors based on odd row', () => {
-    const neighborsOfOddRow = flatMap.getNeighbors(new Coordinate(1, 1))
+    const neighborsOfOddRow = flatMap.getOnMapNeighbors(new Coordinate(1, 1))
     expect(neighborsOfOddRow.length).to.equal(6)
     assertNeighborsInclude(neighborsOfOddRow, [[1,0], [1,2], [0,1], [2,1], [0,2], [2,2],])
   })
 
   it('Can generate neighbors that are on the map', () => {
-    const neighborsOfLowerLeft = flatMap.getNeighbors(new Coordinate(0, 0))
+    const neighborsOfLowerLeft = flatMap.getOnMapNeighbors(new Coordinate(0, 0))
     expect(neighborsOfLowerLeft.length).to.equal(2)
     assertNeighborsInclude(neighborsOfLowerLeft, [[1,0], [0,1]])
 
-    const neighborsOfUpperRight = flatMap.getNeighbors(new Coordinate(3, 4))
+    const neighborsOfUpperRight = flatMap.getOnMapNeighbors(new Coordinate(3, 4))
     expect(neighborsOfUpperRight.length).to.equal(2)
     assertNeighborsInclude(neighborsOfUpperRight, [[3,3], [2,4]])
   })
