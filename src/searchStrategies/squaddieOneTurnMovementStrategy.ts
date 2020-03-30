@@ -1,11 +1,11 @@
 import {Coordinate, Path} from "../mapMeasurement";
-import {SearchHistoryContext, SearchStrategy, SquaddieSearchHistoryContext} from "./SearchStrategy";
+import {SearchHistoryContext, SearchStrategy, SquaddieSearchHistoryContext} from "./searchStrategy";
 import {
   addNeighborsToPathAndCreateNewPaths,
   addPathLocationToVisited,
   checkIfCoordinatesAreOffMap, endIfPathIsAtDestination, getUnvisitedCoordinatesNextToPathHead,
   initalizeSearchHistoryWithPriorityQueue, morePathsToSearch, popNextPathFromQueue,
-} from "./StraightLineStrategy";
+} from "./straightLineStrategy";
 
 const addNewPathsIfWithinMoverange = (searchHistoryContext: SquaddieSearchHistoryContext, newPaths: Array<Path>): void => {
   newPaths.forEach((newPath) => {

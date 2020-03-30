@@ -1,6 +1,6 @@
 import {Coordinate, Path} from "../mapMeasurement";
 import TinyQueue from "tinyqueue";
-import {SearchHistoryContext, SearchStrategy} from "./SearchStrategy";
+import {SearchHistoryContext, SearchStrategy} from "./searchStrategy";
 
 export const lowerMoveCostIsFirst = (a: Path, b: Path): number => {
   const pathAMovementCost = a.getMovementCostSpent()

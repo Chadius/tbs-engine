@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import {BattleMap, MapTerrain} from "../src/battleMap";
 import {Squaddie} from "../src/squaddie";
 import {Coordinate, Path} from "../src/mapMeasurement";
-import {MapSearchService} from "../src/MapSearchService";
+import {MapSearchService} from "../src/mapSearchService";
 
 describe('Map contains the terrain and can query it', () => {
   let terrain: MapTerrain

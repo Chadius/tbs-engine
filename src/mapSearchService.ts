@@ -1,9 +1,9 @@
 import {Coordinate, Path} from "./mapMeasurement";
 import {BattleMap} from "./battleMap";
-import {StraightLineStrategy} from "./searchStrategies/StraightLineStrategy";
-import {SearchHistoryContext, SearchStrategy, SquaddieSearchHistoryContext} from "./searchStrategies/SearchStrategy";
+import {StraightLineStrategy} from "./searchStrategies/straightLineStrategy";
+import {SearchHistoryContext, SearchStrategy, SquaddieSearchHistoryContext} from "./searchStrategies/searchStrategy";
 import {Squaddie} from "./squaddie";
-import {SquaddieOneTurnMovementStrategy} from "./searchStrategies/SquaddieOneTurnMovementStrategy";
+import {SquaddieOneTurnMovementStrategy} from "./searchStrategies/squaddieOneTurnMovementStrategy";
 
 export const MapSearchService = {
   runSearchAlgorithm(searchStrategy: SearchStrategy, searchHistoryContext: SearchHistoryContext): Path | null{
