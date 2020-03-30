@@ -48,4 +48,19 @@ describe('Paths', () => {
     expect(newPath.getNumberOfCoordinates()).to.equal(2)
     expect(newPath.getMovementCostSpent()).to.equal(1)
   })
+
+  it('can clone existing paths', () => {
+    const clonedPath = newPath.clone()
+    expect(newPath.getNumberOfCoordinates()).to.equal(clonedPath.getNumberOfCoordinates())
+    expect(newPath.getHeadCoordinate().getLocationKey()).to.equal(clonedPath.getHeadCoordinate().getLocationKey())
+    expect(newPath.getMovementCostSpent()).to.equal(clonedPath.getMovementCostSpent())
+  })
+
+  it('can clone and extend existing paths', () => {
+    const extendedPath: Path = newPath.cloneAndAddCoordinate(new Coordinate(2, 3), 10)
+    expect(extendedPath.getNumberOfCoordinates()).to.equal(newPath.getNumberOfCoordinates() + 1)
+    expect(extendedPath.getMovementCostSpent()).to.equal(newPath.getMovementCostSpent() + 10)
+    expect(extendedPath.getHeadCoordinate().getRow()).to.equal(2)
+    expect(extendedPath.getHeadCoordinate().getColumn()).to.equal(3)
+  })
 })

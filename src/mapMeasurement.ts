@@ -58,4 +58,10 @@ export class Path {
     clonedPath.movementCostSpent = this.getMovementCostSpent()
     return clonedPath
   }
+
+  cloneAndAddCoordinate(coordinate: Coordinate, movementCost: number): Path {
+    const newPath = this.clone()
+    newPath.addCoordinate(coordinate, movementCost)
+    return newPath
+  }
 }

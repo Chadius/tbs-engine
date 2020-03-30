@@ -167,7 +167,7 @@ describe('PathMaps can introspect', () => {
     expect(blankOutline.length).to.equal(0)
   })
 
-  it.only('can generate a new PathMap by expanding a given distance beyond the outline', () => {
+  it('can generate a new PathMap by expanding a given distance beyond the outline', () => {
     const expandDonutByOne: PathMap = donutPathMap.expandBorder(1)
     expect(expandDonutByOne.getNumberOfPaths()).to.equal(15)
 
