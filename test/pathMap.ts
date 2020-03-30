@@ -167,44 +167,45 @@ describe('PathMaps can introspect', () => {
     expect(blankOutline.length).to.equal(0)
   })
 
-  // it('can generate a new PathMap by expanding a given distance beyond the outline', () => {
-  //   const expandDonutByOne: PathMap = donutPathMap.expandBorder(1)
-  //   expect(expandDonutByOne.getNumberOfPaths()).to.equal(15)
-  //
-  //   const expandedDonutCoordinates = expandDonutByOne.getAllCoordinates()
-  //   const expandedDonutCoordinateKeys = expandedDonutCoordinates.map((coordinate) => {return coordinate.getLocationKey()})
-  //
-  //   const expectedExpandedDonutCoordinates = [
-  //     "-1, -1",
-  //     "-1, 0",
-  //     "-1, 1",
-  //     "-1, 2",
-  //
-  //     "0, -1",
-  //     "0, 3",
-  //
-  //     "1, -1",
-  //     "1, 1",
-  //     "1, 3",
-  //
-  //     "2, -1",
-  //     "2, 3",
-  //
-  //     "3, 0",
-  //     "3, 1",
-  //     "3, 2",
-  //     "3, 3",
-  //   ]
-  //   expect(expandedDonutCoordinateKeys).to.have.members(expectedExpandedDonutCoordinates)
-  //
-  //   const upperLeftPath = donutPathMap.getPathForCoordinate(new Coordinate(2, 0))
-  //   const expandedPath = expandDonutByOne.getPathForCoordinate(new Coordinate(2, 0))
-  //
-  //   expect(upperLeftPath.getNumberOfCoordinates() + 1).to.equal(expandedPath.getNumberOfCoordinates())
-  //
-  //   const expandDonutByTwo: PathMap = donutPathMap.expandBorder(2)
-  //   expect(expandDonutByTwo.getNumberOfPaths()).to.equal(35)
-  // })
+  it.only('can generate a new PathMap by expanding a given distance beyond the outline', () => {
+    const expandDonutByOne: PathMap = donutPathMap.expandBorder(1)
+    expect(expandDonutByOne.getNumberOfPaths()).to.equal(15)
+
+    const expandedDonutCoordinates = expandDonutByOne.getAllCoordinates()
+    const expandedDonutCoordinateKeys = expandedDonutCoordinates.map((coordinate) => {return coordinate.getLocationKey()})
+
+    const expectedExpandedDonutCoordinates = [
+      "-1, -1",
+      "-1, 0",
+      "-1, 1",
+      "-1, 2",
+
+      "0, -1",
+      "0, 3",
+
+      "1, -1",
+      "1, 1",
+      "1, 3",
+
+      "2, 0",
+      "2, 4",
+
+      "3, 0",
+      "3, 1",
+      "3, 2",
+      "3, 3",
+    ]
+    expect(expandedDonutCoordinateKeys).to.have.members(expectedExpandedDonutCoordinates)
+
+    // const upperLeftPath = donutPathMap.getPathForCoordinate(new Coordinate(2, 1))
+    // const expandedPath = expandDonutByOne.getPathForCoordinate(new Coordinate(3, 0))
+    // console.log(upperLeftPath)
+    // console.log(expandedPath)
+    // expect(upperLeftPath.getNumberOfCoordinates() + 1).to.equal(expandedPath.getNumberOfCoordinates())
+
+    const expandDonutByTwo: PathMap = donutPathMap.expandBorder(2)
+    expect(expandDonutByTwo.getNumberOfPaths()).to.equal(35)
+  })
 
   it('returns undefined if tries to expand by a negative number', () => {
     const expandDonutByInvalidRange: PathMap = donutPathMap.expandBorder(-1)

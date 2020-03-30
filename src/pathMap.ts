@@ -1,6 +1,5 @@
 import {Coordinate, Path} from "./mapMeasurement";
 import {BattleMapFunctions} from "./battleMap";
-import {BaseSearchHistoryContext} from "./searchStrategies/SearchStrategy";
 
 export class PathMap {
   pathsByCoordinateLocationKey: Map<string, Path>
@@ -161,25 +160,54 @@ export class PathMap {
       return this.clone()
     }
 
-    // Add all of the Paths from the sourcePathMap into a working array.
-    // Create a visited list. Initialize with the sourcePathMap coordinates. This will also add the feathered locations.
+    const outlineCoordinates = this.getOutlineCoordinates()
+    const visitedCoordinateKeys = new Set(
+      outlineCoordinates.map( coordinate => {
+        return coordinate.getLocationKey()
+      })
+    )
 
-    // For each Path in the sourcePathMap,
-    //// currentPath is one of the sourcePathMap Paths.
-    //// Create an array to store the resulting paths.
-    //// Call recursive function, pass in the array, visited, the current feather distance (0) and the path to work on (currentPath)
+    const newPathsForNewPathMap = new Array<Path> ()
 
-    ////// Add 1 to the feather distance. Stop if it's more than the range.
-    ////// get the neighbors of the working path
-    ////// - If the neighbor is already visited, stop
-    ////// For each neighbor,
-    //////// Add the neighbor location to visited.
-    //////// Make a cloned path, and add the neighbor.
-    //////// Add the cloned path to the result.
-    //////// Now recurse on the neighbor if the feather distance isn't too far.
+    const helperAddUnvisitedNeighborPathsWithinRange = (
+      currentPath: Path,
+      newPathsForNewPathMap: Array<Path>,
+      visitedCoordinateKeys: Set<string>,
+      currentDistanceFromOutline: number): void => {
 
-    // get all Paths and create a PathMap from them.
+      currentDistanceFromOutline = currentDistanceFromOutline + 1
+      if (currentDistanceFromOutline > range) {
+        return
+      }
 
-    return undefined;
+      const unvisitedNeighbors = BattleMapFunctions.getNeighborCoordinates(currentPath.getHeadCoordinate())
+        .filter(coordinate => {
+          const locationKey = coordinate.getLocationKey()
+          if(visitedCoordinateKeys.has(locationKey)) {
+            return false
+          }
+          return true
+        })
+
+      unvisitedNeighbors.forEach(neighbor => {
+        const locationKey = neighbor.getLocationKey()
+        visitedCoordinateKeys.add(locationKey)
+
+        const newPath = currentPath.clone()
+        newPath.addCoordinate(neighbor, 1)
+        newPathsForNewPathMap.push(newPath)
+
+        if (currentDistanceFromOutline < range) {
+          helperAddUnvisitedNeighborPathsWithinRange(newPath, newPathsForNewPathMap, visitedCoordinateKeys, currentDistanceFromOutline)
+        }
+      })
+    }
+
+    outlineCoordinates.forEach(outlineCoordinate => {
+      const currentPath = this.getPathForCoordinate(outlineCoordinate)
+      helperAddUnvisitedNeighborPathsWithinRange(currentPath, newPathsForNewPathMap, visitedCoordinateKeys, 0)
+    })
+
+    return PathMap.newPathMapByArrayOfPaths(newPathsForNewPathMap)
   }
 }
