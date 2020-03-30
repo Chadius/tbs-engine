@@ -193,8 +193,7 @@ export class PathMap {
         const locationKey = neighbor.getLocationKey()
         visitedCoordinateKeys.add(locationKey)
 
-        const newPath = currentPath.clone()
-        newPath.addCoordinate(neighbor, 1)
+        const newPath = currentPath.cloneAndAddCoordinate(neighbor, 1)
         newPathsForNewPathMap.push(newPath)
 
         if (currentDistanceFromOutline < range) {

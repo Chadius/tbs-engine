@@ -69,9 +69,7 @@ export const getUnvisitedCoordinatesNextToPathHead = (searchHistoryContext: Sear
 export const addNeighborsToPathAndCreateNewPaths = (searchHistoryContext: SearchHistoryContext, neighbors: Array<Coordinate>, currentPath: Path): Array<Path> => {
   return neighbors.map((neighbor) => {
     const movementCostToNeighbor = 1
-    const newPathToSearch = currentPath.clone()
-    newPathToSearch.addCoordinate(neighbor, movementCostToNeighbor)
-    return newPathToSearch
+    return currentPath.cloneAndAddCoordinate(neighbor, movementCostToNeighbor)
   })
 }
 
