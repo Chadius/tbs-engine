@@ -22,6 +22,17 @@ export class Coordinate {
   getLocationKey(): string {
     return `${this.getRow()}, ${this.getColumn()}`
   }
+
+  static newFromLocationKey(locationKey: string): Coordinate {
+    const splitByComma = locationKey.split(",")
+    const row = parseInt(splitByComma[0])
+    const column = parseInt(splitByComma[1])
+
+    if (isNaN(row) || isNaN(column)) {
+      return undefined
+    }
+    return new Coordinate(row, column)
+  }
 }
 
 export class Path {

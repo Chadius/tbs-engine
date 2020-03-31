@@ -30,23 +30,6 @@ describe('Map contains the terrain and can query it', () => {
     expect(battleMap.isOnMap(3,0)).to.be.false
     expect(battleMap.isOnMap(0,2)).to.be.false
   })
-
-  it('Can convert coordinates to location index', () => {
-    expect(battleMap.coordinatesToLocationIndex(0,0)).to.equal(0)
-    expect(battleMap.coordinatesToLocationIndex(1,0)).to.equal(2)
-    expect(battleMap.coordinatesToLocationIndex(2,1)).to.equal(5)
-    expect(battleMap.coordinatesToLocationIndex(-1,0)).to.equal(undefined)
-    expect(battleMap.coordinatesToLocationIndex(0,2)).to.equal(undefined)
-  })
-
-  it('Can convert location index to coordinates', () => {
-    expect(battleMap.locationIndexToCoordinates(0)).to.eql({row:0,column:0})
-    expect(battleMap.locationIndexToCoordinates(1)).to.eql({row:0,column:1})
-    expect(battleMap.locationIndexToCoordinates(2)).to.eql({row:1,column:0})
-    expect(battleMap.locationIndexToCoordinates(-1)).to.eql(undefined)
-    expect(battleMap.locationIndexToCoordinates(6)).to.eql(undefined)
-  })
-
 })
 
 describe('Map can contain Squaddies',  () => {
@@ -65,55 +48,50 @@ describe('Map can contain Squaddies',  () => {
     soldier2 = new Squaddie(10)
   })
 
-
-  describe('Locate added squaddies', () => {
-    it('by coordinates', () => {
-      const battleMap = new BattleMap(terrain)
-
-      battleMap.addSquaddie(soldier, 0, 1)
-      battleMap.addSquaddie(soldier2, 2, 1)
-
-      expect(battleMap.getSquaddieAtCoordinates(0,1)).to.equal(soldier)
-      expect(battleMap.getSquaddieAtCoordinates(2,1)).to.equal(soldier2)
-      expect(battleMap.getSquaddieAtCoordinates(1,1)).to.equal(null)
-      expect(battleMap.getSquaddieAtCoordinates(10,30)).to.equal(undefined)
-    })
-
-    it('by location', () => {
-      const battleMap = new BattleMap(terrain)
-
-      battleMap.addSquaddie(soldier, 0, 1)
-      battleMap.addSquaddie(soldier2, 2, 1)
-
-      expect(battleMap.getSquaddieAtLocationIndex(1)).to.equal(soldier)
-      expect(battleMap.getSquaddieAtLocationIndex(5)).to.equal(soldier2)
-      expect(battleMap.getSquaddieAtLocationIndex(3)).to.equal(null)
-      expect(battleMap.getSquaddieAtLocationIndex(9001)).to.equal(undefined)
-    })
-
-    it('and get location index of Squaddies', () => {
-      const battleMap = new BattleMap(terrain)
-
-      battleMap.addSquaddie(soldier, 0, 1)
-      battleMap.addSquaddie(soldier2, 2, 1)
-      const soldier3 = new Squaddie(10)
-
-      expect(battleMap.getLocationIndexOfSquaddie(soldier)).to.equal(1)
-      expect(battleMap.getCoordinateOfSquaddie(soldier2)).to.eql(new Coordinate(2, 1))
-      expect(battleMap.getLocationIndexOfSquaddie(soldier3)).to.equal(null)
-    })
+  it('cannot add a squaddie off map', () => {
+    const battleMap = new BattleMap(terrain)
+    const offMapAdding = () => {
+      battleMap.addSquaddie(soldier, new Coordinate(-1, 9000))
+    }
+    expect(offMapAdding).to.throw(Error)
   })
 
   it('Cannot add two Squaddies at the same location', () => {
     const battleMap = new BattleMap(terrain)
 
-    battleMap.addSquaddie(soldier, 0, 1)
+    battleMap.addSquaddie(soldier, new Coordinate(0, 1))
 
     const stackingSquaddiesThrowsErrors: () => void = () => {
-      battleMap.addSquaddie(soldier2, 0, 1)
+      battleMap.addSquaddie(soldier2, new Coordinate(0, 1))
     }
 
     expect(stackingSquaddiesThrowsErrors).to.throw(Error)
+  })
+
+  describe('Locate added squaddies', () => {
+    it('by coordinates', () => {
+      const battleMap = new BattleMap(terrain)
+
+      battleMap.addSquaddie(soldier, new Coordinate(0, 1))
+      battleMap.addSquaddie(soldier2, new Coordinate(2, 1))
+
+      expect(battleMap.getSquaddieAtCoordinate(new Coordinate(0,1))).to.equal(soldier)
+      expect(battleMap.getSquaddieAtCoordinate(new Coordinate(2,1))).to.equal(soldier2)
+      expect(battleMap.getSquaddieAtCoordinate(new Coordinate(1,1))).to.equal(null)
+      expect(battleMap.getSquaddieAtCoordinate(new Coordinate(10,30))).to.equal(undefined)
+    })
+
+    it('and get location index of Squaddies', () => {
+      const battleMap = new BattleMap(terrain)
+
+      battleMap.addSquaddie(soldier, new Coordinate(0, 1))
+      battleMap.addSquaddie(soldier2, new Coordinate(2, 1))
+      const soldier3 = new Squaddie(10)
+
+      expect(battleMap.getCoordinateOfSquaddie(soldier)).to.eql(new Coordinate(0, 1))
+      expect(battleMap.getCoordinateOfSquaddie(soldier2)).to.eql(new Coordinate(2, 1))
+      expect(battleMap.getCoordinateOfSquaddie(soldier3)).to.equal(null)
+    })
   })
 });
 
@@ -189,15 +167,19 @@ describe('Map can generate neighbors based on location', () => {
     ]))
   })
 
-  const convertSetCoordinatesToArrayOfLocationIndecies = (setOfCoordinates: Array<Coordinate>): Array<number> => {
-    return setOfCoordinates.map((x) => {return flatMap.coordinatesToLocationIndex(x)})
+  const convertSetCoordinatesToArrayOfLocationIndecies = (setOfCoordinates: Array<Coordinate>): Array<string> => {
+    return setOfCoordinates.map((x) => {return x.getLocationKey()})
   }
 
   const assertNeighborsInclude = (setOfNeighborCoordinates: Array<Coordinate>, expectedCoordinates: Array<Array<number>>): void => {
     const locationOfNeighbors = convertSetCoordinatesToArrayOfLocationIndecies(setOfNeighborCoordinates)
-    expectedCoordinates.forEach((rowColumnPair: Array<number>) => {
-      const expectedLocation = flatMap.coordinatesToLocationIndex(rowColumnPair[0],rowColumnPair[1])
-      expect(locationOfNeighbors).to.include(expectedLocation, `Cannot find (${rowColumnPair[0]}, ${rowColumnPair[1]})`)
+
+    const expectedCoordinateKeys = expectedCoordinates.map(rowColumnPair => {
+      return `${rowColumnPair[0]}, ${rowColumnPair[1]}`
+    })
+
+    expectedCoordinateKeys.forEach(expectedCoordinateKey => {
+      expect(locationOfNeighbors).to.include(expectedCoordinateKey)
     })
   }
 
@@ -405,33 +387,32 @@ describe('Map can move Squaddies on the map', () => {
   it('Will update Squaddie locations', () => {
     const battleMap = new BattleMap(terrain)
 
-    battleMap.addSquaddie(soldier, 0, 1)
-    battleMap.moveSquaddie(soldier, 2, 0)
-    expect(battleMap.getSquaddieAtCoordinates(0,1)).to.equal(null)
-    expect(battleMap.getSquaddieAtCoordinates(2,0)).to.equal(soldier)
-    expect(battleMap.getSquaddieAtLocationIndex(4)).to.equal(soldier)
+    battleMap.addSquaddie(soldier, new Coordinate(0, 1))
+    battleMap.moveSquaddie(soldier, new Coordinate(2, 0))
+    expect(battleMap.getSquaddieAtCoordinate(new Coordinate(0,1))).to.equal(null)
+    expect(battleMap.getSquaddieAtCoordinate(new Coordinate(2,0))).to.equal(soldier)
     expect(battleMap.getCoordinateOfSquaddie(soldier)).to.eql(new Coordinate(2, 0))
   })
 
   it('Throws an error if destination is off map', () => {
     const battleMap = new BattleMap(terrain)
 
-    battleMap.addSquaddie(soldier, 0, 1)
+    battleMap.addSquaddie(soldier, new Coordinate(0, 1))
 
     const moveOffLeftEdge: () => void = () => {
-      battleMap.moveSquaddie(soldier, 0, -1)
+      battleMap.moveSquaddie(soldier, new Coordinate(0, -1))
     }
 
     const moveOffRightEdge: () => void = () => {
-      battleMap.moveSquaddie(soldier, 0, 2)
+      battleMap.moveSquaddie(soldier, new Coordinate(0, 2))
     }
 
     const moveOffBottomEdge: () => void = () => {
-      battleMap.moveSquaddie(soldier, -1, 0)
+      battleMap.moveSquaddie(soldier, new Coordinate(-1, 0))
     }
 
     const moveOffTopEdge: () => void = () => {
-      battleMap.moveSquaddie(soldier, 3, 0)
+      battleMap.moveSquaddie(soldier, new Coordinate(3, 0))
     }
 
     expect(moveOffLeftEdge).to.throw(Error)
@@ -443,16 +424,24 @@ describe('Map can move Squaddies on the map', () => {
   it('Throws an error if destination is occupied by another squaddie and aborts movement', () => {
     const battleMap = new BattleMap(terrain)
 
-    battleMap.addSquaddie(soldier, 0, 1)
+    battleMap.addSquaddie(soldier, new Coordinate(0, 1))
 
     const soldier2 = new Squaddie(5)
-    battleMap.addSquaddie(soldier2, 1, 0)
+    battleMap.addSquaddie(soldier2, new Coordinate(1, 0))
 
     const moveOnOtherSoldier: () => void = () => {
-      battleMap.moveSquaddie(soldier, 1, 0)
+      battleMap.moveSquaddie(soldier, new Coordinate(1, 0))
     }
 
     expect(moveOnOtherSoldier).to.throw(Error)
-    expect(battleMap.getSquaddieAtCoordinates(0,1)).to.equal(soldier)
+    expect(battleMap.getSquaddieAtCoordinate(new Coordinate(0,1))).to.equal(soldier)
+  })
+
+  it('Does not throw an error if the destination is the starting location', () => {
+    const battleMap = new BattleMap(terrain)
+
+    battleMap.addSquaddie(soldier, new Coordinate(0, 1))
+    battleMap.moveSquaddie(soldier, new Coordinate(0, 1))
+    expect(battleMap.getSquaddieAtCoordinate(new Coordinate(0,1))).to.equal(soldier)
   })
 })

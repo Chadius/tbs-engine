@@ -8,7 +8,7 @@ export interface BaseSearchHistoryContext {
   endCoordinate: Coordinate;
   pathsToSearch: TinyQueue<Path> | null;
   startCoordinate: Coordinate;
-  visitedLocations: Set<number>;
+  visitedLocations: Set<string>;
 }
 
 export class SearchHistoryContext implements BaseSearchHistoryContext{
@@ -16,13 +16,13 @@ export class SearchHistoryContext implements BaseSearchHistoryContext{
   endCoordinate: Coordinate;
   pathsToSearch: TinyQueue<Path> | null;
   startCoordinate: Coordinate;
-  visitedLocations: Set<number>;
+  visitedLocations: Set<string>;
 
   constructor(battleMap: BattleMap, startCoordinate: Coordinate, endCoordinate: Coordinate) {
     this.battleMap = battleMap
     this.startCoordinate = startCoordinate
     this.endCoordinate = endCoordinate
-    this.visitedLocations = new Set<number>()
+    this.visitedLocations = new Set<string>()
     this.pathsToSearch = null
   }
 }

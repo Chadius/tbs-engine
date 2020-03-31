@@ -42,12 +42,12 @@ export class MapTerrain {
 
 export class BattleMap{
   terrain: MapTerrain
-  squaddiesByLocationIndex: Map<number, Squaddie>
+  squaddiesByLocationKey: Map<string, Squaddie>
 
   constructor(terrain: MapTerrain) {
     this.terrain = terrain
 
-    this.squaddiesByLocationIndex = new Map<number, Squaddie>()
+    this.squaddiesByLocationKey = new Map<string, Squaddie>()
   }
 
   rowCount(): number {
@@ -76,61 +76,27 @@ export class BattleMap{
     )
   }
 
-  coordinatesToLocationIndex(rowOrCoordinate: number | Coordinate, column?: number): number {
-    let row: number = undefined
-
-    if(typeof rowOrCoordinate === 'number') {
-      row = rowOrCoordinate
-    }
-    else {
-      row = rowOrCoordinate.getRow()
-      column = rowOrCoordinate.getColumn()
+  addSquaddie(newSquaddie: Squaddie, coordinate: Coordinate) {
+    const locationKey = coordinate.getLocationKey()
+    if (this.squaddiesByLocationKey.get(locationKey)) {
+      throw Error(`Two squaddies cannot be at the same coordinates ${locationKey}`)
     }
 
-    if (this.isOnMap(row, column) !== true) {
-      return undefined
+    if (!this.isOnMap(coordinate)) {
+      throw Error(`Cannot add Squaddie off map at ${locationKey}`)
     }
-    return (row * this.columnCount() + column)
+
+    this.squaddiesByLocationKey.set(locationKey, newSquaddie)
   }
 
-  locationIndexToCoordinates(locationIndex: number): {row: number; column: number} {
-    const row = Math.floor(locationIndex / this.columnCount()),
-      column = locationIndex % this.columnCount()
-
-    if (this.isOnMap(row, column) !== true) {
+  getSquaddieAtCoordinate(coordinate: Coordinate) {
+    if (!this.isOnMap(coordinate)) {
       return undefined
     }
 
-    return {
-      row: row,
-      column: column,
-    }
-  }
+    const locationKey = coordinate.getLocationKey()
 
-  addSquaddie(newSquaddie: Squaddie, row: number, column: number) {
-    const locationIndex = this.coordinatesToLocationIndex(row, column)
-    if (this.squaddiesByLocationIndex.get(locationIndex)) {
-      throw Error(`Two squaddies cannot be at the same coordinates (${row}, ${column})`)
-    }
-
-    this.squaddiesByLocationIndex.set(locationIndex, newSquaddie)
-  }
-
-  getSquaddieAtCoordinates(row: number, column: number) {
-    const squaddieCoordinate = this.coordinatesToLocationIndex(row, column)
-    if (!squaddieCoordinate) {
-      return undefined
-    }
-
-    return this.squaddiesByLocationIndex.get(squaddieCoordinate) || null
-  }
-
-  getSquaddieAtLocationIndex(locationIndex: number): Squaddie {
-    if (this.locationIndexToCoordinates(locationIndex) === undefined) {
-      return undefined
-    }
-
-    return this.squaddiesByLocationIndex.get(locationIndex) || null
+    return this.squaddiesByLocationKey.get(locationKey) || null
   }
 
   getDirectDistance(startCoordinate: Coordinate, endCoordinate: Coordinate): number {
@@ -159,15 +125,15 @@ export class BattleMap{
     });
   }
 
-  getLocationIndexOfSquaddie(squaddieToFind: Squaddie): number{
-    const squaddieIterator = this.squaddiesByLocationIndex.entries()
+  getCoordinateOfSquaddie(squaddieToFind: Squaddie): Coordinate {
+    const squaddieIterator = this.squaddiesByLocationKey.entries()
 
     let nextSquaddieKeyValue = squaddieIterator.next()
     while(!nextSquaddieKeyValue.done) {
-      const locationIndex = nextSquaddieKeyValue.value[0]
+      const locationKey = nextSquaddieKeyValue.value[0]
       const squaddie = nextSquaddieKeyValue.value[1]
       if (squaddie === squaddieToFind) {
-        return locationIndex
+        return Coordinate.newFromLocationKey(locationKey)
       }
       nextSquaddieKeyValue = squaddieIterator.next()
     }
@@ -175,26 +141,18 @@ export class BattleMap{
     return null
   }
 
-  getCoordinateOfSquaddie(squaddie: Squaddie): Coordinate {
-    const locationIndex = this.getLocationIndexOfSquaddie(squaddie)
-    if (!locationIndex) {
-      return null
-    }
-    const rowIndexPair = this.locationIndexToCoordinates(locationIndex)
-    return new Coordinate(rowIndexPair.row, rowIndexPair.column)
-  }
-
-  moveSquaddie(squaddieToMove: Squaddie, destinationRow: number, destinationColumn: number): void {
-    if (!this.isOnMap(destinationRow, destinationColumn)) {
-      throw Error(`Destination is off map: (${destinationRow}, ${destinationColumn})`)
+  moveSquaddie(squaddieToMove: Squaddie, destination: Coordinate): void {
+    if (!this.isOnMap(destination.getRow(), destination.getColumn())) {
+      throw Error(`Destination is off map: ${destination.getLocationKey()}`)
     }
 
-    const locationIndexOfSquaddie = this.getLocationIndexOfSquaddie(squaddieToMove)
-    if (this.getSquaddieAtCoordinates(destinationRow, destinationColumn)) {
-      throw Error(`Another Squaddie is at the destination, cannot move: (${destinationRow}, ${destinationColumn})`)
+    const squaddieLocation = this.getCoordinateOfSquaddie(squaddieToMove)
+    const squaddieAtDestination = this.getSquaddieAtCoordinate(destination)
+    if (squaddieAtDestination && squaddieAtDestination !== squaddieToMove) {
+      throw Error(`Another Squaddie is at the destination, cannot move: ${destination.getLocationKey()}`)
     }
 
-    this.squaddiesByLocationIndex.set(locationIndexOfSquaddie, null)
-    this.addSquaddie(squaddieToMove, destinationRow, destinationColumn)
+    this.squaddiesByLocationKey.set(squaddieLocation.getLocationKey(), null)
+    this.addSquaddie(squaddieToMove, destination)
   }
 }

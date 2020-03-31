@@ -29,7 +29,7 @@ export const initalizeSearchHistoryWithPriorityQueue = (searchHistoryContext: Se
   searchHistoryContext.pathsToSearch.push(new Path(startCoordinate))
   visitedLocations.clear()
   visitedLocations.add(
-    battleMap.coordinatesToLocationIndex(startCoordinate)
+    startCoordinate.getLocationKey()
   )
 }
 
@@ -42,11 +42,7 @@ export const popNextPathFromQueue = (searchHistoryContext: SearchHistoryContext)
 }
 
 export const addPathLocationToVisited = (searchHistoryContext: SearchHistoryContext, currentPath: Path): void => {
-  const currentPathLocationIndex = searchHistoryContext.battleMap.coordinatesToLocationIndex(
-    currentPath.getHeadCoordinate()
-  )
-
-  searchHistoryContext.visitedLocations.add(currentPathLocationIndex)
+  searchHistoryContext.visitedLocations.add(currentPath.getHeadCoordinate().getLocationKey())
 }
 
 export const endIfPathIsAtDestination = (searchHistoryContext: SearchHistoryContext, currentPath: Path): {shouldExitEarly: boolean; returnVal: Path} => {
@@ -60,8 +56,8 @@ export const endIfPathIsAtDestination = (searchHistoryContext: SearchHistoryCont
 export const getUnvisitedCoordinatesNextToPathHead = (searchHistoryContext: SearchHistoryContext, currentPath: Path): Array<Coordinate> => {
   const neighbors = searchHistoryContext.battleMap.getOnMapNeighbors(currentPath.getHeadCoordinate())
     .filter((neighbor) => {
-      const locationIndex = searchHistoryContext.battleMap.coordinatesToLocationIndex(neighbor)
-      return !(searchHistoryContext.visitedLocations.has(locationIndex))
+      const locationKey = neighbor.getLocationKey()
+      return !(searchHistoryContext.visitedLocations.has(locationKey))
     })
   return neighbors
 }

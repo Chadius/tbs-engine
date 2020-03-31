@@ -24,6 +24,20 @@ describe('Coordinates', () => {
     expect(newCoordinate.equals(sameRowAndColumn)).to.be.true
     expect(newCoordinate.equals(differentRowAndColumn)).to.be.false
   })
+
+  it('can create a new coordinate from a string', () => {
+    expect(Coordinate.newFromLocationKey("0, 0").getRow()).to.equal(0)
+    expect(Coordinate.newFromLocationKey("0,0").getColumn()).to.equal(0)
+
+    expect(Coordinate.newFromLocationKey("0, 1").getRow()).to.equal(0)
+    expect(Coordinate.newFromLocationKey("0, 1").getColumn()).to.equal(1)
+
+    expect(Coordinate.newFromLocationKey("1, 0").getRow()).to.equal(1)
+    expect(Coordinate.newFromLocationKey("1, 0").getColumn()).to.equal(0)
+
+    expect(Coordinate.newFromLocationKey("10")).to.be.undefined
+    expect(Coordinate.newFromLocationKey("s, t")).to.be.undefined
+  })
 })
 
 describe('Paths', () => {
