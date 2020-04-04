@@ -5,23 +5,31 @@
   "main": "index.js",
   "scripts": {
     "test": "ts-mocha test/**.ts",
-    "lint": "npx eslint --fix test/*.ts"
+    "lint": "npx eslint --fix test/*.ts",
+    "build": "webpack",
+    "start": "webpack --watch & live-server --port=8085"
   },
   "author": "Chad Serrant <therealchadius@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "@types/mocha": "^7.0.2",
+    "@types/node": "^13.11.0",
     "@typescript-eslint/eslint-plugin": "^2.22.0",
     "@typescript-eslint/parser": "^2.22.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-google": "^0.14.0",
+    "live-server": "^1.2.1",
     "mocha": "^7.1.0",
-    "ts-mocha": "^6.0.0"
+    "phaser": "^3.22.0",
+    "ts-loader": "^6.2.2",
+    "ts-mocha": "^6.0.0",
+    "typescript": "^3.8.3",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
   },
   "dependencies": {
     "minimist": ">=1.2.2",
-    "tinyqueue": "^2.0.3",
-    "typescript": "^3.8.3"
+    "tinyqueue": "^2.0.3"
   }
 }
