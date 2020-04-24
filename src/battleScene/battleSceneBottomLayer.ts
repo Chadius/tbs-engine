@@ -18,43 +18,17 @@ export class BattleSceneBottomLayer {
   }
 
   create(): void {
-    this.centerCamera(-200, 200);
-    this.scene.cameras.main.setZoom(1.0);
+    this.setupCamera()
 
     this.drawMapLayer()
   }
 
-  zoomCamera(zoomIn: boolean) {
-    if (zoomIn) {
-      this.zoomLevel = this.zoomLevel - 0.1;
-    }
-    else {
-      this.zoomLevel = this.zoomLevel + 0.1;
-    }
-
-    const zoomMin = 0.3;
-    const zoomMax = 4.0;
-    if (this.zoomLevel < zoomMin) {
-      this.zoomLevel = zoomMin
-    }
-    else if(this.zoomLevel > zoomMax) {
-      this.zoomLevel = zoomMax
-    }
-
-    this.scene.cameras.main.setZoom(this.zoomLevel);
-  }
-
   centerCamera(x: number, y: number) {
-    this.scene.cameras.main.setZoom(2.0);
-    this.scene.cameras.main.setScroll(x, y);
+    this.scene.cameras.main.setZoom(2.0)
+    this.scene.cameras.main.setScroll(x, y)
   }
 
   update(time: number, delta: number): void {
-    if (!this.lastZoomTime || time - this.lastZoomTime > 1000.0) {
-
-      this.zoomCamera(false)
-      this.lastZoomTime = time
-    }
   }
 
   drawMapLayer() {
@@ -81,5 +55,43 @@ export class BattleSceneBottomLayer {
     for(let i = 0; i < width; i++) {
       this.scene.physics.add.image(drawX + (i * this.tileWidth), drawY, "sand");
     }
+  }
+
+  setupCamera() {
+    this.centerCamera(-200, 200)
+    this.scene.cameras.main.setZoom(1.0)
+    this.createCameraControls()
+  }
+
+  createCameraControls() {
+    this.scene.input.keyboard.on('keydown-MINUS', (event) => {
+      this.zoomInCamera()
+    })
+    this.scene.input.keyboard.on('keydown-PLUS', (event) => {
+      this.zoomOutCamera()
+    })
+  }
+
+  boundCameraZoomVLevel() {
+    const zoomInLimit = 1.0 / 4.0
+    const zoomOutLimit = 1.0 * 4.0
+    if (this.zoomLevel < zoomInLimit) {
+      this.zoomLevel = zoomInLimit
+    }
+    else if(this.zoomLevel > zoomOutLimit) {
+      this.zoomLevel = zoomOutLimit
+    }
+  }
+
+  zoomInCamera() {
+    this.zoomLevel = this.zoomLevel / 2.0
+    this.boundCameraZoomVLevel()
+    this.scene.cameras.main.setZoom(this.zoomLevel)
+  }
+
+  zoomOutCamera() {
+    this.zoomLevel = this.zoomLevel * 2.0
+    this.boundCameraZoomVLevel()
+    this.scene.cameras.main.setZoom(this.zoomLevel)
   }
 }
