@@ -2,9 +2,18 @@ import "phaser";
 export class BattleSceneBottomLayer {
   rowHeight = 64;
   tileWidth = 64;
-  zoomLevel = 1.0;
-  lastZoomTime: number = undefined;
   scene: Phaser.Scene
+  zoomInfo: {
+    start: number;
+    end: number;
+    timeElapsed: number;
+    transitionDuration: number;
+    current: number;
+    min: number;
+    max: number;
+    isInTransition(): boolean;
+    boundToMinMax(): void;
+  };
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
@@ -29,13 +38,14 @@ export class BattleSceneBottomLayer {
   }
 
   update(time: number, delta: number): void {
+    this.updateCameraZoom(delta)
   }
 
   drawMapLayer() {
-    this.drawRow(0, 3);
-    this.drawRow(1, 3);
-    this.drawRow(2, 3);
-    this.drawRow(3, 3);
+    this.drawRow(0, 3)
+    this.drawRow(1, 3)
+    this.drawRow(2, 3)
+    this.drawRow(3, 3)
   }
 
   drawRow(row: number, width: number): void {
@@ -59,8 +69,33 @@ export class BattleSceneBottomLayer {
 
   setupCamera() {
     this.centerCamera(-200, 200)
-    this.scene.cameras.main.setZoom(1.0)
     this.createCameraControls()
+    this.zoomInfo = {
+      start: undefined,
+      end: undefined,
+      timeElapsed: undefined,
+      transitionDuration: undefined,
+      current: 1.0,
+      min: 1.0 / 4.0,
+      max: 1.0 * 4.0,
+      isInTransition: () => {
+        if (this.zoomInfo.timeElapsed === undefined || this.zoomInfo.transitionDuration === undefined) {
+          return false
+        }
+
+        return this.zoomInfo.timeElapsed < this.zoomInfo.transitionDuration
+      },
+      boundToMinMax: () => {
+        if (this.zoomInfo.end <= this.zoomInfo.min) {
+          this.zoomInfo.end = this.zoomInfo.min
+        }
+        else if(this.zoomInfo.end >= this.zoomInfo.max) {
+          this.zoomInfo.end = this.zoomInfo.max
+        }
+      }
+    }
+
+    this.scene.cameras.main.setZoom(this.zoomInfo.current)
   }
 
   createCameraControls() {
@@ -72,26 +107,58 @@ export class BattleSceneBottomLayer {
     })
   }
 
-  boundCameraZoomVLevel() {
-    const zoomInLimit = 1.0 / 4.0
-    const zoomOutLimit = 1.0 * 4.0
-    if (this.zoomLevel < zoomInLimit) {
-      this.zoomLevel = zoomInLimit
-    }
-    else if(this.zoomLevel > zoomOutLimit) {
-      this.zoomLevel = zoomOutLimit
-    }
-  }
-
   zoomInCamera() {
-    this.zoomLevel = this.zoomLevel / 2.0
-    this.boundCameraZoomVLevel()
-    this.scene.cameras.main.setZoom(this.zoomLevel)
+    if (this.zoomInfo.isInTransition()) {
+      return
+    }
+    if (this.zoomInfo.current >= this.zoomInfo.max) {
+      return
+    }
+
+    this.zoomInfo.start = this.zoomInfo.current
+    this.zoomInfo.end = this.zoomInfo.current * 2.0
+    this.zoomInfo.boundToMinMax()
+
+    this.zoomInfo.timeElapsed = 0
+    this.zoomInfo.transitionDuration = 1000
   }
 
   zoomOutCamera() {
-    this.zoomLevel = this.zoomLevel * 2.0
-    this.boundCameraZoomVLevel()
-    this.scene.cameras.main.setZoom(this.zoomLevel)
+    if (this.zoomInfo.isInTransition()) {
+      return
+    }
+    if (this.zoomInfo.current <= this.zoomInfo.min) {
+      return
+    }
+
+    this.zoomInfo.start = this.zoomInfo.current
+    this.zoomInfo.end = this.zoomInfo.current / 2.0
+    this.zoomInfo.boundToMinMax()
+
+    this.zoomInfo.timeElapsed = 0
+    this.zoomInfo.transitionDuration = 1000
+  }
+
+  updateCameraZoom(timeDelta: number) {
+    if (!this.zoomInfo.isInTransition()) {
+      return
+    }
+
+    const lerpPoints = [
+      this.zoomInfo.start,
+      this.zoomInfo.end,
+    ]
+
+    const timeElapsed = (this.zoomInfo.timeElapsed / this.zoomInfo.transitionDuration)
+
+    this.zoomInfo.current = Phaser.Math.Interpolation.Linear(lerpPoints, timeElapsed)
+
+    this.zoomInfo.timeElapsed = this.zoomInfo.timeElapsed + timeDelta
+
+    if (this.zoomInfo.timeElapsed >= this.zoomInfo.transitionDuration) {
+      this.zoomInfo.current = this.zoomInfo.end
+    }
+
+    this.scene.cameras.main.setZoom(this.zoomInfo.current)
   }
 }
