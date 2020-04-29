@@ -1,19 +1,10 @@
 import "phaser";
+import {ZoomInfoForBattleMainLayer} from "../battleSceneUtilities/zoomLevelManagement";
 export class BattleSceneBottomLayer {
   rowHeight = 64;
   tileWidth = 64;
   scene: Phaser.Scene
-  zoomInfo: {
-    start: number;
-    end: number;
-    timeElapsed: number;
-    transitionDuration: number;
-    current: number;
-    min: number;
-    max: number;
-    isInTransition(): boolean;
-    boundToMinMax(): void;
-  };
+  zoomInfo: ZoomInfoForBattleMainLayer
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
@@ -70,40 +61,22 @@ export class BattleSceneBottomLayer {
   setupCamera() {
     this.centerCamera(-200, 200)
     this.createCameraControls()
-    this.zoomInfo = {
-      start: undefined,
-      end: undefined,
-      timeElapsed: undefined,
-      transitionDuration: undefined,
-      current: 1.0,
+    this.zoomInfo = new ZoomInfoForBattleMainLayer({
+      initial: 1.0,
       min: 1.0 / 4.0,
       max: 1.0 * 4.0,
-      isInTransition: () => {
-        if (this.zoomInfo.timeElapsed === undefined || this.zoomInfo.transitionDuration === undefined) {
-          return false
-        }
+      interpolator: Phaser.Math.Interpolation.Linear,
+    })
 
-        return this.zoomInfo.timeElapsed < this.zoomInfo.transitionDuration
-      },
-      boundToMinMax: () => {
-        if (this.zoomInfo.end <= this.zoomInfo.min) {
-          this.zoomInfo.end = this.zoomInfo.min
-        }
-        else if(this.zoomInfo.end >= this.zoomInfo.max) {
-          this.zoomInfo.end = this.zoomInfo.max
-        }
-      }
-    }
-
-    this.scene.cameras.main.setZoom(this.zoomInfo.current)
+    this.scene.cameras.main.setZoom(this.zoomInfo.getCurrentZoomLevel())
   }
 
   createCameraControls() {
     this.scene.input.keyboard.on('keydown-MINUS', (event) => {
-      this.zoomInCamera()
+      this.zoomOutCamera()
     })
     this.scene.input.keyboard.on('keydown-PLUS', (event) => {
-      this.zoomOutCamera()
+      this.zoomInCamera()
     })
   }
 
@@ -111,54 +84,18 @@ export class BattleSceneBottomLayer {
     if (this.zoomInfo.isInTransition()) {
       return
     }
-    if (this.zoomInfo.current >= this.zoomInfo.max) {
-      return
-    }
-
-    this.zoomInfo.start = this.zoomInfo.current
-    this.zoomInfo.end = this.zoomInfo.current * 2.0
-    this.zoomInfo.boundToMinMax()
-
-    this.zoomInfo.timeElapsed = 0
-    this.zoomInfo.transitionDuration = 1000
+    this.zoomInfo.transitionZoomLevel(this.zoomInfo.getCurrentZoomLevel() * 2.0)
   }
 
   zoomOutCamera() {
     if (this.zoomInfo.isInTransition()) {
       return
     }
-    if (this.zoomInfo.current <= this.zoomInfo.min) {
-      return
-    }
-
-    this.zoomInfo.start = this.zoomInfo.current
-    this.zoomInfo.end = this.zoomInfo.current / 2.0
-    this.zoomInfo.boundToMinMax()
-
-    this.zoomInfo.timeElapsed = 0
-    this.zoomInfo.transitionDuration = 1000
+    this.zoomInfo.transitionZoomLevel(this.zoomInfo.getCurrentZoomLevel() / 2.0)
   }
 
   updateCameraZoom(timeDelta: number) {
-    if (!this.zoomInfo.isInTransition()) {
-      return
-    }
-
-    const lerpPoints = [
-      this.zoomInfo.start,
-      this.zoomInfo.end,
-    ]
-
-    const timeElapsed = (this.zoomInfo.timeElapsed / this.zoomInfo.transitionDuration)
-
-    this.zoomInfo.current = Phaser.Math.Interpolation.Linear(lerpPoints, timeElapsed)
-
-    this.zoomInfo.timeElapsed = this.zoomInfo.timeElapsed + timeDelta
-
-    if (this.zoomInfo.timeElapsed >= this.zoomInfo.transitionDuration) {
-      this.zoomInfo.current = this.zoomInfo.end
-    }
-
-    this.scene.cameras.main.setZoom(this.zoomInfo.current)
+    this.zoomInfo.passMilliseconds(timeDelta)
+    this.scene.cameras.main.setZoom(this.zoomInfo.getCurrentZoomLevel())
   }
 }
