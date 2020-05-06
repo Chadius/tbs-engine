@@ -8,6 +8,7 @@ export class BattleSceneBottomLayer {
   scene: Phaser.Scene
   zoomInfo: ZoomInfoForBattleMainLayer
   cameraInfo: CameraControlForMainLayer
+  mainLayerBounds = {x: 0, y: 0, width: 800, height: 600}
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
@@ -88,6 +89,13 @@ export class BattleSceneBottomLayer {
     })
 
     this.scene.cameras.main.setZoom(this.zoomInfo.getCurrentZoomLevel())
+
+    this.scene.cameras.main.setBounds(
+      this.mainLayerBounds.x,
+      this.mainLayerBounds.y,
+      this.mainLayerBounds.width,
+      this.mainLayerBounds.height
+    )
   }
 
   createCameraControls() {
@@ -133,22 +141,31 @@ export class BattleSceneBottomLayer {
 
   scrollCameraUp() {
     const currentPosition = this.cameraInfo.getPosition()
-    this.cameraInfo.transitionScroll([currentPosition[0], currentPosition[1] - 100])
+    this.scrollCameraWithinBounds(currentPosition[0], currentPosition[1] - 100)
+  }
+
+  private scrollCameraWithinBounds(destinationX: number, destinationY: number) {
+    this.cameraInfo.transitionScroll(
+      [
+        this.scene.cameras.main.clampX(destinationX),
+        this.scene.cameras.main.clampY(destinationY)
+      ]
+    )
   }
 
   scrollCameraDown() {
     const currentPosition = this.cameraInfo.getPosition()
-    this.cameraInfo.transitionScroll([currentPosition[0], currentPosition[1] + 100])
+    this.scrollCameraWithinBounds(currentPosition[0], currentPosition[1] + 100)
   }
 
   scrollCameraLeft() {
     const currentPosition = this.cameraInfo.getPosition()
-    this.cameraInfo.transitionScroll([currentPosition[0] - 100, currentPosition[1]])
+    this.scrollCameraWithinBounds(currentPosition[0] - 100, currentPosition[1])
   }
 
   scrollCameraRight() {
     const currentPosition = this.cameraInfo.getPosition()
-    this.cameraInfo.transitionScroll([currentPosition[0] + 100, currentPosition[1]])
+    this.scrollCameraWithinBounds(currentPosition[0] + 100, currentPosition[1])
   }
 
   updateCameraScroll(timeDelta: number) {
