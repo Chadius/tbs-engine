@@ -16,6 +16,7 @@ export class BattleSceneBottomLayer {
   preload(): void {
     this.scene.load.image("sand", "assets/BrownSand.png");
     this.scene.load.image("blue_boy", "assets/BlueBoy.png");
+    this.scene.load.image("orange_background", "assets/OrangeBackground.png");
   }
 
   create(): void {
@@ -23,18 +24,20 @@ export class BattleSceneBottomLayer {
   }
 
   update(time: number, delta: number): void {
-    let graphics = this.scene.add.graphics({ fillStyle: { color: 0xcccccc } });
-    graphics.fillRectShape(new Phaser.Geom.Rectangle(0, 0, 800, 600));
-
-    graphics = this.scene.add.graphics({ lineStyle: { width: 4, color: 0x010101 } });
-    graphics.strokeLineShape(new Phaser.Geom.Line(0, 600, 0, 0));
-    graphics.strokeLineShape(new Phaser.Geom.Line(0, 600, 800, 600));
-    graphics.strokeLineShape(new Phaser.Geom.Line(800, 600, 800, 0));
-    graphics.strokeLineShape(new Phaser.Geom.Line(0,  0, 800, 0));
-
+    this.drawBackgroundLayer()
     this.drawMapLayer()
-
     this.drawAllSquaddies()
+  }
+
+  drawBackgroundLayer() {
+    const backgroundImage = this.scene.physics.add.image(400, 300, "orange_background")
+    backgroundImage.setDisplaySize(800, 600)
+
+    const graphics = this.scene.add.graphics({ lineStyle: { width: 4, color: 0x010101 } })
+    graphics.strokeLineShape(new Phaser.Geom.Line(0, 600, 0, 0))
+    graphics.strokeLineShape(new Phaser.Geom.Line(0, 600, 800, 600))
+    graphics.strokeLineShape(new Phaser.Geom.Line(800, 600, 800, 0))
+    graphics.strokeLineShape(new Phaser.Geom.Line(0,  0, 800, 0))
   }
 
   drawMapLayer() {
