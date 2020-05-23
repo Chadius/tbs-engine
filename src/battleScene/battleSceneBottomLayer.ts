@@ -9,6 +9,7 @@ export class BattleSceneBottomLayer {
   scene: Phaser.Scene
   mainLayerBounds = {x: 0, y: 0, width: 800, height: 600}
   battleMap: BattleMap
+  squaddieSpriteNameByID: Map<string, string>
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
@@ -20,18 +21,26 @@ export class BattleSceneBottomLayer {
       ['1', 'X', '1', '1'],
       ['3', '1', '1', '1'],
     ]))
+
+    this.squaddieSpriteNameByID = new Map<string, string>()
+
     this.battleMap.addSquaddie(
       new Squaddie('soldier0', 5),
       new Coordinate(0, 1)
     )
+    this.squaddieSpriteNameByID.set('soldier0', 'blue_boy')
+
     this.battleMap.addSquaddie(
       new Squaddie('soldier1', 5),
       new Coordinate(2, 3)
     )
+    this.squaddieSpriteNameByID.set('soldier1', 'blue_boy')
+
     this.battleMap.addSquaddie(
       new Squaddie('soldier2', 5),
       new Coordinate(1, 2)
     )
+    this.squaddieSpriteNameByID.set('soldier2', 'blue_boy')
   }
 
   preload(): void {
@@ -96,21 +105,25 @@ export class BattleSceneBottomLayer {
 
     let nextSquaddieKeyValue = squaddieIterator.next()
     while(!nextSquaddieKeyValue.done) {
+      const squaddieId = nextSquaddieKeyValue.value[0]
+      const squaddieToDraw = this.battleMap.getSquaddieById(squaddieId)
+
       const squaddieCoordinate = nextSquaddieKeyValue.value[1]
 
-      this.drawSquaddie(squaddieCoordinate.getRow(),squaddieCoordinate.getColumn())
+      this.drawSquaddie(squaddieToDraw, squaddieCoordinate.getRow(),squaddieCoordinate.getColumn())
       nextSquaddieKeyValue = squaddieIterator.next()
     }
   }
 
 
-  private drawSquaddie(row: number, column: number) {
+  private drawSquaddie(squaddie: Squaddie, row: number, column: number) {
     const coordinates = this.getPixelCoordinates(row, column)
 
     const graphics = this.scene.add.graphics({ lineStyle: { width: 4, color: 0x010101 } })
     graphics.strokeEllipse(coordinates[0], coordinates[1], 20, 20, 32)
 
-    this.scene.physics.add.image(coordinates[0], coordinates[1], "blue_boy");
+    const spriteID = this.squaddieSpriteNameByID.get(squaddie.getId())
+    this.scene.physics.add.image(coordinates[0], coordinates[1], spriteID);
   }
 
   private getPixelCoordinates(row: number, column: number): number[] {
