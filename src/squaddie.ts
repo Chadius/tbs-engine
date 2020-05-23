@@ -10,8 +10,10 @@ export class Squaddie {
   movePerTurn: number
 
   moveAvailableThisTurn: boolean
+  private readonly id: string;
 
-  constructor(maxHealth, attributes = {}, movement = {} ) {
+  constructor(id, maxHealth, attributes = {}, movement = {} ) {
+    this.id = id
     this.maxHealth = maxHealth
     this.health = this.getMaxHealth()
 
@@ -108,6 +110,10 @@ export class Squaddie {
 
   getCurrentMovePerTurn(): number {
     return this.getBaseMovePerTurn()
+  }
+
+  getId(): string {
+    return this.id
   }
 
   canMoveThisTurn(): boolean {

@@ -44,8 +44,8 @@ describe('Map can contain Squaddies',  () => {
       ['3', '1'],
     ])
 
-    soldier = new Squaddie(5)
-    soldier2 = new Squaddie(10)
+    soldier = new Squaddie('soldier', 5)
+    soldier2 = new Squaddie('soldier2', 10)
   })
 
   it('cannot add a squaddie off map', () => {
@@ -68,7 +68,19 @@ describe('Map can contain Squaddies',  () => {
     expect(stackingSquaddiesThrowsErrors).to.throw(Error)
   })
 
-  describe('Locate added squaddies', () => {
+  it('Cannot add two Squaddies with the same id', () => {
+    const battleMap = new BattleMap(terrain)
+
+    battleMap.addSquaddie(soldier, new Coordinate(0, 1))
+
+    const sameIdSquaddieThrowsErrors: () => void = () => {
+      battleMap.addSquaddie(soldier, new Coordinate(2, 1))
+    }
+
+    expect(sameIdSquaddieThrowsErrors).to.throw(Error)
+  })
+
+  describe('Find added squaddies', () => {
     it('by coordinates', () => {
       const battleMap = new BattleMap(terrain)
 
@@ -86,11 +98,34 @@ describe('Map can contain Squaddies',  () => {
 
       battleMap.addSquaddie(soldier, new Coordinate(0, 1))
       battleMap.addSquaddie(soldier2, new Coordinate(2, 1))
-      const soldier3 = new Squaddie(10)
+      const soldier3 = new Squaddie('soldier3', 10)
 
       expect(battleMap.getCoordinateOfSquaddie(soldier)).to.eql(new Coordinate(0, 1))
       expect(battleMap.getCoordinateOfSquaddie(soldier2)).to.eql(new Coordinate(2, 1))
       expect(battleMap.getCoordinateOfSquaddie(soldier3)).to.equal(null)
+    })
+
+    it('by ID', () => {
+      const battleMap = new BattleMap(terrain)
+
+      battleMap.addSquaddie(soldier, new Coordinate(0, 1))
+      battleMap.addSquaddie(soldier2, new Coordinate(2, 1))
+
+      expect(battleMap.getSquaddieById("soldier")).to.eq(soldier)
+      expect(battleMap.getSquaddieById("soldier2")).to.eq(soldier2)
+      expect(battleMap.getSquaddieById("soldier3")).to.equal(null)
+    })
+
+    it('and return a list of squaddies at their locations', () => {
+      const battleMap = new BattleMap(terrain)
+
+      battleMap.addSquaddie(soldier, new Coordinate(0, 1))
+      battleMap.addSquaddie(soldier2, new Coordinate(2, 1))
+
+      const allSquaddieLocations = battleMap.getCoordinatesOfAllSquaddiesByID()
+      expect(allSquaddieLocations.size).to.eq(2)
+      expect(allSquaddieLocations.get("soldier")).to.eql(new Coordinate(0, 1))
+      expect(allSquaddieLocations.get("soldier2")).to.eql(new Coordinate(2, 1))
     })
   })
 });
@@ -323,14 +358,14 @@ describe('A* Navigation', () => {
 
 describe('Squaddie has move limits on a map', () => {
   it('Squaddie has movement', () => {
-    const soldierWithMovement = new Squaddie(5, {}, {movement:6})
+    const soldierWithMovement = new Squaddie('soldierWithMovement',5, {}, {movement:6})
 
     expect(soldierWithMovement.getBaseMovePerTurn()).to.equal(6)
     expect(soldierWithMovement.getCurrentMovePerTurn()).to.equal(6)
   })
 
   it('Can determine paths to destinations in range', () => {
-    const soldierWithMovement = new Squaddie(5, {}, {movement:4})
+    const soldierWithMovement = new Squaddie('soldierWithMovement', 5, {}, {movement:4})
     const oneRowMap = new BattleMap(
       new MapTerrain([
         ['1', '1', '1', '1', ],
@@ -350,7 +385,7 @@ describe('Squaddie has move limits on a map', () => {
   })
 
   it('Cannot find paths to destinations out of range', () => {
-    const soldierWithMovement = new Squaddie(5, {}, {movement:1})
+    const soldierWithMovement = new Squaddie('soldierWithMovement',5, {}, {movement:1})
     const oneRowMap = new BattleMap(
       new MapTerrain([
         ['1', '1', '1', '1', ],
@@ -381,7 +416,7 @@ describe('Map can move Squaddies on the map', () => {
       ['3', '1'],
     ])
 
-    soldier = new Squaddie(5)
+    soldier = new Squaddie('soldier', 5)
   })
 
   it('Will update Squaddie locations', () => {
@@ -426,7 +461,7 @@ describe('Map can move Squaddies on the map', () => {
 
     battleMap.addSquaddie(soldier, new Coordinate(0, 1))
 
-    const soldier2 = new Squaddie(5)
+    const soldier2 = new Squaddie('soldier2',5)
     battleMap.addSquaddie(soldier2, new Coordinate(1, 0))
 
     const moveOnOtherSoldier: () => void = () => {

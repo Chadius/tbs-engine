@@ -1,16 +1,37 @@
 import "phaser";
+import {BattleMap, MapTerrain} from "../battleMap";
+import {Coordinate} from "../mapMeasurement";
+import {Squaddie} from "../squaddie";
 
 export class BattleSceneBottomLayer {
   rowHeight = 64
   tileWidth = 64
   scene: Phaser.Scene
   mainLayerBounds = {x: 0, y: 0, width: 800, height: 600}
+  battleMap: BattleMap
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
   }
 
   init(params: any): void {
+    this.battleMap = new BattleMap(new MapTerrain([
+      ['1', '1', '1', '1'],
+      ['1', 'X', '1', '1'],
+      ['3', '1', '1', '1'],
+    ]))
+    this.battleMap.addSquaddie(
+      new Squaddie('soldier0', 5),
+      new Coordinate(0, 1)
+    )
+    this.battleMap.addSquaddie(
+      new Squaddie('soldier1', 5),
+      new Coordinate(2, 3)
+    )
+    this.battleMap.addSquaddie(
+      new Squaddie('soldier2', 5),
+      new Coordinate(1, 2)
+    )
   }
 
   preload(): void {
@@ -69,9 +90,17 @@ export class BattleSceneBottomLayer {
   }
 
   private drawAllSquaddies() {
-    this.drawSquaddie(0,1)
-    this.drawSquaddie(1,1)
-    this.drawSquaddie(1,2)
+    const coordinatesOfAllSquaddiesByID = this.battleMap.getCoordinatesOfAllSquaddiesByID()
+
+    const squaddieIterator = coordinatesOfAllSquaddiesByID.entries()
+
+    let nextSquaddieKeyValue = squaddieIterator.next()
+    while(!nextSquaddieKeyValue.done) {
+      const squaddieCoordinate = nextSquaddieKeyValue.value[1]
+
+      this.drawSquaddie(squaddieCoordinate.getRow(),squaddieCoordinate.getColumn())
+      nextSquaddieKeyValue = squaddieIterator.next()
+    }
   }
 
 

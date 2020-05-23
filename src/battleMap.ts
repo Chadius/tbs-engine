@@ -43,11 +43,13 @@ export class MapTerrain {
 export class BattleMap{
   terrain: MapTerrain
   squaddiesByLocationKey: Map<string, Squaddie>
+  squaddiesById: Map<string, Squaddie>
 
   constructor(terrain: MapTerrain) {
     this.terrain = terrain
 
     this.squaddiesByLocationKey = new Map<string, Squaddie>()
+    this.squaddiesById = new Map<string, Squaddie>()
   }
 
   rowCount(): number {
@@ -82,11 +84,16 @@ export class BattleMap{
       throw Error(`Two squaddies cannot be at the same coordinates ${locationKey}`)
     }
 
+    if (this.squaddiesById.get(newSquaddie.getId())) {
+      throw Error(`Squaddie already exists with this ID: ${newSquaddie.getId()}`)
+    }
+
     if (!this.isOnMap(coordinate)) {
       throw Error(`Cannot add Squaddie off map at ${locationKey}`)
     }
 
     this.squaddiesByLocationKey.set(locationKey, newSquaddie)
+    this.squaddiesById.set(newSquaddie.getId(), newSquaddie)
   }
 
   getSquaddieAtCoordinate(coordinate: Coordinate) {
@@ -153,6 +160,27 @@ export class BattleMap{
     }
 
     this.squaddiesByLocationKey.set(squaddieLocation.getLocationKey(), null)
+    this.squaddiesById.set(squaddieToMove.getId(), null)
     this.addSquaddie(squaddieToMove, destination)
+  }
+
+  getCoordinatesOfAllSquaddiesByID(): Map<string, Coordinate> {
+    const allCoordinates = new Map<string, Coordinate>()
+
+    const squaddieIterator = this.squaddiesByLocationKey.entries()
+
+    let nextSquaddieKeyValue = squaddieIterator.next()
+    while(!nextSquaddieKeyValue.done) {
+      const locationKey = nextSquaddieKeyValue.value[0]
+      const squaddie = nextSquaddieKeyValue.value[1]
+      allCoordinates.set(squaddie.getId(), Coordinate.newFromLocationKey(locationKey))
+      nextSquaddieKeyValue = squaddieIterator.next()
+    }
+
+    return allCoordinates
+  }
+
+  getSquaddieById(squaddieID: string): Squaddie {
+    return this.squaddiesById.get(squaddieID) || null
   }
 }
