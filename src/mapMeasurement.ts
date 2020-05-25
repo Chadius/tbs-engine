@@ -73,6 +73,10 @@ export class SearchCoordinate extends Coordinate {
   getEstimatedMovementCostRemaining(): number {
     return this.estimatedMovementCostRemaining
   }
+
+  isOrigin() {
+    return (this.getOriginLocationKey() === null)
+  }
 }
 
 export class Path {

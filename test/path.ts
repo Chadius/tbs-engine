@@ -46,6 +46,8 @@ describe('SearchCoordinate', () => {
     expect(firstSearchCoordinate.getOriginRow()).to.be.null
     expect(firstSearchCoordinate.getOriginColumn()).to.be.null
     expect(firstSearchCoordinate.getOriginLocationKey()).to.be.null
+
+    expect(firstSearchCoordinate.isOrigin()).to.be.true
   })
 
   it('Can be created with an origin', () => {

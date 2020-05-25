@@ -1,49 +1,79 @@
-import {Coordinate, Path} from "./mapMeasurement";
-import {BattleMapFunctions} from "./battleMap";
-
-// TODO: Rebuild PathMap
-/*
-PathMap should be a vector field and a cost field of SearchCoordinates, organized by their location key.
--isEmpty
--addSearchCoordinate
--getNumberOfSearchCoordinates
--getSearchCoordinateAtCoordinate
--generatePathFromCoordinate
--removeSearchCoordinate
--getAllCoordinates
--clone
- */
+import {Coordinate, Path, SearchCoordinate} from "./mapMeasurement";
 
 export class PathMap {
-  pathsByCoordinateLocationKey: Map<string, Path>
+  searchCoordinatesByLocationKey: Map<string, SearchCoordinate>
+  pathsByCoordinateLocationKey: Map<string, Path> // TODO remove this
 
   constructor() {
-    this.pathsByCoordinateLocationKey = new Map<string, Path> ()
-  }
+    this.pathsByCoordinateLocationKey = new Map<string, Path> () // TODO Delete me
 
-  static newPathMapByArrayOfPaths(pathsToInclude: Array<Path>): PathMap {
-    const newPathMap = new PathMap()
-
-    pathsToInclude.forEach((path: Path) => {
-      newPathMap.setPath(path)
-    })
-
-    return newPathMap
+    this.searchCoordinatesByLocationKey = new Map<string, SearchCoordinate> ()
   }
 
   isEmpty(): boolean {
-    return this.getNumberOfPaths() === 0
+    return this.getNumberOfSearchCoordinates() === 0
   }
 
+  getNumberOfSearchCoordinates(): number {
+    return this.searchCoordinatesByLocationKey.size
+  }
+
+  addSearchCoordinate(searchCoordinate: SearchCoordinate): void {
+    const locationKey = searchCoordinate.getLocationKey()
+    this.searchCoordinatesByLocationKey.set(locationKey, searchCoordinate)
+  }
+
+  getSearchCoordinateAtCoordinate(coordinate: Coordinate): SearchCoordinate | undefined {
+    const locationKey = coordinate.getLocationKey()
+    if (this.searchCoordinatesByLocationKey.has(locationKey)) {
+      return this.searchCoordinatesByLocationKey.get(locationKey) // TODO Add a clone function and call it here
+    }
+    return undefined
+  }
+
+  generatePathToCoordinate(destination: Coordinate): Path | undefined {
+    const searchCoordinateAtDestination = this.getSearchCoordinateAtCoordinate(destination)
+    if (searchCoordinateAtDestination === undefined) {
+      return undefined
+    }
+
+    const pathCoordinatesFromDestinationToStart = new Array<Coordinate>()
+    let searchCoordinate = searchCoordinateAtDestination
+
+    do {
+      pathCoordinatesFromDestinationToStart.push(searchCoordinate)
+      const previousSearchCoordinate = this.getSearchCoordinateAtCoordinate(
+        new Coordinate(
+          searchCoordinate.getOriginRow(),
+          searchCoordinate.getOriginColumn(),
+        )
+      )
+      searchCoordinate = previousSearchCoordinate
+    }
+    while(searchCoordinate && searchCoordinate.isOrigin() === false)
+
+    let newPath
+    pathCoordinatesFromDestinationToStart.reverse().forEach((coordinate, index) => {
+      if(index === 0) {
+        newPath = new Path(coordinate) // TODO add empty Path constructor and remove this
+      }
+      newPath.addCoordinate(coordinate, 1) // TODO movement cost? Maybe Path should have SearchCoordinates
+    })
+    return newPath
+  }
+
+  removeSearchCoordinate(coordinate: Coordinate): void {
+    const locationKey = coordinate.getLocationKey()
+    this.searchCoordinatesByLocationKey.delete(locationKey)
+  }
+
+  // TODO: Delete me
   setPath(path: Path): void {
     const locationKeyFromHeadOfPath = path.getHeadCoordinate().getLocationKey()
     this.pathsByCoordinateLocationKey.set(locationKeyFromHeadOfPath, path)
   }
 
-  getNumberOfPaths(): number{
-    return this.pathsByCoordinateLocationKey.size
-  }
-
+  // TODO: Delete me
   getPathForCoordinate(coordinate: Coordinate) {
     const locationKey = coordinate.getLocationKey()
     if (this.pathsByCoordinateLocationKey.has(locationKey)) {
@@ -52,20 +82,22 @@ export class PathMap {
     return undefined
   }
 
+  // TODO: Delete me
   removePathAtCoordinate(coordinate: Coordinate): void {
     const locationKey = coordinate.getLocationKey()
     this.pathsByCoordinateLocationKey.delete(locationKey)
   }
 
-  getAllCoordinates(): Array<Coordinate> {
-    const coordinates = new Array<Coordinate>()
+  // TODO: Update this to get all SearchCoordinates.
+  // TODO: Refactor opportunity: ICoordinate
+  getAllCoordinates(): Array<SearchCoordinate> {
+    const coordinates = new Array<SearchCoordinate>()
 
-    const pathIterator = this.pathsByCoordinateLocationKey.values()
-
-    let nextPath = pathIterator.next()
-    while(!nextPath.done) {
-      coordinates.push(nextPath.value.getHeadCoordinate())
-      nextPath = pathIterator.next()
+    const locationKeySearchCoordinateIterator = this.searchCoordinatesByLocationKey.values()
+    let nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
+    while(!nextLocationKeySearchCoordinatePair.done) {
+      coordinates.push(nextLocationKeySearchCoordinatePair.value) // TODO clone this
+      nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
     }
 
     return coordinates
@@ -73,13 +105,12 @@ export class PathMap {
 
   clone(): PathMap {
     const newPathMap = new PathMap()
-    const locationKeyPathIterator = this.pathsByCoordinateLocationKey.values()
+    const locationKeySearchCoordinateIterator = this.searchCoordinatesByLocationKey.values()
 
-    let nextLocationKeyPathPair = locationKeyPathIterator.next()
-    while(!nextLocationKeyPathPair.done) {
-      newPathMap.setPath(nextLocationKeyPathPair.value.clone())
-
-      nextLocationKeyPathPair = locationKeyPathIterator.next()
+    let nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
+    while(!nextLocationKeySearchCoordinatePair.done) {
+      newPathMap.addSearchCoordinate(nextLocationKeySearchCoordinatePair.value) // TODO clone this
+      nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
     }
 
     return newPathMap
