@@ -32,8 +32,6 @@ describe('PathMaps are created', () => {
     expect(clonedPathMap.getAllCoordinates().length).to.equal(pathMapWithPaths.getAllCoordinates().length)
     expect(clonedPathMap).to.not.equal(pathMapWithPaths)
   })
-
-  // it('from multiple PathMaps', () => {})
 })
 
 describe('PathMaps can introspect', () => {

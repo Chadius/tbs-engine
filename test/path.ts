@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {Coordinate, Path} from "../src/mapMeasurement";
+import {Coordinate, Path, SearchCoordinate} from "../src/mapMeasurement";
 
 describe('Coordinates', () => {
   let newCoordinate: Coordinate
@@ -37,6 +37,30 @@ describe('Coordinates', () => {
 
     expect(Coordinate.newFromLocationKey("10")).to.be.undefined
     expect(Coordinate.newFromLocationKey("s, t")).to.be.undefined
+  })
+})
+
+describe.only('SearchCoordinate', () => {
+  it('Can be created without an origin', () => {
+    const firstSearchCoordinate = new SearchCoordinate(1,2, null, null, 0, 0)
+    expect(firstSearchCoordinate.getOriginRow()).to.be.null
+    expect(firstSearchCoordinate.getOriginColumn()).to.be.null
+    expect(firstSearchCoordinate.getOriginLocationKey()).to.be.null
+  })
+
+  it('Can be created with an origin', () => {
+    const nextSearchCoordinate = new SearchCoordinate(1,2, 3, 4, 0 ,0)
+    expect(nextSearchCoordinate.getOriginRow()).to.equal(3)
+    expect(nextSearchCoordinate.getOriginColumn()).to.equal(4)
+  })
+  it('Can be return location key of the origin', () => {
+    const nextSearchCoordinate = new SearchCoordinate(1,2, 3, 4, 0 ,0)
+    expect(nextSearchCoordinate.getOriginLocationKey()).to.equal("3, 4")
+  })
+  it('Can record and recall the movement cost', () => {
+    const nextSearchCoordinate = new SearchCoordinate(1,2, 3, 4, 5 ,6)
+    expect(nextSearchCoordinate.getMovementCostSpent()).to.equal(5)
+    expect(nextSearchCoordinate.getEstimatedMovementCostRemaining()).to.equal(6)
   })
 })
 

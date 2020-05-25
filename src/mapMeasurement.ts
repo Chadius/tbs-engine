@@ -35,6 +35,46 @@ export class Coordinate {
   }
 }
 
+export class SearchCoordinate extends Coordinate {
+  originRow: number | null
+  originColumn: number | null
+  movementCostSpent: number
+  estimatedMovementCostRemaining: number
+
+  constructor(row: number, column: number, originRow: number | null, originColumn: number | null,
+              movementCostSpent: number,
+              estimatedMovementCostRemaining: number) {
+    super(row, column);
+    this.originRow = originRow
+    this.originColumn = originColumn
+    this.movementCostSpent = movementCostSpent
+    this.estimatedMovementCostRemaining = estimatedMovementCostRemaining
+  }
+
+  getOriginColumn(): number | null {
+    return this.originColumn
+  }
+
+  getOriginRow(): number | null {
+    return this.originRow
+  }
+
+  getOriginLocationKey(): string | null {
+    if (this.originRow && this.originColumn) {
+      return `${this.getOriginRow()}, ${this.getOriginColumn()}`
+    }
+    return null
+  }
+
+  getMovementCostSpent(): number {
+    return this.movementCostSpent
+  }
+
+  getEstimatedMovementCostRemaining(): number {
+    return this.estimatedMovementCostRemaining
+  }
+}
+
 export class Path {
   coordinates: Array<Coordinate>
   movementCostSpent: number
