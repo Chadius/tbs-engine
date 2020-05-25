@@ -40,7 +40,7 @@ describe('Coordinates', () => {
   })
 })
 
-describe.only('SearchCoordinate', () => {
+describe('SearchCoordinate', () => {
   it('Can be created without an origin', () => {
     const firstSearchCoordinate = new SearchCoordinate(1,2, null, null, 0, 0)
     expect(firstSearchCoordinate.getOriginRow()).to.be.null

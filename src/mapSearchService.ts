@@ -15,20 +15,24 @@ export const MapSearchService = {
     }
 
     while (searchStrategy.shouldContinueSearching(searchHistoryContext)) {
-      const currentPath = searchStrategy.getNextPath(searchHistoryContext)
+      const currentPath = searchStrategy.getNextPath(searchHistoryContext) // getNextPath could be get next FrontierCoordinate
 
-      searchStrategy.markPathAsVisited(searchHistoryContext, currentPath)
+      searchStrategy.markPathAsVisited(searchHistoryContext, currentPath) // rename to mark Coordinate as Visited
 
       const endSearchQuery = searchStrategy.shouldEndSearchEarly(searchHistoryContext, currentPath)
       if (endSearchQuery.shouldExitEarly) {
         return endSearchQuery.returnVal
       }
 
-      const neighbors = searchStrategy.findNewNeighborsForPath(searchHistoryContext, currentPath)
+      const neighbors = searchStrategy.findNewNeighborsForPath(searchHistoryContext, currentPath) // rename ForCoordinate
+
+      // markNeighborOrigins
       const newPaths = searchStrategy.addNeighborsToPath(searchHistoryContext, neighbors, currentPath)
+      // addNewCoordinatesToFrontier
       searchStrategy.addNewPathsToSearch(searchHistoryContext, newPaths)
     }
 
+    // no coordinates remain
     return searchStrategy.noPathsRemain(searchHistoryContext)
   },
 
