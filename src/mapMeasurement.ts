@@ -77,6 +77,17 @@ export class SearchCoordinate extends Coordinate {
   isOrigin() {
     return (this.getOriginLocationKey() === null)
   }
+
+  clone() {
+    return new SearchCoordinate(
+      this.getRow(),
+      this.getColumn(),
+      this.getOriginRow(),
+      this.getOriginColumn(),
+      this.getMovementCostSpent(),
+      this.getEstimatedMovementCostRemaining(),
+    )
+  }
 }
 
 export class Path {
@@ -84,8 +95,13 @@ export class Path {
   movementCostSpent: number
   estimatedMovementCostToDestination: number
 
-  constructor(startingCoordinate: Coordinate) {
-    this.coordinates = new Array<Coordinate>(startingCoordinate)
+  constructor(startingCoordinate?: Coordinate) {
+    if (startingCoordinate) {
+      this.coordinates = new Array<Coordinate>(startingCoordinate)
+    }
+    else {
+      this.coordinates = new Array<Coordinate>()
+    }
     this.movementCostSpent = 0
     this.estimatedMovementCostToDestination = 0
   }

@@ -64,6 +64,20 @@ describe('SearchCoordinate', () => {
     expect(nextSearchCoordinate.getMovementCostSpent()).to.equal(5)
     expect(nextSearchCoordinate.getEstimatedMovementCostRemaining()).to.equal(6)
   })
+
+  it('can be cloned and compared with a custom equals function', () => {
+    const firstSearchCoordinate = new SearchCoordinate(1,2, null, null, 0, 0)
+    const clonedSearchCoordinate = firstSearchCoordinate.clone()
+
+    expect(clonedSearchCoordinate.getOriginRow()).to.equal(firstSearchCoordinate.getOriginRow())
+    expect(clonedSearchCoordinate.getOriginColumn()).to.equal(firstSearchCoordinate.getOriginColumn())
+    expect(clonedSearchCoordinate.getRow()).to.equal(firstSearchCoordinate.getRow())
+    expect(clonedSearchCoordinate.getColumn()).to.equal(firstSearchCoordinate.getColumn())
+    expect(clonedSearchCoordinate.getMovementCostSpent()).to.equal(firstSearchCoordinate.getMovementCostSpent())
+    expect(clonedSearchCoordinate.getEstimatedMovementCostRemaining()).to.equal(firstSearchCoordinate.getEstimatedMovementCostRemaining())
+
+    expect(clonedSearchCoordinate).to.eql(firstSearchCoordinate)
+  })
 })
 
 describe('Paths', () => {

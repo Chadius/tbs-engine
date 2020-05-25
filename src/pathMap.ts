@@ -26,7 +26,7 @@ export class PathMap {
   getSearchCoordinateAtCoordinate(coordinate: Coordinate): SearchCoordinate | undefined {
     const locationKey = coordinate.getLocationKey()
     if (this.searchCoordinatesByLocationKey.has(locationKey)) {
-      return this.searchCoordinatesByLocationKey.get(locationKey) // TODO Add a clone function and call it here
+      return this.searchCoordinatesByLocationKey.get(locationKey).clone()
     }
     return undefined
   }
@@ -37,10 +37,11 @@ export class PathMap {
       return undefined
     }
 
-    const pathCoordinatesFromDestinationToStart = new Array<Coordinate>()
-    let searchCoordinate = searchCoordinateAtDestination
+    const pathCoordinatesFromDestinationToStart = new Array<SearchCoordinate>()
 
-    do {
+    let searchCoordinate = searchCoordinateAtDestination
+    pathCoordinatesFromDestinationToStart.push(searchCoordinate)
+    while(searchCoordinate && searchCoordinate.isOrigin() === false) {
       pathCoordinatesFromDestinationToStart.push(searchCoordinate)
       const previousSearchCoordinate = this.getSearchCoordinateAtCoordinate(
         new Coordinate(
@@ -50,14 +51,10 @@ export class PathMap {
       )
       searchCoordinate = previousSearchCoordinate
     }
-    while(searchCoordinate && searchCoordinate.isOrigin() === false)
 
-    let newPath
+    const newPath = new Path()
     pathCoordinatesFromDestinationToStart.reverse().forEach((coordinate, index) => {
-      if(index === 0) {
-        newPath = new Path(coordinate) // TODO add empty Path constructor and remove this
-      }
-      newPath.addCoordinate(coordinate, 1) // TODO movement cost? Maybe Path should have SearchCoordinates
+      newPath.addCoordinate(coordinate, coordinate.getMovementCostSpent()) // TODO movement cost? Maybe Path should have SearchCoordinates
     })
     return newPath
   }
@@ -96,7 +93,7 @@ export class PathMap {
     const locationKeySearchCoordinateIterator = this.searchCoordinatesByLocationKey.values()
     let nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
     while(!nextLocationKeySearchCoordinatePair.done) {
-      coordinates.push(nextLocationKeySearchCoordinatePair.value) // TODO clone this
+      coordinates.push(nextLocationKeySearchCoordinatePair.value.clone())
       nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
     }
 
@@ -109,7 +106,7 @@ export class PathMap {
 
     let nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
     while(!nextLocationKeySearchCoordinatePair.done) {
-      newPathMap.addSearchCoordinate(nextLocationKeySearchCoordinatePair.value) // TODO clone this
+      newPathMap.addSearchCoordinate(nextLocationKeySearchCoordinatePair.value.clone())
       nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
     }
 

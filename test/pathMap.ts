@@ -2,7 +2,7 @@ import {expect} from 'chai'
 import {Coordinate, Path, SearchCoordinate} from "../src/mapMeasurement";
 import {PathMap} from "../src/pathMap";
 
-describe.only('PathMaps are created', () => {
+describe('PathMaps are created', () => {
   it('with no Paths and be empty', () => {
     const blankPathMap = new PathMap()
     expect(blankPathMap.isEmpty()).to.be.true
@@ -21,10 +21,10 @@ describe.only('PathMaps are created', () => {
 
     expect (clonedPathMap.getSearchCoordinateAtCoordinate(
       new Coordinate(1, 2)
-    )).to.equal(searchCoordinateStart)
+    )).to.eql(searchCoordinateStart)
     expect (clonedPathMap.getSearchCoordinateAtCoordinate(
       new Coordinate(2, 2)
-    )).to.equal(searchCoordinateEnd)
+    )).to.eql(searchCoordinateEnd)
   })
 
   it('by adding SearchCoordinates one at a time', () => {
@@ -44,7 +44,7 @@ describe.only('PathMaps are created', () => {
   })
 })
 
-describe.only('PathMaps with SearchCoordinates', () => {
+describe('PathMaps with SearchCoordinates', () => {
   let newPathMap: PathMap
   let searchCoordinateStart: SearchCoordinate
   let searchCoordinateAfterStart: SearchCoordinate
@@ -76,7 +76,7 @@ describe.only('PathMaps with SearchCoordinates', () => {
     const existingSearchCoordinate = newPathMap.getSearchCoordinateAtCoordinate(
       new Coordinate(3, 2)
     )
-    expect(existingSearchCoordinate).to.equal(searchCoordinateBeforeGoal)
+    expect(existingSearchCoordinate).to.eql(searchCoordinateBeforeGoal)
   })
 
   it('can remove existing search coordinates', () => {
@@ -92,6 +92,7 @@ describe.only('PathMaps with SearchCoordinates', () => {
 
     expect(pathToGoal.getNumberOfCoordinates()).to.equal(4)
     expect(pathToGoal.getHeadCoordinate()).to.eql(searchCoordinateGoal)
+    expect(pathToGoal.getMovementCostSpent()).to.equal(3)
   })
 
   it('returns undefined if it tries to generate a Path from a nonexistent coordinate', () => {
@@ -103,9 +104,9 @@ describe.only('PathMaps with SearchCoordinates', () => {
     const allCoordinates = newPathMap.getAllCoordinates()
 
     expect(allCoordinates.length).to.equal(4)
-    expect(allCoordinates).to.include(searchCoordinateStart)
-    expect(allCoordinates).to.include(searchCoordinateAfterStart)
-    expect(allCoordinates).to.include(searchCoordinateBeforeGoal)
-    expect(allCoordinates).to.include(searchCoordinateGoal)
+    expect(allCoordinates).to.deep.include(searchCoordinateStart)
+    expect(allCoordinates).to.deep.include(searchCoordinateAfterStart)
+    expect(allCoordinates).to.deep.include(searchCoordinateBeforeGoal)
+    expect(allCoordinates).to.deep.include(searchCoordinateGoal)
   })
 })
