@@ -129,7 +129,7 @@ describe('Map can contain Squaddies',  () => {
       expect(allSquaddieLocations.get("soldier2")).to.eql(new Coordinate(2, 1))
     })
   })
-});
+})
 
 describe('Map can create Paths and Coordinates', () => {
   it('Can create and inspect Coordinates', () => {
