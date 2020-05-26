@@ -3,8 +3,8 @@ import TinyQueue from "tinyqueue";
 import {SearchHistoryContext, SearchStrategy} from "./searchStrategy";
 
 export const lowerMoveCostIsFirst = (a: Path, b: Path): number => {
-  const pathAMovementCost = a.getMovementCostSpent()
-  const pathBMovementCost = b.getMovementCostSpent()
+  const pathAMovementCost = a.getTotalMovementCostSpent()
+  const pathBMovementCost = b.getTotalMovementCostSpent()
   if (pathAMovementCost < pathBMovementCost) {
     return -1
   }

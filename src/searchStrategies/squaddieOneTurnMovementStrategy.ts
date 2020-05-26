@@ -9,7 +9,7 @@ import {
 
 const addNewPathsIfWithinMoverange = (searchHistoryContext: SquaddieSearchHistoryContext, newPaths: Array<Path>): void => {
   newPaths.forEach((newPath) => {
-    if (newPath.getMovementCostSpent() <= searchHistoryContext.squaddie.getCurrentMovePerTurn()) {
+    if (newPath.getTotalMovementCostSpent() <= searchHistoryContext.squaddie.getCurrentMovePerTurn()) {
       searchHistoryContext.pathsToSearch.push(newPath)
     }
   })

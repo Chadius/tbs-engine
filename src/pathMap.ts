@@ -40,8 +40,8 @@ export class PathMap {
     const pathCoordinatesFromDestinationToStart = new Array<SearchCoordinate>()
 
     let searchCoordinate = searchCoordinateAtDestination
-    pathCoordinatesFromDestinationToStart.push(searchCoordinate)
-    while(searchCoordinate && searchCoordinate.isOrigin() === false) {
+
+    while(searchCoordinate) {
       pathCoordinatesFromDestinationToStart.push(searchCoordinate)
       const previousSearchCoordinate = this.getSearchCoordinateAtCoordinate(
         new Coordinate(
@@ -53,8 +53,8 @@ export class PathMap {
     }
 
     const newPath = new Path()
-    pathCoordinatesFromDestinationToStart.reverse().forEach((coordinate, index) => {
-      newPath.addCoordinate(coordinate, coordinate.getMovementCostSpent()) // TODO movement cost? Maybe Path should have SearchCoordinates
+    pathCoordinatesFromDestinationToStart.reverse().forEach((searchCoordinate, index) => {
+      newPath.addSearchCoordinate(searchCoordinate)
     })
     return newPath
   }
@@ -70,23 +70,6 @@ export class PathMap {
     this.pathsByCoordinateLocationKey.set(locationKeyFromHeadOfPath, path)
   }
 
-  // TODO: Delete me
-  getPathForCoordinate(coordinate: Coordinate) {
-    const locationKey = coordinate.getLocationKey()
-    if (this.pathsByCoordinateLocationKey.has(locationKey)) {
-      return this.pathsByCoordinateLocationKey.get(locationKey).clone()
-    }
-    return undefined
-  }
-
-  // TODO: Delete me
-  removePathAtCoordinate(coordinate: Coordinate): void {
-    const locationKey = coordinate.getLocationKey()
-    this.pathsByCoordinateLocationKey.delete(locationKey)
-  }
-
-  // TODO: Update this to get all SearchCoordinates.
-  // TODO: Refactor opportunity: ICoordinate
   getAllCoordinates(): Array<SearchCoordinate> {
     const coordinates = new Array<SearchCoordinate>()
 

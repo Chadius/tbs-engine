@@ -91,48 +91,51 @@ export class SearchCoordinate extends Coordinate {
 }
 
 export class Path {
-  coordinates: Array<Coordinate>
-  movementCostSpent: number
-  estimatedMovementCostToDestination: number
+  searchCoordinates: Array<SearchCoordinate>
 
-  constructor(startingCoordinate?: Coordinate) {
+  constructor(startingCoordinate?: SearchCoordinate) {
     if (startingCoordinate) {
-      this.coordinates = new Array<Coordinate>(startingCoordinate)
+      this.searchCoordinates = new Array<SearchCoordinate>(startingCoordinate)
     }
     else {
-      this.coordinates = new Array<Coordinate>()
+      this.searchCoordinates = new Array<SearchCoordinate>()
     }
-    this.movementCostSpent = 0
-    this.estimatedMovementCostToDestination = 0
   }
 
   getNumberOfCoordinates(): number{
-    return this.coordinates.length
+    return this.searchCoordinates.length
   }
 
-  getHeadCoordinate(): Coordinate{
-    return this.coordinates[this.coordinates.length - 1]
+  getHeadCoordinate(): SearchCoordinate {
+    return this.searchCoordinates[this.searchCoordinates.length - 1]
   }
 
-  getMovementCostSpent(): number{
-    return this.movementCostSpent
+  getTotalMovementCostSpent(): number {
+    return this.searchCoordinates.map(
+      searchCoordinate => searchCoordinate.getMovementCostSpent()
+    ).reduce(
+      (accumulator, currentCost) => {
+        return accumulator + currentCost
+      },
+      0
+    )
   }
 
-  addCoordinate(newCoordinate: Coordinate, movementCost: number): void {
-    this.coordinates.push(newCoordinate)
-    this.movementCostSpent = this.movementCostSpent + movementCost
+  addSearchCoordinate(newSearchCoordinate: SearchCoordinate): void {
+    this.searchCoordinates.push(newSearchCoordinate)
   }
 
   clone(): Path {
-    const clonedPath = new Path(this.coordinates[0])
-    clonedPath.coordinates = [...this.coordinates]
-    clonedPath.movementCostSpent = this.getMovementCostSpent()
+    const clonedPath = new Path()
+    this.searchCoordinates.forEach((newSearchCoordinate) => {
+      clonedPath.addSearchCoordinate(newSearchCoordinate.clone())
+    })
     return clonedPath
   }
 
-  cloneAndAddCoordinate(coordinate: Coordinate, movementCost: number): Path {
+  cloneAndAddCoordinate(newSearchCoordinate: SearchCoordinate): Path {
     const newPath = this.clone()
-    newPath.addCoordinate(coordinate, movementCost)
+    newPath.addSearchCoordinate(newSearchCoordinate)
     return newPath
   }
 }

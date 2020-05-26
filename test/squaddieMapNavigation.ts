@@ -1,8 +1,9 @@
 import {expect} from 'chai'
 import {BattleMap, MapTerrain} from "../src/battleMap";
 import {Squaddie} from "../src/squaddie";
-import {Coordinate, Path} from "../src/mapMeasurement";
+import {Coordinate, Path, SearchCoordinate} from "../src/mapMeasurement";
 import {MapSearchService} from "../src/mapSearchService";
+import {PathMap} from "../src/pathMap";
 
 describe('Map contains the terrain and can query it', () => {
   let terrain: MapTerrain
@@ -152,40 +153,45 @@ describe('Map can create Paths and Coordinates', () => {
   })
 
   it('Can create and query Paths', () => {
-    const startingCoord = new Coordinate(2, 0)
+    const startingCoord = new SearchCoordinate(2, 0, null, null, 0, 0)
     const path = new Path(startingCoord)
 
     expect(path.getNumberOfCoordinates()).to.equal(1)
-    expect(path.getHeadCoordinate().row).to.equal(2)
-    expect(path.getHeadCoordinate().column).to.equal(0)
-    expect(path.getMovementCostSpent()).to.equal(0)
+    expect(path.getHeadCoordinate().getRow()).to.equal(2)
+    expect(path.getHeadCoordinate().getColumn()).to.equal(0)
+    expect(path.getTotalMovementCostSpent()).to.equal(0)
   })
 
   it('Can add more Coordinates to a Path and change the movement cost', () => {
-    const startingCoord = new Coordinate(2, 0)
+    const startingCoord = new SearchCoordinate(2, 0, null, null, 0, 0)
     const path = new Path(startingCoord)
-    path.addCoordinate(new Coordinate(2, 1), 1)
-    path.addCoordinate(new Coordinate(3, 1), 1)
-    path.addCoordinate(new Coordinate(3, 2), 1)
-    path.addCoordinate(new Coordinate(4, 3), 3)
 
-    expect(path.getNumberOfCoordinates()).to.equal(5)
-    expect(path.getHeadCoordinate().row).to.equal(4)
-    expect(path.getHeadCoordinate().column).to.equal(3)
-    expect(path.getMovementCostSpent()).to.equal(6)
+    const searchCoordinate2 = new SearchCoordinate(2, 2, 2, 0, 1, 2)
+    const searchCoordinate3 = new SearchCoordinate(3, 2, 2, 2, 2, 1)
+    const searchCoordinate4 = new SearchCoordinate(3, 1, 3, 2, 3, 0)
+
+    const newPathMap = new PathMap()
+    path.addSearchCoordinate(searchCoordinate2)
+    path.addSearchCoordinate(searchCoordinate3)
+    path.addSearchCoordinate(searchCoordinate4)
+
+    expect(path.getNumberOfCoordinates()).to.equal(4)
+    expect(path.getHeadCoordinate().row).to.equal(3)
+    expect(path.getHeadCoordinate().column).to.equal(1)
+    expect(path.getTotalMovementCostSpent()).to.equal(6)
   })
 
   it('Can clone Paths', () => {
-    const startingCoord = new Coordinate(2, 0)
+    const startingCoord = new SearchCoordinate(2, 0, null, null, 0, 0)
     const firstPath = new Path(startingCoord)
     const secondPath = firstPath.clone()
-    firstPath.addCoordinate(new Coordinate(2, 1), 1)
+    firstPath.addSearchCoordinate(new SearchCoordinate(2, 2, 2, 0, 1, 2))
 
     expect(firstPath.getNumberOfCoordinates()).to.equal(2)
     expect(secondPath.getNumberOfCoordinates()).to.equal(1)
     expect(secondPath.getHeadCoordinate().row).to.equal(2)
     expect(secondPath.getHeadCoordinate().column).to.equal(0)
-    expect(secondPath.getMovementCostSpent()).to.equal(0)
+    expect(secondPath.getTotalMovementCostSpent()).to.equal(0)
   })
 })
 
@@ -330,7 +336,7 @@ describe('A* Navigation', () => {
     expect(pathToStartingPoint.getNumberOfCoordinates()).to.equal(1)
     expect(pathToStartingPoint.getHeadCoordinate().row).to.equal(0)
     expect(pathToStartingPoint.getHeadCoordinate().column).to.equal(0)
-    expect(pathToStartingPoint.getMovementCostSpent()).to.equal(0)
+    expect(pathToStartingPoint.getTotalMovementCostSpent()).to.equal(0)
   })
 
   it('Returns null if the start coordinate is off screen', () => {
@@ -352,7 +358,7 @@ describe('A* Navigation', () => {
     expect(pathToStartingPoint.getNumberOfCoordinates()).to.equal(4)
     expect(pathToStartingPoint.getHeadCoordinate().row).to.equal(0)
     expect(pathToStartingPoint.getHeadCoordinate().column).to.equal(3)
-    expect(pathToStartingPoint.getMovementCostSpent()).to.equal(3)
+    expect(pathToStartingPoint.getTotalMovementCostSpent()).to.equal(3)
   })
 })
 

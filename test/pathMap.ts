@@ -54,8 +54,8 @@ describe('PathMaps with SearchCoordinates', () => {
   beforeEach(() => {
     searchCoordinateStart = new SearchCoordinate(1, 2, null, null, 0, 3)
     searchCoordinateAfterStart = new SearchCoordinate(2, 2, 1, 2, 1, 2)
-    searchCoordinateBeforeGoal = new SearchCoordinate(3, 2, 2, 2, 2, 1)
-    searchCoordinateGoal = new SearchCoordinate(3, 1, 3, 2, 3, 0)
+    searchCoordinateBeforeGoal = new SearchCoordinate(3, 2, 2, 2, 1, 1)
+    searchCoordinateGoal = new SearchCoordinate(3, 1, 3, 2, 1, 0)
 
     newPathMap = new PathMap()
     newPathMap.addSearchCoordinate(searchCoordinateStart)
@@ -92,7 +92,7 @@ describe('PathMaps with SearchCoordinates', () => {
 
     expect(pathToGoal.getNumberOfCoordinates()).to.equal(4)
     expect(pathToGoal.getHeadCoordinate()).to.eql(searchCoordinateGoal)
-    expect(pathToGoal.getMovementCostSpent()).to.equal(3)
+    expect(pathToGoal.getTotalMovementCostSpent()).to.equal(3)
   })
 
   it('returns undefined if it tries to generate a Path from a nonexistent coordinate', () => {
