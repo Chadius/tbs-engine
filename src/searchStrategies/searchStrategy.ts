@@ -40,11 +40,11 @@ export interface SearchStrategy {
   checkForEarlyExitCondition(searchHistoryContext: BaseSearchHistoryContext): {shouldExitEarly: boolean; returnVal: null | undefined};
   initalizeSearchHistory(searchHistoryContext: BaseSearchHistoryContext): void;
   shouldContinueSearching(searchHistoryContext: BaseSearchHistoryContext): boolean;
-  getNextPath(searchHistoryContext: BaseSearchHistoryContext): Path;
-  markPathAsVisited(searchHistoryContext: BaseSearchHistoryContext, currentPath: Path): void;
+  getNextFrontierCoordinate(searchHistoryContext: BaseSearchHistoryContext): Path;
+  markCoordinateAsVisited(searchHistoryContext: BaseSearchHistoryContext, currentPath: Path): void;
   shouldEndSearchEarly(searchHistoryContext: BaseSearchHistoryContext, currentPath: Path): {shouldExitEarly: boolean; returnVal: Path | undefined};
-  findNewNeighborsForPath(searchHistoryContext: BaseSearchHistoryContext, currentPath: Path): Array<Coordinate>;
-  addNeighborsToPath(searchHistoryContext: BaseSearchHistoryContext, neighbors: Array<Coordinate>, currentPath: Path): Array<Path>;
-  addNewPathsToSearch(searchHistoryContext: BaseSearchHistoryContext, newPaths: Array<Path>): void;
-  noPathsRemain(searchHistoryContext: BaseSearchHistoryContext): any;
+  findNewNeighborsForCoordinate(searchHistoryContext: BaseSearchHistoryContext, currentPath: Path): Array<Coordinate>;
+  markNeighborOrigins(searchHistoryContext: BaseSearchHistoryContext, neighbors: Array<Coordinate>, currentPath: Path): Array<Path>;
+  addNewCoordinatesToFrontier(searchHistoryContext: BaseSearchHistoryContext, newPaths: Array<Path>): void;
+  noCoordinatesRemain(searchHistoryContext: BaseSearchHistoryContext): any;
 }

@@ -1,4 +1,13 @@
-export class Coordinate {
+export interface BaseCoordinate {
+  row: number;
+  column: number;
+
+  getRow(): number;
+  getColumn(): number;
+  getLocationKey(): string;
+}
+
+export class Coordinate implements BaseCoordinate{
   row: number
   column: number
 
@@ -35,44 +44,112 @@ export class Coordinate {
   }
 }
 
-export class Path {
-  coordinates: Array<Coordinate>
+export class SearchCoordinate extends Coordinate implements BaseCoordinate {
+  originRow: number | null
+  originColumn: number | null
   movementCostSpent: number
-  estimatedMovementCostToDestination: number
+  estimatedMovementCostRemaining: number
 
-  constructor(startingCoordinate: Coordinate) {
-    this.coordinates = new Array<Coordinate>(startingCoordinate)
-    this.movementCostSpent = 0
-    this.estimatedMovementCostToDestination = 0
+  constructor(
+    row: number,
+    column: number,
+    originRow: number | null,
+    originColumn: number | null,
+    movementCostSpent: number,
+    estimatedMovementCostRemaining: number
+  ) {
+    super(row, column);
+    this.originRow = originRow
+    this.originColumn = originColumn
+    this.movementCostSpent = movementCostSpent
+    this.estimatedMovementCostRemaining = estimatedMovementCostRemaining
   }
 
-  getNumberOfCoordinates(): number{
-    return this.coordinates.length
+  getOriginColumn(): number | null {
+    return this.originColumn
   }
 
-  getHeadCoordinate(): Coordinate{
-    return this.coordinates[this.coordinates.length - 1]
+  getOriginRow(): number | null {
+    return this.originRow
   }
 
-  getMovementCostSpent(): number{
+  getOriginLocationKey(): string | null {
+    if (this.originRow && this.originColumn) {
+      return `${this.getOriginRow()}, ${this.getOriginColumn()}`
+    }
+    return null
+  }
+
+  getMovementCostSpent(): number {
     return this.movementCostSpent
   }
 
-  addCoordinate(newCoordinate: Coordinate, movementCost: number): void {
-    this.coordinates.push(newCoordinate)
-    this.movementCostSpent = this.movementCostSpent + movementCost
+  getEstimatedMovementCostRemaining(): number {
+    return this.estimatedMovementCostRemaining
+  }
+
+  isOrigin() {
+    return (this.getOriginLocationKey() === null)
+  }
+
+  clone() {
+    return new SearchCoordinate(
+      this.getRow(),
+      this.getColumn(),
+      this.getOriginRow(),
+      this.getOriginColumn(),
+      this.getMovementCostSpent(),
+      this.getEstimatedMovementCostRemaining(),
+    )
+  }
+}
+
+export class Path {
+  searchCoordinates: Array<SearchCoordinate>
+
+  constructor(startingCoordinate?: SearchCoordinate) {
+    if (startingCoordinate) {
+      this.searchCoordinates = new Array<SearchCoordinate>(startingCoordinate)
+    }
+    else {
+      this.searchCoordinates = new Array<SearchCoordinate>()
+    }
+  }
+
+  getNumberOfCoordinates(): number{
+    return this.searchCoordinates.length
+  }
+
+  getHeadCoordinate(): SearchCoordinate {
+    return this.searchCoordinates[this.searchCoordinates.length - 1]
+  }
+
+  getTotalMovementCostSpent(): number {
+    return this.searchCoordinates.map(
+      searchCoordinate => searchCoordinate.getMovementCostSpent()
+    ).reduce(
+      (accumulator, currentCost) => {
+        return accumulator + currentCost
+      },
+      0
+    )
+  }
+
+  addSearchCoordinate(newSearchCoordinate: SearchCoordinate): void {
+    this.searchCoordinates.push(newSearchCoordinate)
   }
 
   clone(): Path {
-    const clonedPath = new Path(this.coordinates[0])
-    clonedPath.coordinates = [...this.coordinates]
-    clonedPath.movementCostSpent = this.getMovementCostSpent()
+    const clonedPath = new Path()
+    this.searchCoordinates.forEach((newSearchCoordinate) => {
+      clonedPath.addSearchCoordinate(newSearchCoordinate.clone())
+    })
     return clonedPath
   }
 
-  cloneAndAddCoordinate(coordinate: Coordinate, movementCost: number): Path {
+  cloneAndAddCoordinate(newSearchCoordinate: SearchCoordinate): Path {
     const newPath = this.clone()
-    newPath.addCoordinate(coordinate, movementCost)
+    newPath.addSearchCoordinate(newSearchCoordinate)
     return newPath
   }
 }

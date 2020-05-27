@@ -9,7 +9,7 @@ import {
 
 const addNewPathsIfWithinMoverange = (searchHistoryContext: SquaddieSearchHistoryContext, newPaths: Array<Path>): void => {
   newPaths.forEach((newPath) => {
-    if (newPath.getMovementCostSpent() <= searchHistoryContext.squaddie.getCurrentMovePerTurn()) {
+    if (newPath.getTotalMovementCostSpent() <= searchHistoryContext.squaddie.getCurrentMovePerTurn()) {
       searchHistoryContext.pathsToSearch.push(newPath)
     }
   })
@@ -25,7 +25,7 @@ export class SquaddieOneTurnMovementStrategy implements SearchStrategy {
     return initalizeSearchHistoryWithPriorityQueue(searchHistoryContext)
   }
 
-  addNewPathsToSearch(searchHistoryContext: SquaddieSearchHistoryContext, newPaths: Array<Path>): void {
+  addNewCoordinatesToFrontier(searchHistoryContext: SquaddieSearchHistoryContext, newPaths: Array<Path>): void {
     return addNewPathsIfWithinMoverange(searchHistoryContext, newPaths)
   }
 
@@ -33,11 +33,11 @@ export class SquaddieOneTurnMovementStrategy implements SearchStrategy {
     return morePathsToSearch(searchHistoryContext)
   }
 
-  getNextPath(searchHistoryContext: SearchHistoryContext): Path {
+  getNextFrontierCoordinate(searchHistoryContext: SearchHistoryContext): Path {
     return popNextPathFromQueue(searchHistoryContext)
   }
 
-  markPathAsVisited(searchHistoryContext: SearchHistoryContext, currentPath: Path): void {
+  markCoordinateAsVisited(searchHistoryContext: SearchHistoryContext, currentPath: Path): void {
     return addPathLocationToVisited(searchHistoryContext, currentPath)
   }
 
@@ -45,15 +45,15 @@ export class SquaddieOneTurnMovementStrategy implements SearchStrategy {
     return endIfPathIsAtDestination(searchHistoryContext, currentPath)
   }
 
-  findNewNeighborsForPath(searchHistoryContext: SearchHistoryContext, currentPath: Path): Array<Coordinate> {
+  findNewNeighborsForCoordinate(searchHistoryContext: SearchHistoryContext, currentPath: Path): Array<Coordinate> {
     return getUnvisitedCoordinatesNextToPathHead(searchHistoryContext, currentPath)
   }
 
-  addNeighborsToPath(searchHistoryContext: SearchHistoryContext, neighbors: Array<Coordinate>, currentPath: Path): Array<Path> {
+  markNeighborOrigins(searchHistoryContext: SearchHistoryContext, neighbors: Array<Coordinate>, currentPath: Path): Array<Path> {
     return addNeighborsToPathAndCreateNewPaths(searchHistoryContext, neighbors, currentPath)
   }
 
-  noPathsRemain(searchHistoryContext: SearchHistoryContext): any {
+  noCoordinatesRemain(searchHistoryContext: SearchHistoryContext): any {
     return null
   };
 }

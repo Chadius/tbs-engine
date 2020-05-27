@@ -1,212 +1,89 @@
-import {Coordinate, Path} from "./mapMeasurement";
-import {BattleMapFunctions} from "./battleMap";
+import {Coordinate, Path, SearchCoordinate} from "./mapMeasurement";
 
 export class PathMap {
-  pathsByCoordinateLocationKey: Map<string, Path>
+  searchCoordinatesByLocationKey: Map<string, SearchCoordinate>
 
   constructor() {
-    this.pathsByCoordinateLocationKey = new Map<string, Path> ()
-  }
-
-  static newPathMapByArrayOfPaths(pathsToInclude: Array<Path>): PathMap {
-    const newPathMap = new PathMap()
-
-    pathsToInclude.forEach((path: Path) => {
-      newPathMap.setPath(path)
-    })
-
-    return newPathMap
+    this.searchCoordinatesByLocationKey = new Map<string, SearchCoordinate> ()
   }
 
   isEmpty(): boolean {
-    return this.getNumberOfPaths() === 0
+    return this.getNumberOfSearchCoordinates() === 0
   }
 
-  setPath(path: Path): void {
-    const locationKeyFromHeadOfPath = path.getHeadCoordinate().getLocationKey()
-    this.pathsByCoordinateLocationKey.set(locationKeyFromHeadOfPath, path)
+  getNumberOfSearchCoordinates(): number {
+    return this.searchCoordinatesByLocationKey.size
   }
 
-  getNumberOfPaths(): number{
-    return this.pathsByCoordinateLocationKey.size
+  addSearchCoordinate(searchCoordinate: SearchCoordinate): void {
+    const locationKey = searchCoordinate.getLocationKey()
+    this.searchCoordinatesByLocationKey.set(locationKey, searchCoordinate)
   }
 
-  getPathForCoordinate(coordinate: Coordinate) {
+  getSearchCoordinateAtCoordinate(coordinate: Coordinate): SearchCoordinate | undefined {
     const locationKey = coordinate.getLocationKey()
-    if (this.pathsByCoordinateLocationKey.has(locationKey)) {
-      return this.pathsByCoordinateLocationKey.get(locationKey).clone()
+    if (this.searchCoordinatesByLocationKey.has(locationKey)) {
+      return this.searchCoordinatesByLocationKey.get(locationKey).clone()
     }
     return undefined
   }
 
-  removePathAtCoordinate(coordinate: Coordinate): void {
-    const locationKey = coordinate.getLocationKey()
-    this.pathsByCoordinateLocationKey.delete(locationKey)
+  generatePathToCoordinate(destination: Coordinate): Path | undefined {
+    const searchCoordinateAtDestination = this.getSearchCoordinateAtCoordinate(destination)
+    if (searchCoordinateAtDestination === undefined) {
+      return undefined
+    }
+
+    const pathCoordinatesFromDestinationToStart = new Array<SearchCoordinate>()
+
+    let searchCoordinate = searchCoordinateAtDestination
+
+    while(searchCoordinate) {
+      pathCoordinatesFromDestinationToStart.push(searchCoordinate)
+      const previousSearchCoordinate = this.getSearchCoordinateAtCoordinate(
+        new Coordinate(
+          searchCoordinate.getOriginRow(),
+          searchCoordinate.getOriginColumn(),
+        )
+      )
+      searchCoordinate = previousSearchCoordinate
+    }
+
+    const newPath = new Path()
+    pathCoordinatesFromDestinationToStart.reverse().forEach((searchCoordinate, index) => {
+      newPath.addSearchCoordinate(searchCoordinate)
+    })
+    return newPath
   }
 
-  getAllCoordinates(): Array<Coordinate> {
-    const coordinates = new Array<Coordinate>()
+  removeSearchCoordinate(coordinate: Coordinate): void {
+    const locationKey = coordinate.getLocationKey()
+    this.searchCoordinatesByLocationKey.delete(locationKey)
+  }
 
-    const pathIterator = this.pathsByCoordinateLocationKey.values()
+  getAllCoordinates(): Array<SearchCoordinate> {
+    const coordinates = new Array<SearchCoordinate>()
 
-    let nextPath = pathIterator.next()
-    while(!nextPath.done) {
-      coordinates.push(nextPath.value.getHeadCoordinate())
-      nextPath = pathIterator.next()
+    const locationKeySearchCoordinateIterator = this.searchCoordinatesByLocationKey.values()
+    let nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
+    while(!nextLocationKeySearchCoordinatePair.done) {
+      coordinates.push(nextLocationKeySearchCoordinatePair.value.clone())
+      nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
     }
 
     return coordinates
   }
 
-  getBoundingBox(): Array<Coordinate> {
-    let leftSide = undefined
-    let rightSide = undefined
-
-    let upSide = undefined
-    let downSide = undefined
-
-    const pathIterator = this.pathsByCoordinateLocationKey.values()
-
-    let nextPath = pathIterator.next()
-    while(!nextPath.done) {
-      const headCoordinate = nextPath.value.getHeadCoordinate()
-      if (leftSide === undefined || headCoordinate.getColumn() < leftSide) {
-        leftSide = headCoordinate.getColumn()
-      }
-
-      if (rightSide === undefined || headCoordinate.getColumn() > rightSide) {
-        rightSide = headCoordinate.getColumn()
-      }
-
-      if (downSide === undefined || headCoordinate.getRow() < downSide) {
-        downSide = headCoordinate.getRow()
-      }
-
-      if (upSide === undefined || headCoordinate.getRow() > upSide) {
-        upSide = headCoordinate.getRow()
-      }
-
-      nextPath = pathIterator.next()
-    }
-
-    if ([leftSide, rightSide, upSide, downSide].includes(undefined)) {
-      return undefined
-    }
-
-    return new Array<Coordinate>(
-      new Coordinate(downSide, leftSide),
-      new Coordinate(upSide, rightSide),
-    )
-  }
-
-  getSmallestMapDimensions(): {row: number; column: number} {
-    const boundingBox = this.getBoundingBox()
-
-    if(!boundingBox) {
-      return undefined
-    }
-
-    return {
-      row: boundingBox[1].getRow(),
-      column: boundingBox[1].getColumn(),
-    }
-  }
-
-  getOutlineCoordinates(): Array<Coordinate> {
-    const pathMapCoordinates = this.getAllCoordinates()
-    const pathMapCoordinateKeys = pathMapCoordinates.map(
-      coordinate => {
-        return coordinate.getLocationKey()
-      }
-    )
-
-    return pathMapCoordinates.filter(coordinate => {
-      const neighborCoordinates = BattleMapFunctions.getNeighborCoordinates(coordinate)
-      const neighborCoordinatesKeys = neighborCoordinates.map(
-        coordinate => {
-          return coordinate.getLocationKey()
-        }
-      )
-
-      const everyNeighborIsInThePathMap = neighborCoordinatesKeys
-        .every(neighborCoordinateKey => {
-          return pathMapCoordinateKeys
-            .includes(neighborCoordinateKey)
-      })
-      return (everyNeighborIsInThePathMap === false)
-    })
-  }
-
   clone(): PathMap {
     const newPathMap = new PathMap()
-    const locationKeyPathIterator = this.pathsByCoordinateLocationKey.values()
+    const locationKeySearchCoordinateIterator = this.searchCoordinatesByLocationKey.values()
 
-    let nextLocationKeyPathPair = locationKeyPathIterator.next()
-    while(!nextLocationKeyPathPair.done) {
-      newPathMap.setPath(nextLocationKeyPathPair.value.clone())
-
-      nextLocationKeyPathPair = locationKeyPathIterator.next()
+    let nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
+    while(!nextLocationKeySearchCoordinatePair.done) {
+      newPathMap.addSearchCoordinate(nextLocationKeySearchCoordinatePair.value.clone())
+      nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
     }
 
     return newPathMap
-  }
-
-  expandBorder(range: number): PathMap {
-    if (range < 0) {
-      return undefined
-    }
-
-    if (range < 1) {
-      return this.clone()
-    }
-
-    const outlineCoordinates = this.getOutlineCoordinates()
-    const visitedCoordinateKeys = new Set(
-      outlineCoordinates.map( coordinate => {
-        return coordinate.getLocationKey()
-      })
-    )
-
-    const newPathsForNewPathMap = new Array<Path> ()
-
-    const helperAddUnvisitedNeighborPathsWithinRange = (
-      currentPath: Path,
-      newPathsForNewPathMap: Array<Path>,
-      visitedCoordinateKeys: Set<string>,
-      currentDistanceFromOutline: number): void => {
-
-      currentDistanceFromOutline = currentDistanceFromOutline + 1
-      if (currentDistanceFromOutline > range) {
-        return
-      }
-
-      const unvisitedNeighbors = BattleMapFunctions.getNeighborCoordinates(currentPath.getHeadCoordinate())
-        .filter(coordinate => {
-          const locationKey = coordinate.getLocationKey()
-          if(visitedCoordinateKeys.has(locationKey)) {
-            return false
-          }
-          return true
-        })
-
-      unvisitedNeighbors.forEach(neighbor => {
-        const locationKey = neighbor.getLocationKey()
-        visitedCoordinateKeys.add(locationKey)
-
-        const newPath = currentPath.cloneAndAddCoordinate(neighbor, 1)
-        newPathsForNewPathMap.push(newPath)
-
-        if (currentDistanceFromOutline < range) {
-          helperAddUnvisitedNeighborPathsWithinRange(newPath, newPathsForNewPathMap, visitedCoordinateKeys, currentDistanceFromOutline)
-        }
-      })
-    }
-
-    outlineCoordinates.forEach(outlineCoordinate => {
-      const currentPath = this.getPathForCoordinate(outlineCoordinate)
-      helperAddUnvisitedNeighborPathsWithinRange(currentPath, newPathsForNewPathMap, visitedCoordinateKeys, 0)
-    })
-
-    return PathMap.newPathMapByArrayOfPaths(newPathsForNewPathMap)
   }
 }
