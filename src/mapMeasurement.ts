@@ -49,6 +49,7 @@ export class SearchCoordinate extends Coordinate implements BaseCoordinate {
   originColumn: number | null
   movementCostSpent: number
   estimatedMovementCostRemaining: number
+  totalMovementCostSpent: number
 
   constructor(
     row: number,
@@ -56,13 +57,15 @@ export class SearchCoordinate extends Coordinate implements BaseCoordinate {
     originRow: number | null,
     originColumn: number | null,
     movementCostSpent: number,
-    estimatedMovementCostRemaining: number
+    estimatedMovementCostRemaining: number,
+    totalMovementCostSpent?: number
   ) {
     super(row, column);
     this.originRow = originRow
     this.originColumn = originColumn
     this.movementCostSpent = movementCostSpent
     this.estimatedMovementCostRemaining = estimatedMovementCostRemaining
+    this.totalMovementCostSpent = totalMovementCostSpent
   }
 
   getOriginColumn(): number | null {
@@ -86,6 +89,10 @@ export class SearchCoordinate extends Coordinate implements BaseCoordinate {
 
   getEstimatedMovementCostRemaining(): number {
     return this.estimatedMovementCostRemaining
+  }
+
+  getTotalMovementCostSpent(): number {
+    return this.totalMovementCostSpent
   }
 
   isOrigin() {

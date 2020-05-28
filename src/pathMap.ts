@@ -1,4 +1,4 @@
-import {Coordinate, Path, SearchCoordinate} from "./mapMeasurement";
+import {BaseCoordinate, Coordinate, Path, SearchCoordinate} from "./mapMeasurement";
 
 export class PathMap {
   searchCoordinatesByLocationKey: Map<string, SearchCoordinate>
@@ -59,6 +59,11 @@ export class PathMap {
   removeSearchCoordinate(coordinate: Coordinate): void {
     const locationKey = coordinate.getLocationKey()
     this.searchCoordinatesByLocationKey.delete(locationKey)
+  }
+
+  hasCoordinate(coordinate: BaseCoordinate): boolean {
+    const locationKey = coordinate.getLocationKey()
+    return this.searchCoordinatesByLocationKey.has(locationKey)
   }
 
   getAllCoordinates(): Array<SearchCoordinate> {

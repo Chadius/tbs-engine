@@ -1,16 +1,15 @@
-import {Coordinate, Path} from "../mapMeasurement";
+import {Path, SearchCoordinate} from "../mapMeasurement";
 import {SearchHistoryContext, SearchStrategy, SquaddieSearchHistoryContext} from "./searchStrategy";
 import {
-  addNeighborsToPathAndCreateNewPaths,
-  addPathLocationToVisited,
-  checkIfCoordinatesAreOffMap, endIfPathIsAtDestination, getUnvisitedCoordinatesNextToPathHead,
-  initalizeSearchHistoryWithPriorityQueue, morePathsToSearch, popNextPathFromQueue,
+  addCoordinateToVisited,
+  checkIfCoordinatesAreOffMap, endIfCoordinateIsAtDestination, getUnvisitedCoordinatesNextToFrontier,
+  initalizeSearchHistoryWithPriorityQueue, areThereMoreCoordinatesToSearch, popNextSearchCoordinateFromQueue,
 } from "./straightLineStrategy";
 
-const addNewPathsIfWithinMoverange = (searchHistoryContext: SquaddieSearchHistoryContext, newPaths: Array<Path>): void => {
-  newPaths.forEach((newPath) => {
-    if (newPath.getTotalMovementCostSpent() <= searchHistoryContext.squaddie.getCurrentMovePerTurn()) {
-      searchHistoryContext.pathsToSearch.push(newPath)
+const addNeighborsToFrontierIfWithinMoverange = (searchHistoryContext: SquaddieSearchHistoryContext, neighbors: Array<SearchCoordinate>): void => {
+  neighbors.forEach((newNeighbor) => {
+    if (newNeighbor.getTotalMovementCostSpent() <= searchHistoryContext.squaddie.getCurrentMovePerTurn()) {
+      searchHistoryContext.frontierCoordinates.push(newNeighbor)
     }
   })
 }
@@ -25,32 +24,28 @@ export class SquaddieOneTurnMovementStrategy implements SearchStrategy {
     return initalizeSearchHistoryWithPriorityQueue(searchHistoryContext)
   }
 
-  addNewCoordinatesToFrontier(searchHistoryContext: SquaddieSearchHistoryContext, newPaths: Array<Path>): void {
-    return addNewPathsIfWithinMoverange(searchHistoryContext, newPaths)
+  addNewCoordinatesToFrontier(searchHistoryContext: SquaddieSearchHistoryContext, neighbors: Array<SearchCoordinate>): void {
+    return addNeighborsToFrontierIfWithinMoverange(searchHistoryContext, neighbors)
   }
 
   shouldContinueSearching(searchHistoryContext: SearchHistoryContext): boolean {
-    return morePathsToSearch(searchHistoryContext)
+    return areThereMoreCoordinatesToSearch(searchHistoryContext)
   }
 
-  getNextFrontierCoordinate(searchHistoryContext: SearchHistoryContext): Path {
-    return popNextPathFromQueue(searchHistoryContext)
+  getNextFrontierCoordinate(searchHistoryContext: SearchHistoryContext): SearchCoordinate {
+    return popNextSearchCoordinateFromQueue(searchHistoryContext)
   }
 
-  markCoordinateAsVisited(searchHistoryContext: SearchHistoryContext, currentPath: Path): void {
-    return addPathLocationToVisited(searchHistoryContext, currentPath)
+  markCoordinateAsVisited(searchHistoryContext: SearchHistoryContext, currentFrontierCoordinate: SearchCoordinate): void {
+    return addCoordinateToVisited(searchHistoryContext, currentFrontierCoordinate)
   }
 
-  shouldEndSearchEarly(searchHistoryContext: SearchHistoryContext, currentPath: Path): {shouldExitEarly: boolean; returnVal: Path} {
-    return endIfPathIsAtDestination(searchHistoryContext, currentPath)
+  shouldEndSearchEarly(searchHistoryContext: SearchHistoryContext, currentFrontierCoordinate: SearchCoordinate): {shouldExitEarly: boolean; returnVal: Path} {
+    return endIfCoordinateIsAtDestination(searchHistoryContext, currentFrontierCoordinate)
   }
 
-  findNewNeighborsForCoordinate(searchHistoryContext: SearchHistoryContext, currentPath: Path): Array<Coordinate> {
-    return getUnvisitedCoordinatesNextToPathHead(searchHistoryContext, currentPath)
-  }
-
-  markNeighborOrigins(searchHistoryContext: SearchHistoryContext, neighbors: Array<Coordinate>, currentPath: Path): Array<Path> {
-    return addNeighborsToPathAndCreateNewPaths(searchHistoryContext, neighbors, currentPath)
+  findNewNeighborsForCoordinate(searchHistoryContext: SearchHistoryContext, currentFrontierCoordinate: SearchCoordinate): Array<SearchCoordinate> {
+    return getUnvisitedCoordinatesNextToFrontier(searchHistoryContext, currentFrontierCoordinate)
   }
 
   noCoordinatesRemain(searchHistoryContext: SearchHistoryContext): any {

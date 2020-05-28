@@ -95,6 +95,22 @@ describe('PathMaps with SearchCoordinates', () => {
     expect(pathToGoal.getTotalMovementCostSpent()).to.equal(3)
   })
 
+  it('can indicate if a coordinate was added', () => {
+    expect(newPathMap.hasCoordinate(searchCoordinateBeforeGoal)).to.be.true
+    expect(newPathMap.hasCoordinate(
+      new Coordinate(
+        searchCoordinateAfterStart.getRow(),
+        searchCoordinateAfterStart.getColumn()
+      )
+    )).to.be.true
+    expect(newPathMap.hasCoordinate(
+      new Coordinate(
+        -1,
+        9001
+      )
+    )).to.be.false
+  })
+
   it('returns undefined if it tries to generate a Path from a nonexistent coordinate', () => {
     const pathToGoal = newPathMap.generatePathToCoordinate(new Coordinate(-1, 9001))
     expect(pathToGoal).to.be.undefined

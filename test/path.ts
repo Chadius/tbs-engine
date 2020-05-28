@@ -60,9 +60,10 @@ describe('SearchCoordinate', () => {
     expect(nextSearchCoordinate.getOriginLocationKey()).to.equal("3, 4")
   })
   it('Can record and recall the movement cost', () => {
-    const nextSearchCoordinate = new SearchCoordinate(1,2, 3, 4, 5 ,6)
+    const nextSearchCoordinate = new SearchCoordinate(1,2, 3, 4, 5 ,6, 7)
     expect(nextSearchCoordinate.getMovementCostSpent()).to.equal(5)
     expect(nextSearchCoordinate.getEstimatedMovementCostRemaining()).to.equal(6)
+    expect(nextSearchCoordinate.getTotalMovementCostSpent()).to.equal(7)
   })
 
   it('can be cloned and compared with a custom equals function', () => {

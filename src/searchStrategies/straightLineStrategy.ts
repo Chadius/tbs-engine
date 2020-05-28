@@ -1,8 +1,9 @@
-import {SearchCoordinate, Path, Coordinate} from "../mapMeasurement";
+import {SearchCoordinate, Path} from "../mapMeasurement";
 import TinyQueue from "tinyqueue";
-import {SearchHistoryContext, SearchStrategy} from "./searchStrategy";
+import {BaseSearchHistoryContext, SearchHistoryContext, SearchStrategy} from "./searchStrategy";
+import {PathMap} from "../pathMap";
 
-export const lowerMoveCostIsFirst = (a: Path, b: Path): number => {
+export const lowerMoveCostIsFirst = (a: SearchCoordinate, b: SearchCoordinate): number => {
   const pathAMovementCost = a.getTotalMovementCostSpent()
   const pathBMovementCost = b.getTotalMovementCostSpent()
   if (pathAMovementCost < pathBMovementCost) {
@@ -23,75 +24,68 @@ export const checkIfCoordinatesAreOffMap = (searchHistoryContext: SearchHistoryC
 }
 
 export const initalizeSearchHistoryWithPriorityQueue = (searchHistoryContext: SearchHistoryContext): void => {
-  const {startCoordinate, battleMap, visitedLocations} = searchHistoryContext
+  const {startCoordinate} = searchHistoryContext
 
-  searchHistoryContext.pathsToSearch = new TinyQueue<Path> ([], lowerMoveCostIsFirst)
-  searchHistoryContext.pathsToSearch.push(
-    new Path(
-      new SearchCoordinate(
-        startCoordinate.getRow(),
-        startCoordinate.getColumn(),
-        null,
-        null,
-        0,
-        0
-      )
-    )
+  const startSearchCoordinate = new SearchCoordinate(
+    startCoordinate.getRow(),
+    startCoordinate.getColumn(),
+    null,
+    null,
+    0,
+    0
   )
-  visitedLocations.clear()
-  visitedLocations.add(
-    startCoordinate.getLocationKey()
+
+  searchHistoryContext.frontierCoordinates = new TinyQueue<SearchCoordinate> ([], lowerMoveCostIsFirst)
+  searchHistoryContext.frontierCoordinates.push(
+    startSearchCoordinate
   )
+  searchHistoryContext.visitedCoordinatesAndMovementCosts = new PathMap()
+  searchHistoryContext.visitedCoordinatesAndMovementCosts.addSearchCoordinate(startSearchCoordinate)
 }
 
-export const morePathsToSearch = (searchHistoryContext: SearchHistoryContext): boolean => {
-  return (searchHistoryContext.pathsToSearch.length > 0)
+export const areThereMoreCoordinatesToSearch = (searchHistoryContext: SearchHistoryContext): boolean => {
+  return (searchHistoryContext.frontierCoordinates.length > 0)
 }
 
-export const popNextPathFromQueue = (searchHistoryContext: SearchHistoryContext): Path => {
-  return searchHistoryContext.pathsToSearch.pop()
+export const popNextSearchCoordinateFromQueue = (searchHistoryContext: SearchHistoryContext): SearchCoordinate => {
+  const coordinateWithLowestTotalMovementCost = searchHistoryContext.frontierCoordinates.pop()
+  return coordinateWithLowestTotalMovementCost
 }
 
-export const addPathLocationToVisited = (searchHistoryContext: SearchHistoryContext, currentPath: Path): void => {
-  searchHistoryContext.visitedLocations.add(currentPath.getHeadCoordinate().getLocationKey())
+export const addCoordinateToVisited = (searchHistoryContext: SearchHistoryContext, currentCoordinate: SearchCoordinate): void => {
+  searchHistoryContext.visitedCoordinatesAndMovementCosts.addSearchCoordinate(currentCoordinate)
 }
 
-export const endIfPathIsAtDestination = (searchHistoryContext: SearchHistoryContext, currentPath: Path): {shouldExitEarly: boolean; returnVal: Path} => {
-  const pathIsAtDestination = (currentPath.getHeadCoordinate().getLocationKey() === searchHistoryContext.endCoordinate.getLocationKey())
+export const endIfCoordinateIsAtDestination = (searchHistoryContext: SearchHistoryContext, currentCoordinate: SearchCoordinate): {shouldExitEarly: boolean; returnVal: Path} => {
+  const pathIsAtDestination = (currentCoordinate.getLocationKey() === searchHistoryContext.endCoordinate.getLocationKey())
   if (pathIsAtDestination) {
+    const currentPath = searchHistoryContext.visitedCoordinatesAndMovementCosts.generatePathToCoordinate(currentCoordinate)
     return {shouldExitEarly: true, returnVal: currentPath}
   }
   return {shouldExitEarly: false, returnVal: undefined }
 }
 
-export const getUnvisitedCoordinatesNextToPathHead = (searchHistoryContext: SearchHistoryContext, currentPath: Path): Array<Coordinate> => {
-  const neighbors = searchHistoryContext.battleMap.getOnMapNeighbors(currentPath.getHeadCoordinate())
+export const getUnvisitedCoordinatesNextToFrontier = (searchHistoryContext: SearchHistoryContext, frontierCoordinate: SearchCoordinate): Array<SearchCoordinate> => {
+  const neighbors = searchHistoryContext.battleMap.getOnMapNeighbors(frontierCoordinate)
     .filter((neighbor) => {
-      const locationKey = neighbor.getLocationKey()
-      return !(searchHistoryContext.visitedLocations.has(locationKey))
+      return !(searchHistoryContext.visitedCoordinatesAndMovementCosts.hasCoordinate(neighbor))
     })
-  return neighbors
-}
-
-export const addNeighborsToPathAndCreateNewPaths = (searchHistoryContext: SearchHistoryContext, neighbors: Array<Coordinate>, currentPath: Path): Array<Path> => {
-  return neighbors.map((neighbor) => {
-    const movementCostToNeighbor = 1
-    return currentPath.cloneAndAddCoordinate(
-      new SearchCoordinate(
-        neighbor.getRow(),
-        neighbor.getColumn(),
-        currentPath.getHeadCoordinate().getRow(),
-        currentPath.getHeadCoordinate().getColumn(),
-        movementCostToNeighbor,
-        0,
-      )
+  return neighbors.map(neighbor => {
+    return new SearchCoordinate(
+      neighbor.getRow(),
+      neighbor.getColumn(),
+      frontierCoordinate.getRow(),
+      frontierCoordinate.getColumn(),
+      1,
+      0,
+      frontierCoordinate.getMovementCostSpent() + 1
     )
   })
 }
 
-export const addNewPathsToSearchQueue = (searchHistoryContext: SearchHistoryContext, newPaths: Array<Path>): void => {
-  newPaths.forEach((newPath) => {
-    searchHistoryContext.pathsToSearch.push(newPath)
+export const addNewCoordinatesToFrontier = (searchHistoryContext: BaseSearchHistoryContext, newNeighbors: Array<SearchCoordinate>): void => {
+  newNeighbors.forEach((neighbor) => {
+    searchHistoryContext.frontierCoordinates.push(neighbor)
   })
 }
 
@@ -105,31 +99,27 @@ export class StraightLineStrategy implements SearchStrategy {
   }
 
   shouldContinueSearching(searchHistoryContext: SearchHistoryContext): boolean {
-    return morePathsToSearch(searchHistoryContext)
+    return areThereMoreCoordinatesToSearch(searchHistoryContext)
   }
 
-  getNextFrontierCoordinate(searchHistoryContext: SearchHistoryContext): Path {
-    return popNextPathFromQueue(searchHistoryContext)
+  getNextFrontierCoordinate(searchHistoryContext: SearchHistoryContext): SearchCoordinate {
+    return popNextSearchCoordinateFromQueue(searchHistoryContext)
   }
 
-  markCoordinateAsVisited(searchHistoryContext: SearchHistoryContext, currentPath: Path): void {
-    return addPathLocationToVisited(searchHistoryContext, currentPath)
+  markCoordinateAsVisited(searchHistoryContext: BaseSearchHistoryContext, currentCoordinate: SearchCoordinate): void {
+    return addCoordinateToVisited(searchHistoryContext, currentCoordinate)
   }
 
-  shouldEndSearchEarly(searchHistoryContext: SearchHistoryContext, currentPath: Path): {shouldExitEarly: boolean; returnVal: Path} {
-    return endIfPathIsAtDestination(searchHistoryContext, currentPath)
+  shouldEndSearchEarly(searchHistoryContext: SearchHistoryContext, currentCoordinate: SearchCoordinate): {shouldExitEarly: boolean; returnVal: Path} {
+    return endIfCoordinateIsAtDestination(searchHistoryContext, currentCoordinate)
   }
 
-  findNewNeighborsForCoordinate(searchHistoryContext: SearchHistoryContext, currentPath: Path): Array<Coordinate> {
-    return getUnvisitedCoordinatesNextToPathHead(searchHistoryContext, currentPath)
+  findNewNeighborsForCoordinate(searchHistoryContext: SearchHistoryContext, currentCoordinate: SearchCoordinate): Array<SearchCoordinate> {
+    return getUnvisitedCoordinatesNextToFrontier(searchHistoryContext, currentCoordinate)
   }
 
-  markNeighborOrigins(searchHistoryContext: SearchHistoryContext, neighbors: Array<Coordinate>, currentPath: Path): Array<Path> {
-    return addNeighborsToPathAndCreateNewPaths(searchHistoryContext, neighbors, currentPath)
-  }
-
-  addNewCoordinatesToFrontier(searchHistoryContext: SearchHistoryContext, newPaths: Array<Path>): void {
-    return addNewPathsToSearchQueue(searchHistoryContext, newPaths)
+  addNewCoordinatesToFrontier(searchHistoryContext: BaseSearchHistoryContext, newNeighbors: Array<SearchCoordinate>): void {
+    return addNewCoordinatesToFrontier(searchHistoryContext, newNeighbors)
   }
 
   noCoordinatesRemain(searchHistoryContext: SearchHistoryContext): any {
