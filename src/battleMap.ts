@@ -20,23 +20,42 @@ export const BattleMapFunctions = {
 }
 
 export class MapTerrain {
-  tileTypesByRow: Array<string[]>
+  tilesByLocationKey: Map<string, string>
+  rowCount: number
+  columnCount: number
 
   constructor(typeTiles: Array<string[]>) {
-    const numColumnsInEachRow = typeTiles.map((row: string[]) => row.length)
-    if (numColumnsInEachRow.every(col => col === numColumnsInEachRow[0]) !== true) {
-      throw TypeError("All rows must have the same number of columns.")
+    this.tilesByLocationKey = new Map<string, string> ()
+
+    typeTiles.forEach((rowOfTiles, rowIndex) => {
+      let columnIndex;
+      for(columnIndex = 0; columnIndex < rowOfTiles.length; columnIndex = columnIndex + 1) {
+        const coordinateOfTile = new Coordinate(rowIndex, columnIndex)
+        this.tilesByLocationKey.set(coordinateOfTile.getLocationKey(), rowOfTiles[columnIndex])
+      }
+    })
+
+    this.rowCount = 0
+    this.columnCount = 0
+
+    this.tilesByLocationKey.forEach((tileLetter, locationKey, map) => {
+      const coordinateOfLocation = Coordinate.newFromLocationKey(locationKey)
+      this.rowCount = this.rowCount > coordinateOfLocation.getRow() ? this.rowCount : coordinateOfLocation.getRow()
+      this.columnCount = this.columnCount > coordinateOfLocation.getColumn() ? this.columnCount : coordinateOfLocation.getColumn()
+    })
+
+    if(this.tilesByLocationKey.size > 0) {
+      this.rowCount = this.rowCount + 1
+      this.columnCount = this.columnCount + 1
     }
-
-    this.tileTypesByRow = typeTiles
   }
 
-  rowCount(): number {
-    return this.tileTypesByRow.length
+  getRowCount(): number {
+    return this.rowCount
   }
 
-  columnCount(): number {
-    return this.tileTypesByRow[0].length
+  getColumnCount(): number {
+    return this.columnCount
   }
 }
 
@@ -53,11 +72,11 @@ export class BattleMap{
   }
 
   rowCount(): number {
-    return this.terrain.rowCount()
+    return this.terrain.getRowCount()
   }
 
   columnCount(): number {
-    return this.terrain.columnCount()
+    return this.terrain.getColumnCount()
   }
 
   isOnMap(rowOrCoordinate: number | Coordinate, column?: number): boolean {

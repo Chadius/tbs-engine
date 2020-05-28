@@ -9,7 +9,7 @@ describe ('Map Terrain Dimensions', () => {
       ['3', '1'],
     ])
 
-    expect(terrain.rowCount()).to.eq(3)
+    expect(terrain.getRowCount()).to.eq(3)
   })
 
   it('Knows the number of columns based on the initialization', () => {
@@ -18,19 +18,6 @@ describe ('Map Terrain Dimensions', () => {
       ['S', '1', 'X'],
     ])
 
-    expect(terrain.columnCount()).to.eq(3)
-  })
-})
-
-describe('Invalid terrain definition throws exceptions', () => {
-  it('Throws an error when the rows do not have the same number of tiles', () => {
-    const makeBadTerrain: () => void = () => {
-      new MapTerrain([
-        [],
-        ['1', '2'],
-      ])
-    }
-
-    expect(makeBadTerrain).to.throw(TypeError)
+    expect(terrain.getColumnCount()).to.eq(3)
   })
 })
