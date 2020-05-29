@@ -152,19 +152,13 @@ export class BattleMap{
   }
 
   getCoordinateOfSquaddie(squaddieToFind: Squaddie): Coordinate {
-    const squaddieIterator = this.squaddiesByLocationKey.entries()
-
-    let nextSquaddieKeyValue = squaddieIterator.next()
-    while(!nextSquaddieKeyValue.done) {
-      const locationKey = nextSquaddieKeyValue.value[0]
-      const squaddie = nextSquaddieKeyValue.value[1]
+    let coordinateOfSquaddie = null
+    this.squaddiesByLocationKey.forEach((squaddie, locationKey) => {
       if (squaddie === squaddieToFind) {
-        return Coordinate.newFromLocationKey(locationKey)
+        coordinateOfSquaddie = Coordinate.newFromLocationKey(locationKey)
       }
-      nextSquaddieKeyValue = squaddieIterator.next()
-    }
-
-    return null
+    })
+    return coordinateOfSquaddie
   }
 
   moveSquaddie(squaddieToMove: Squaddie, destination: Coordinate): void {
@@ -185,17 +179,9 @@ export class BattleMap{
 
   getCoordinatesOfAllSquaddiesByID(): Map<string, Coordinate> {
     const allCoordinates = new Map<string, Coordinate>()
-
-    const squaddieIterator = this.squaddiesByLocationKey.entries()
-
-    let nextSquaddieKeyValue = squaddieIterator.next()
-    while(!nextSquaddieKeyValue.done) {
-      const locationKey = nextSquaddieKeyValue.value[0]
-      const squaddie = nextSquaddieKeyValue.value[1]
+    this.squaddiesByLocationKey.forEach((squaddie, locationKey) => {
       allCoordinates.set(squaddie.getId(), Coordinate.newFromLocationKey(locationKey))
-      nextSquaddieKeyValue = squaddieIterator.next()
-    }
-
+    })
     return allCoordinates
   }
 

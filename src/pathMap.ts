@@ -69,26 +69,17 @@ export class PathMap {
   getAllCoordinates(): Array<SearchCoordinate> {
     const coordinates = new Array<SearchCoordinate>()
 
-    const locationKeySearchCoordinateIterator = this.searchCoordinatesByLocationKey.values()
-    let nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
-    while(!nextLocationKeySearchCoordinatePair.done) {
-      coordinates.push(nextLocationKeySearchCoordinatePair.value.clone())
-      nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
-    }
-
+    this.searchCoordinatesByLocationKey.forEach((searchCoordinate) => {
+      coordinates.push(searchCoordinate.clone())
+    })
     return coordinates
   }
 
   clone(): PathMap {
     const newPathMap = new PathMap()
-    const locationKeySearchCoordinateIterator = this.searchCoordinatesByLocationKey.values()
-
-    let nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
-    while(!nextLocationKeySearchCoordinatePair.done) {
-      newPathMap.addSearchCoordinate(nextLocationKeySearchCoordinatePair.value.clone())
-      nextLocationKeySearchCoordinatePair = locationKeySearchCoordinateIterator.next()
-    }
-
+    this.searchCoordinatesByLocationKey.forEach((searchCoordinate) => {
+      newPathMap.addSearchCoordinate(searchCoordinate.clone())
+    })
     return newPathMap
   }
 }

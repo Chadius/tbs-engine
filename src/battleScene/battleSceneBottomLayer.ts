@@ -101,18 +101,10 @@ export class BattleSceneBottomLayer {
   private drawAllSquaddies() {
     const coordinatesOfAllSquaddiesByID = this.battleMap.getCoordinatesOfAllSquaddiesByID()
 
-    const squaddieIterator = coordinatesOfAllSquaddiesByID.entries()
-
-    let nextSquaddieKeyValue = squaddieIterator.next()
-    while(!nextSquaddieKeyValue.done) {
-      const squaddieId = nextSquaddieKeyValue.value[0]
+    coordinatesOfAllSquaddiesByID.forEach((squaddieCoordinate, squaddieId) => {
       const squaddieToDraw = this.battleMap.getSquaddieById(squaddieId)
-
-      const squaddieCoordinate = nextSquaddieKeyValue.value[1]
-
       this.drawSquaddie(squaddieToDraw, squaddieCoordinate.getRow(),squaddieCoordinate.getColumn())
-      nextSquaddieKeyValue = squaddieIterator.next()
-    }
+    })
   }
 
 
