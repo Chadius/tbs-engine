@@ -18,8 +18,8 @@ export class BattleSceneBottomLayer {
   init(params: any): void {
     this.battleMap = new BattleMap(new MapTerrain([
       ['1', '1', '1', '1'],
-      ['1', 'X', '1', '1'],
-      ['3', '1', '1', '1'],
+        ['1', 'X', '1', '1'],
+          ['3', '1', '1', '1'],
     ]))
 
     this.squaddieSpriteNameByID = new Map<string, string>()

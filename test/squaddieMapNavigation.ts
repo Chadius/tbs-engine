@@ -11,10 +11,10 @@ describe('Map contains the terrain and can query it', () => {
 
   beforeEach(() => {
     terrain = new MapTerrain([
-          ['1',],
+      ['1',],
         ['1', 'X'],
-      ['3', '1'],
-    ].reverse())
+          ['3', '1'],
+    ])
 
     battleMap = new BattleMap(terrain)
   })
@@ -26,8 +26,9 @@ describe('Map contains the terrain and can query it', () => {
 
   it('Can tell if coordinates are off map', () => {
     expect(battleMap.isOnMap(0,0)).to.be.true
+    expect(battleMap.isOnMap(0,1)).to.be.false
     expect(battleMap.isOnMap(1,0)).to.be.true
-    expect(battleMap.isOnMap(2,1)).to.be.false
+    expect(battleMap.isOnMap(2,1)).to.be.true
     expect(battleMap.isOnMap(3,0)).to.be.false
     expect(battleMap.isOnMap(0,2)).to.be.false
   })
@@ -41,8 +42,8 @@ describe('Map can contain Squaddies',  () => {
   beforeEach(() => {
     terrain = new MapTerrain([
       ['1', '1'],
-      ['1', 'X'],
-      ['3', '1'],
+        ['1', 'X'],
+          ['3', '1'],
     ])
 
     soldier = new Squaddie('soldier', 5)
@@ -201,10 +202,10 @@ describe('Map can generate neighbors based on location', () => {
   before(() => {
     flatMap = new BattleMap(
       new MapTerrain([
-      ['1', '1', '1', '1', '1',],
-      ['1', '1', '1', '1', '1',],
-      ['1', '1', '1', '1', '1',],
-      ['1', '1', '1', '1', '1',],
+        ['1', '1', '1', '1', '1',],
+          ['1', '1', '1', '1', '1',],
+            ['1', '1', '1', '1', '1',],
+              ['1', '1', '1', '1', '1',],
     ]))
   })
 
@@ -243,14 +244,15 @@ describe('Map can generate neighbors based on location', () => {
 
     const mapWithShortRow = new BattleMap(
       new MapTerrain([
-          ['1', '1', '1', '1',],
-        ['1', '1', '1', '1', '1',],
-      ].reverse()))
-    const neighborsOfShortRow = mapWithShortRow.getOnMapNeighbors(new Coordinate(1, 3))
+        ['1', '1', '1', '1',],
+          ['1', '1', '1', '1', '1',],
+      ]))
+    const neighborsOfShortRow = mapWithShortRow.getOnMapNeighbors(new Coordinate(0, 3))
     expect(neighborsOfShortRow.length).to.equal(3)
+    expect(neighborsOfShortRow).to.deep.include(new Coordinate(0, 2))
     expect(neighborsOfShortRow).to.deep.include(new Coordinate(1, 2))
-    expect(neighborsOfShortRow).to.deep.include(new Coordinate(0, 3))
-    expect(neighborsOfShortRow).to.deep.include(new Coordinate(0, 4))
+    expect(neighborsOfShortRow).to.deep.include(new Coordinate(1, 3))
+    expect(neighborsOfShortRow).not.to.deep.include(new Coordinate(0, 4))
     expect(neighborsOfShortRow).not.to.deep.include(new Coordinate(1, 4))
   })
 })
@@ -265,9 +267,9 @@ describe('Map can calculate as the crow flies distance between hex tiles', () =>
   beforeEach(() => {
     terrain = new MapTerrain([
       ['1', '1', '1', '1', '1',],
-      ['1', '1', '1', '1', '1',],
-      ['1', '1', '1', '1', '1',],
-      ['1', '1', '1', '1', '1',],
+        ['1', '1', '1', '1', '1',],
+          ['1', '1', '1', '1', '1',],
+            ['1', '1', '1', '1', '1',],
     ])
     battleMap = new BattleMap(terrain)
     startCoordEvenRow = new Coordinate(2, 1)
@@ -426,8 +428,8 @@ describe('Map can move Squaddies on the map', () => {
   beforeEach(() => {
     terrain = new MapTerrain([
       ['1', '1'],
-      ['1', 'X'],
-      ['3', '1'],
+        ['1', 'X'],
+          ['3', '1'],
     ])
 
     soldier = new Squaddie('soldier', 5)
