@@ -40,4 +40,28 @@ describe ('Map Terrain Dimensions', () => {
     expect(mapWithShortRow.hasTileAtCoordinate(new Coordinate(9001,0))).to.be.false
     expect(mapWithShortRow.hasTileAtCoordinate(new Coordinate(-1,0))).to.be.false
   })
+
+  it('knows how to return a list of ordered tiles', () => {
+    const mapWithShortRow = new MapTerrain([
+        ['1', 'X'],
+      ['S', '1', 'X'],
+    ].reverse())
+
+    const orderedTiles = mapWithShortRow.getTilesOrderedByCoordinates()
+    expect(orderedTiles.length).to.equal(5)
+    expect(orderedTiles[0]["locationKey"]).to.equal("0, 0")
+    expect(orderedTiles[0]["terrain"]).to.equal("S")
+
+    expect(orderedTiles[1]["locationKey"]).to.equal("0, 1")
+    expect(orderedTiles[1]["terrain"]).to.equal("1")
+
+    expect(orderedTiles[2]["locationKey"]).to.equal("0, 2")
+    expect(orderedTiles[2]["terrain"]).to.equal("X")
+
+    expect(orderedTiles[3]["locationKey"]).to.equal("1, 0")
+    expect(orderedTiles[3]["terrain"]).to.equal("1")
+
+    expect(orderedTiles[4]["locationKey"]).to.equal("1, 1")
+    expect(orderedTiles[4]["terrain"]).to.equal("X")
+  })
 })

@@ -1,12 +1,6 @@
 import {Squaddie} from "./squaddie";
 import {BaseCoordinate, Coordinate} from "./mapMeasurement";
 
-export const BattleMapFunctions = {
-  getNeighborCoordinates: (originCoordinate: Coordinate) => {
-    return originCoordinate.generateNeighbors()
-  }
-}
-
 export class MapTerrain {
   tilesByLocationKey: Map<string, string>
   rowCount: number
@@ -49,6 +43,27 @@ export class MapTerrain {
   hasTileAtCoordinate(coordinate: BaseCoordinate): boolean {
     const locationKey = coordinate.getLocationKey()
     return this.tilesByLocationKey.has(locationKey)
+  }
+
+  getTilesOrderedByCoordinates(): Array<{locationKey: string; terrain: string }> {
+    const allTiles = new Array<{locationKey: string; terrain: string }>()
+
+    let row, column;
+    for (row = 0; row < this.getRowCount(); row = row + 1) {
+      for (column = 0; column < this.getColumnCount(); column = column + 1) {
+        const coordinateToSearchFor = new Coordinate(row, column)
+        if (this.hasTileAtCoordinate(coordinateToSearchFor)) {
+          const locationKey = coordinateToSearchFor.getLocationKey()
+          allTiles.push(
+            {
+              locationKey: locationKey,
+              terrain: this.tilesByLocationKey.get(locationKey),
+            }
+          )
+        }
+      }
+    }
+    return allTiles
   }
 }
 
@@ -132,7 +147,7 @@ export class BattleMap{
   }
 
   getOnMapNeighbors(originCoordinate: Coordinate): Array<Coordinate> {
-    return BattleMapFunctions.getNeighborCoordinates(originCoordinate)
+    return originCoordinate.generateNeighbors()
       .filter((neighbor) => {
       return this.isOnMap(neighbor)
     });
