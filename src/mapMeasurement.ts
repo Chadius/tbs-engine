@@ -5,6 +5,7 @@ export interface BaseCoordinate {
   getRow(): number;
   getColumn(): number;
   getLocationKey(): string;
+  toCubeCoordinates(): {x: number; y: number; z: number};
 }
 
 export class Coordinate implements BaseCoordinate{
@@ -32,6 +33,15 @@ export class Coordinate implements BaseCoordinate{
     return `${this.getRow()}, ${this.getColumn()}`
   }
 
+
+  toCubeCoordinates(): {x: number; y: number; z: number} {
+    return {
+      x: this.getColumn(),
+      y: this.getRow(),
+      z: -1 * (this.getColumn() + this.getRow()),
+    }
+  }
+
   static newFromLocationKey(locationKey: string): Coordinate {
     const splitByComma = locationKey.split(",")
     const row = parseInt(splitByComma[0])
@@ -41,6 +51,54 @@ export class Coordinate implements BaseCoordinate{
       return undefined
     }
     return new Coordinate(row, column)
+  }
+
+  static newFromCubeCoordinates(x: number, y: number, z: number): Coordinate {
+    const row = y
+    const column = x
+    return new Coordinate(row,column)
+  }
+
+  add(addend: Coordinate): Coordinate {
+    const thisAsCubeCoordinates = this.toCubeCoordinates()
+    const addendAsCubeCoordinates = addend.toCubeCoordinates()
+
+    const sumCubeCoordinates = {
+      x: thisAsCubeCoordinates.x + addendAsCubeCoordinates.x,
+      y: thisAsCubeCoordinates.y + addendAsCubeCoordinates.y,
+      z: thisAsCubeCoordinates.z + addendAsCubeCoordinates.z,
+    }
+
+    return Coordinate.newFromCubeCoordinates(sumCubeCoordinates.x, sumCubeCoordinates.y, sumCubeCoordinates.z)
+  }
+
+  static generateCubeDirections(): Coordinate[] {
+    return [
+      Coordinate.newFromCubeCoordinates(1, -1, 0),
+      Coordinate.newFromCubeCoordinates(1, 0, -1),
+      Coordinate.newFromCubeCoordinates(0, 1, -1),
+      Coordinate.newFromCubeCoordinates(-1, 1, 0),
+      Coordinate.newFromCubeCoordinates(-1, 0, -1),
+      Coordinate.newFromCubeCoordinates(0, -1, 1),
+    ]
+  }
+
+  static generateAxialDirections(): Coordinate[] {
+    return [
+      new Coordinate(0, 1),
+      new Coordinate(-1, 1),
+      new Coordinate(-1, 0),
+      new Coordinate(0, -1),
+      new Coordinate(1, -1),
+      new Coordinate(1, 0),
+    ]
+  }
+
+  generateNeighbors(): Array<Coordinate> {
+    const axialDirections = Coordinate.generateAxialDirections()
+    return [0,1,2,3,4,5].map((directionIndex) => {
+      return this.add(axialDirections[directionIndex])
+    })
   }
 }
 

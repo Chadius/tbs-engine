@@ -11,15 +11,15 @@ describe('Map contains the terrain and can query it', () => {
 
   beforeEach(() => {
     terrain = new MapTerrain([
-      ['1', '1'],
-      ['1', 'X'],
+          ['1',],
+        ['1', 'X'],
       ['3', '1'],
-    ])
+    ].reverse())
 
     battleMap = new BattleMap(terrain)
   })
 
-  it('Knows the size of the terrain', () => {
+  it('Knows the bounding box size of the terrain', () => {
     expect(battleMap.rowCount()).to.eq(3)
     expect(battleMap.columnCount()).to.eq(2)
   })
@@ -27,7 +27,7 @@ describe('Map contains the terrain and can query it', () => {
   it('Can tell if coordinates are off map', () => {
     expect(battleMap.isOnMap(0,0)).to.be.true
     expect(battleMap.isOnMap(1,0)).to.be.true
-    expect(battleMap.isOnMap(2,1)).to.be.true
+    expect(battleMap.isOnMap(2,1)).to.be.false
     expect(battleMap.isOnMap(3,0)).to.be.false
     expect(battleMap.isOnMap(0,2)).to.be.false
   })
@@ -208,42 +208,50 @@ describe('Map can generate neighbors based on location', () => {
     ]))
   })
 
-  const convertSetCoordinatesToArrayOfLocationIndecies = (setOfCoordinates: Array<Coordinate>): Array<string> => {
-    return setOfCoordinates.map((x) => {return x.getLocationKey()})
-  }
-
-  const assertNeighborsInclude = (setOfNeighborCoordinates: Array<Coordinate>, expectedCoordinates: Array<Array<number>>): void => {
-    const locationOfNeighbors = convertSetCoordinatesToArrayOfLocationIndecies(setOfNeighborCoordinates)
-
-    const expectedCoordinateKeys = expectedCoordinates.map(rowColumnPair => {
-      return `${rowColumnPair[0]}, ${rowColumnPair[1]}`
-    })
-
-    expectedCoordinateKeys.forEach(expectedCoordinateKey => {
-      expect(locationOfNeighbors).to.include(expectedCoordinateKey)
-    })
-  }
-
   it('Can generate neighbors based on even row', () => {
     const neighborsOfEvenRow = flatMap.getOnMapNeighbors(new Coordinate(2, 1))
     expect(neighborsOfEvenRow.length).to.equal(6)
-    assertNeighborsInclude(neighborsOfEvenRow, [[2,0], [2,2], [3,1], [1,1], [3,0], [1,0],])
+    expect(neighborsOfEvenRow).to.deep.include(new Coordinate(2,0))
+    expect(neighborsOfEvenRow).to.deep.include(new Coordinate(2,2))
+    expect(neighborsOfEvenRow).to.deep.include(new Coordinate(1,1))
+    expect(neighborsOfEvenRow).to.deep.include(new Coordinate(3,1))
+    expect(neighborsOfEvenRow).to.deep.include(new Coordinate(1,2))
+    expect(neighborsOfEvenRow).to.deep.include(new Coordinate(3,0))
   })
 
   it('Can generate neighbors based on odd row', () => {
     const neighborsOfOddRow = flatMap.getOnMapNeighbors(new Coordinate(1, 1))
     expect(neighborsOfOddRow.length).to.equal(6)
-    assertNeighborsInclude(neighborsOfOddRow, [[1,0], [1,2], [0,1], [2,1], [0,2], [2,2],])
+    expect(neighborsOfOddRow).to.deep.include(new Coordinate(1,0))
+    expect(neighborsOfOddRow).to.deep.include(new Coordinate(1,2))
+    expect(neighborsOfOddRow).to.deep.include(new Coordinate(0,1))
+    expect(neighborsOfOddRow).to.deep.include(new Coordinate(2,1))
+    expect(neighborsOfOddRow).to.deep.include(new Coordinate(0,2))
+    expect(neighborsOfOddRow).to.deep.include(new Coordinate(2,0))
   })
 
   it('Can generate neighbors that are on the map', () => {
     const neighborsOfLowerLeft = flatMap.getOnMapNeighbors(new Coordinate(0, 0))
     expect(neighborsOfLowerLeft.length).to.equal(2)
-    assertNeighborsInclude(neighborsOfLowerLeft, [[1,0], [0,1]])
+    expect(neighborsOfLowerLeft).to.deep.include(new Coordinate(1, 0))
+    expect(neighborsOfLowerLeft).to.deep.include(new Coordinate(0, 1))
 
     const neighborsOfUpperRight = flatMap.getOnMapNeighbors(new Coordinate(3, 4))
     expect(neighborsOfUpperRight.length).to.equal(2)
-    assertNeighborsInclude(neighborsOfUpperRight, [[3,3], [2,4]])
+    expect(neighborsOfUpperRight).to.deep.include(new Coordinate(3, 3))
+    expect(neighborsOfUpperRight).to.deep.include(new Coordinate(2, 4))
+
+    const mapWithShortRow = new BattleMap(
+      new MapTerrain([
+          ['1', '1', '1', '1',],
+        ['1', '1', '1', '1', '1',],
+      ].reverse()))
+    const neighborsOfShortRow = mapWithShortRow.getOnMapNeighbors(new Coordinate(1, 3))
+    expect(neighborsOfShortRow.length).to.equal(3)
+    expect(neighborsOfShortRow).to.deep.include(new Coordinate(1, 2))
+    expect(neighborsOfShortRow).to.deep.include(new Coordinate(0, 3))
+    expect(neighborsOfShortRow).to.deep.include(new Coordinate(0, 4))
+    expect(neighborsOfShortRow).not.to.deep.include(new Coordinate(1, 4))
   })
 })
 

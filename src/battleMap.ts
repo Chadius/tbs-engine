@@ -1,21 +1,9 @@
 import {Squaddie} from "./squaddie";
-import {Coordinate} from "./mapMeasurement";
+import {BaseCoordinate, Coordinate} from "./mapMeasurement";
 
 export const BattleMapFunctions = {
   getNeighborCoordinates: (originCoordinate: Coordinate) => {
-    const originRow = originCoordinate.getRow()
-    const originColumn = originCoordinate.getColumn()
-    const originRowIsEven = (originRow % 2 === 0)
-    const freeDiagonalDirection = originRowIsEven ? -1 : 1
-
-    return [
-      new Coordinate(originRow, originColumn - 1),
-      new Coordinate(originRow, originColumn + 1),
-      new Coordinate(originRow - 1, originColumn),
-      new Coordinate(originRow + 1, originColumn),
-      new Coordinate(originRow - 1, originColumn + freeDiagonalDirection),
-      new Coordinate(originRow + 1, originColumn + freeDiagonalDirection),
-    ]
+    return originCoordinate.generateNeighbors()
   }
 }
 
@@ -57,6 +45,11 @@ export class MapTerrain {
   getColumnCount(): number {
     return this.columnCount
   }
+
+  hasTileAtCoordinate(coordinate: BaseCoordinate): boolean {
+    const locationKey = coordinate.getLocationKey()
+    return this.tilesByLocationKey.has(locationKey)
+  }
 }
 
 export class BattleMap{
@@ -79,22 +72,16 @@ export class BattleMap{
     return this.terrain.getColumnCount()
   }
 
-  isOnMap(rowOrCoordinate: number | Coordinate, column?: number): boolean {
-    let row = 0
+  isOnMap(rowOrCoordinate: number | BaseCoordinate, column?: number): boolean {
     if (typeof rowOrCoordinate === 'number') {
-      row = rowOrCoordinate
+      if (column !== undefined) {
+        return this.terrain.hasTileAtCoordinate(new Coordinate(rowOrCoordinate, column))
+      }
     }
     else {
-      row = rowOrCoordinate.getRow()
-      column = rowOrCoordinate.getColumn()
+      return this.terrain.hasTileAtCoordinate(rowOrCoordinate)
     }
-
-    return (
-      row >= 0
-      && row < this.rowCount()
-      && column >= 0
-      && column < this.columnCount()
-    )
+    return undefined
   }
 
   addSquaddie(newSquaddie: Squaddie, coordinate: Coordinate) {
