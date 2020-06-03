@@ -70,11 +70,17 @@ export class BattleSceneBottomLayer {
     graphics.strokeLineShape(new Phaser.Geom.Line(0,  0, 800, 0))
   }
 
-  drawMapLayer() {
-    this.drawRow(0, 3)
-    this.drawRow(1, 3)
-    this.drawRow(2, 3)
-    this.drawRow(3, 3)
+  drawMapLayer(): void {
+    const coordinateAndTilePair = this.battleMap.terrain.getTilesOrderedByCoordinates()
+    coordinateAndTilePair.forEach((coordinateAndTile) => {
+      const coordinateToDraw = Coordinate.newFromLocationKey(coordinateAndTile.locationKey)
+      this.drawTile(coordinateToDraw)
+    })
+  }
+
+  drawTile(coordinate: Coordinate): void {
+    const pixelCoordinates = this.getPixelCoordinates(coordinate.getRow(), coordinate.getColumn())
+    this.scene.physics.add.image(pixelCoordinates[0], pixelCoordinates[1], "sand");
   }
 
   drawRow(row: number, width: number): void {
@@ -119,19 +125,9 @@ export class BattleSceneBottomLayer {
   }
 
   private getPixelCoordinates(row: number, column: number): number[] {
-    const oddRowHorizontalOffset = 32
-    const oddRowVerticalOffset = 16
-
-    let drawX = this.tileWidth;
-    let drawY = 600 - this.rowHeight
-
-    const rowIsOdd = (row % 2 === 1)
-    if (rowIsOdd) {
-      drawX = drawX + oddRowHorizontalOffset
-    }
-
-    drawY = drawY - ((this.rowHeight - oddRowVerticalOffset) * row)
-    drawX = drawX + (column * this.tileWidth)
+    const distanceFromCenterToCorner = this.tileWidth / Math.sqrt(3);
+    const drawX = distanceFromCenterToCorner * (Math.sqrt(3) * column  +  Math.sqrt(3)/2 * row) + this.tileWidth / 2
+    const drawY = (row * this.tileWidth / 4.0 * 3)  + this.tileWidth / 2
     return [drawX, drawY]
   }
 }
