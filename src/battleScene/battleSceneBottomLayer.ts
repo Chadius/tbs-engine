@@ -4,7 +4,6 @@ import {Coordinate} from "../mapMeasurement";
 import {Squaddie} from "../squaddie";
 
 export class BattleSceneBottomLayer {
-  rowHeight = 64
   tileWidth = 64
   scene: Phaser.Scene
   mainLayerBounds = {x: 0, y: 0, width: 800, height: 600}
@@ -19,7 +18,7 @@ export class BattleSceneBottomLayer {
     this.battleMap = new BattleMap(new MapTerrain([
       ['1', '1', '1', '1'],
         ['1', 'X', '1', '1'],
-          ['3', '1', '1', '1'],
+          ['-', '-', 'S', 'X'],
     ]))
 
     this.squaddieSpriteNameByID = new Map<string, string>()
@@ -44,7 +43,11 @@ export class BattleSceneBottomLayer {
   }
 
   preload(): void {
-    this.scene.load.image("sand", "assets/BrownSand.png");
+    this.scene.load.image("sand_tile", "assets/BrownSand.png");
+    this.scene.load.image("wall_tile", "assets/BlackWall.png");
+    this.scene.load.image("sky_tile", "assets/BlueSky.png");
+    this.scene.load.image("road_tile", "assets/GrayRoad.png");
+
     this.scene.load.image("blue_boy", "assets/BlueBoy.png");
     this.scene.load.image("orange_background", "assets/OrangeBackground.png");
   }
@@ -74,22 +77,22 @@ export class BattleSceneBottomLayer {
     const coordinateAndTilePair = this.battleMap.terrain.getTilesOrderedByCoordinates()
     coordinateAndTilePair.forEach((coordinateAndTile) => {
       const coordinateToDraw = Coordinate.newFromLocationKey(coordinateAndTile.locationKey)
-      this.drawTile(coordinateToDraw)
+      this.drawTile(coordinateToDraw, coordinateAndTile.terrain)
     })
   }
 
-  drawTile(coordinate: Coordinate): void {
+  drawTile(coordinate: Coordinate, terrain: string): void {
     const pixelCoordinates = this.getPixelCoordinates(coordinate.getRow(), coordinate.getColumn())
-    this.scene.physics.add.image(pixelCoordinates[0], pixelCoordinates[1], "sand");
-  }
 
-  drawRow(row: number, width: number): void {
-    const coordinates = this.getPixelCoordinates(row, 0)
-    const drawX = coordinates[0]
-    const drawY = coordinates[1]
-    for(let i = 0; i < width; i++) {
-      this.scene.physics.add.image(drawX + (i * this.tileWidth), drawY, "sand");
+    const terrainTypeToTexture = {
+      "1": "sand_tile",
+      "X": "wall_tile",
+      "S" : "sky_tile",
+      "-": "road_tile",
     }
+    const textureToDraw = terrainTypeToTexture[terrain] || "wall_tile";
+
+    this.scene.physics.add.image(pixelCoordinates[0], pixelCoordinates[1], textureToDraw);
   }
 
   setupCamera() {
