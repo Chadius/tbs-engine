@@ -1,19 +1,21 @@
 import {Squaddie} from "./squaddie";
 import {BaseCoordinate, Coordinate} from "./mapMeasurement";
+import {TerrainTile} from "./terrain/terrain";
 
 export class MapTerrain {
-  tilesByLocationKey: Map<string, string>
+  tilesByLocationKey: Map<string, TerrainTile>
   rowCount: number
   columnCount: number
 
   constructor(typeTiles: Array<string[]>) {
-    this.tilesByLocationKey = new Map<string, string> ()
+    this.tilesByLocationKey = new Map<string, TerrainTile> ()
 
     typeTiles.forEach((rowOfTiles, rowIndex) => {
       let columnIndex;
       for(columnIndex = 0; columnIndex < rowOfTiles.length; columnIndex = columnIndex + 1) {
         const coordinateOfTile = new Coordinate(rowIndex, columnIndex)
-        this.tilesByLocationKey.set(coordinateOfTile.getLocationKey(), rowOfTiles[columnIndex])
+        const terrainTile = TerrainTile.newFromNickname(rowOfTiles[columnIndex])
+        this.tilesByLocationKey.set(coordinateOfTile.getLocationKey(), terrainTile)
       }
     })
 
@@ -45,8 +47,8 @@ export class MapTerrain {
     return this.tilesByLocationKey.has(locationKey)
   }
 
-  getTilesOrderedByCoordinates(): Array<{locationKey: string; terrain: string }> {
-    const allTiles = new Array<{locationKey: string; terrain: string }>()
+  getTilesOrderedByCoordinates(): Array<{locationKey: string; terrain: TerrainTile }> {
+    const allTiles = new Array<{locationKey: string; terrain: TerrainTile }>()
 
     let row, column;
     for (row = 0; row < this.getRowCount(); row = row + 1) {

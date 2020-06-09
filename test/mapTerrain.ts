@@ -1,6 +1,7 @@
 import {MapTerrain} from '../src/battleMap'
 import {expect} from 'chai'
-import {Coordinate} from "../src/mapMeasurement";
+import {Coordinate} from "../src/mapMeasurement"
+import {TerrainType} from "../src/terrain/terrain";
 
 describe ('Map Terrain Dimensions', () => {
   it('Knows the number of rows based on the initialization', () => {
@@ -51,18 +52,18 @@ describe ('Map Terrain Dimensions', () => {
     const orderedTiles = mapWithShortRow.getTilesOrderedByCoordinates()
     expect(orderedTiles.length).to.equal(5)
     expect(orderedTiles[0]["locationKey"]).to.equal("0, 0")
-    expect(orderedTiles[0]["terrain"]).to.equal("1")
+    expect(orderedTiles[0]["terrain"].getTerrainType()).to.equal(TerrainType.road)
 
     expect(orderedTiles[1]["locationKey"]).to.equal("0, 1")
-    expect(orderedTiles[1]["terrain"]).to.equal("X")
+    expect(orderedTiles[1]["terrain"].getTerrainType()).to.equal(TerrainType.wall)
 
     expect(orderedTiles[2]["locationKey"]).to.equal("1, 0")
-    expect(orderedTiles[2]["terrain"]).to.equal("S")
+    expect(orderedTiles[2]["terrain"].getTerrainType()).to.equal(TerrainType.sky)
 
     expect(orderedTiles[3]["locationKey"]).to.equal("1, 1")
-    expect(orderedTiles[3]["terrain"]).to.equal("1")
+    expect(orderedTiles[3]["terrain"].getTerrainType()).to.equal(TerrainType.road)
 
     expect(orderedTiles[4]["locationKey"]).to.equal("1, 2")
-    expect(orderedTiles[4]["terrain"]).to.equal("X")
+    expect(orderedTiles[4]["terrain"].getTerrainType()).to.equal(TerrainType.wall)
   })
 })
