@@ -2,16 +2,24 @@ import "phaser";
 import {BattleMap, MapTerrain} from "../battleMap";
 import {Coordinate} from "../mapMeasurement";
 import {Squaddie} from "../squaddie";
-import {TerrainTile} from "../terrain/terrain";
 import {GraphicAssets} from "../assetMapping/graphicAssets";
+import Image = Phaser.GameObjects.Image;
 
 export class BattleSceneBottomLayer {
+  BACKGROUND_LAYER_DEPTH = -10
+  TERRAIN_LAYER_DEPTH = 10
+  SQUADDIE_LAYER_DEPTH = 20
+
   tileWidth = 64
   scene: Phaser.Scene
   mainLayerBounds = {x: 0, y: 0, width: 800, height: 600}
   battleMap: BattleMap
   squaddieSpriteNameByID: Map<string, string>
   imageAssets: GraphicAssets
+
+  backgroundImage: Image
+  squaddieSpritesByKey: Map<string, Image>
+  mapTilesByKey: Map<string, Image>
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
@@ -25,6 +33,9 @@ export class BattleSceneBottomLayer {
     ]))
 
     this.squaddieSpriteNameByID = new Map<string, string>()
+
+    this.squaddieSpritesByKey = new Map<string, Image>()
+    this.mapTilesByKey = new Map<string, Image>()
 
     this.battleMap.addSquaddie(
       new Squaddie('soldier0', 5),
@@ -57,52 +68,75 @@ export class BattleSceneBottomLayer {
 
     this.imageAssets = new GraphicAssets(imagesByAssetName)
     Object.entries(imagesByAssetName).forEach(pair => {
-      this.scene.load.image(pair[0], pair[1]);
+      this.scene.load.image(pair[0], pair[1])
     })
   }
 
   create(): void {
+    this.createMapLayerToDrawWith()
+    this.createSquaddieSprites()
+    this.createBackgroundLayer()
     this.setupCamera()
+  }
+
+  createBackgroundLayer(): void {
+    this.backgroundImage = this.scene.physics.add.image(400, 300, "orange_background")
+    this.backgroundImage.setDepth(this.BACKGROUND_LAYER_DEPTH)
+  }
+
+  createSquaddieSprites(): void {
+    const coordinatesOfAllSquaddiesByID = this.battleMap.getCoordinatesOfAllSquaddiesByID()
+
+    coordinatesOfAllSquaddiesByID.forEach((squaddieCoordinate, squaddieId) => {
+      const spriteToDraw = this.squaddieSpriteNameByID.get(squaddieId)
+      const coordinatesToDrawSquaddieAt = this.getPixelCoordinates(squaddieCoordinate.getRow(), squaddieCoordinate.getColumn())
+
+      const squaddieSprite = this.scene.physics.add.image(coordinatesToDrawSquaddieAt[0], coordinatesToDrawSquaddieAt[1], spriteToDraw)
+      squaddieSprite.setDepth(this.SQUADDIE_LAYER_DEPTH)
+      this.squaddieSpritesByKey.set(
+        squaddieId,
+        squaddieSprite
+      )
+    })
+  }
+
+  private createMapLayerToDrawWith(): void {
+    const coordinateAndTilePair = this.battleMap.terrain.getTilesOrderedByCoordinates()
+    coordinateAndTilePair.forEach((coordinateAndTile) => {
+      const coordinateToDraw = Coordinate.newFromLocationKey(coordinateAndTile.locationKey)
+      const pixelCoordinates = this.getPixelCoordinates(coordinateToDraw.getRow(), coordinateToDraw.getColumn())
+
+      const terrainTypeToTexture = {
+        "sand": "sand_tile",
+        "wall": "wall_tile",
+        "sky" : "sky_tile",
+        "road": "road_tile",
+      }
+
+      const textureToDraw = terrainTypeToTexture[coordinateAndTile.terrain.getName()] || "wall_tile"
+      const tileKey = `mapTile${coordinateToDraw.getRow()} ${coordinateToDraw.getColumn()}`
+      const mapTileImage = this.scene.physics.add.image(pixelCoordinates[0], pixelCoordinates[1], textureToDraw)
+      mapTileImage.setDepth(this.TERRAIN_LAYER_DEPTH)
+      this.mapTilesByKey.set(
+        tileKey,
+        mapTileImage
+      )
+    })
   }
 
   update(time: number, delta: number): void {
     this.drawBackgroundLayer()
-    this.drawMapLayer()
     this.drawAllSquaddies()
   }
 
   drawBackgroundLayer() {
-    const backgroundImage = this.scene.physics.add.image(400, 300, "orange_background")
-    backgroundImage.setDisplaySize(800, 600)
+    this.backgroundImage.setDisplaySize(800, 600)
 
     const graphics = this.scene.add.graphics({ lineStyle: { width: 4, color: 0x010101 } })
     graphics.strokeLineShape(new Phaser.Geom.Line(0, 600, 0, 0))
     graphics.strokeLineShape(new Phaser.Geom.Line(0, 600, 800, 600))
     graphics.strokeLineShape(new Phaser.Geom.Line(800, 600, 800, 0))
     graphics.strokeLineShape(new Phaser.Geom.Line(0,  0, 800, 0))
-  }
-
-  drawMapLayer(): void {
-    const coordinateAndTilePair = this.battleMap.terrain.getTilesOrderedByCoordinates()
-    coordinateAndTilePair.forEach((coordinateAndTile) => {
-      const coordinateToDraw = Coordinate.newFromLocationKey(coordinateAndTile.locationKey)
-      this.drawTile(coordinateToDraw, coordinateAndTile.terrain)
-    })
-  }
-
-  drawTile(coordinate: Coordinate, terrain: TerrainTile): void {
-    const pixelCoordinates = this.getPixelCoordinates(coordinate.getRow(), coordinate.getColumn())
-
-    const terrainTypeToTexture = {
-      "sand": "sand_tile",
-      "wall": "wall_tile",
-      "sky" : "sky_tile",
-      "road": "road_tile",
-    }
-
-    const textureToDraw = terrainTypeToTexture[terrain.getName()] || "wall_tile";
-
-    this.scene.physics.add.image(pixelCoordinates[0], pixelCoordinates[1], textureToDraw);
   }
 
   setupCamera() {
@@ -126,15 +160,11 @@ export class BattleSceneBottomLayer {
     })
   }
 
-
   private drawSquaddie(squaddie: Squaddie, row: number, column: number) {
     const coordinates = this.getPixelCoordinates(row, column)
-
-    const graphics = this.scene.add.graphics({ lineStyle: { width: 4, color: 0x010101 } })
-    graphics.strokeEllipse(coordinates[0], coordinates[1], 20, 20, 32)
-
-    const spriteID = this.squaddieSpriteNameByID.get(squaddie.getId())
-    this.scene.physics.add.image(coordinates[0], coordinates[1], spriteID);
+    const squaddieSprite = this.squaddieSpritesByKey.get(squaddie.getId())
+    squaddieSprite.x = coordinates[0]
+    squaddieSprite.y = coordinates[1]
   }
 
   private getPixelCoordinates(row: number, column: number): number[] {
