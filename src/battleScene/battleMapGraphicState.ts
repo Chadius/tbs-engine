@@ -10,14 +10,36 @@ export class BattleMapGraphicState {
     this.battleMap = parameters.battleMap
   }
 
-  getTileCoordinateAtWorldLocation(worldX: number, worldY: number): Coordinate {
-    const distanceFromCenterToCorner = this.tileSize / Math.sqrt(3);
-    const worldXNoOffset = worldX - (this.tileSize / 2)
-    const worldYNoOffset = worldY - (this.tileSize / 2)
+  getMeasurements(): {
+    horizontalOffset: number;
+    verticalOffset: number;
+    distanceFromCenterToCorner: number;
+    perRowMovementDown: number;
+    perRowMovementRight: number;
+    perColumnMovementRight: number;
+  } {
+    const distanceFromCenterToCorner = this.tileSize / Math.sqrt(3)
+    return {
+      horizontalOffset: this.tileSize / 2,
+      verticalOffset: this.tileSize / 2,
+      distanceFromCenterToCorner: distanceFromCenterToCorner,
+      perRowMovementDown: 3 * distanceFromCenterToCorner / 2,
+      perRowMovementRight: this.tileSize / 2.0,
+      perColumnMovementRight: this.tileSize,
+    }
+  }
 
-    const perRowMovementDown = 3 * distanceFromCenterToCorner / 2
-    const perRowMovementRight = distanceFromCenterToCorner / 2.0
-    const perColumnMovementRight = this.tileSize
+  getTileCoordinateAtWorldLocation(worldX: number, worldY: number): Coordinate {
+    const {
+      horizontalOffset,
+      verticalOffset,
+      perRowMovementRight,
+      perRowMovementDown,
+      perColumnMovementRight
+    } = this.getMeasurements()
+
+    const worldXNoOffset = worldX - horizontalOffset
+    const worldYNoOffset = worldY - verticalOffset
 
     const rowFraction = worldYNoOffset / perRowMovementDown
 
@@ -31,5 +53,22 @@ export class BattleMapGraphicState {
     }
 
     return undefined
+  }
+
+  getPixelCoordinates(coordinate: Coordinate): number[] {
+    const {
+      horizontalOffset,
+      verticalOffset,
+      perRowMovementRight,
+      perRowMovementDown,
+      perColumnMovementRight
+    } = this.getMeasurements()
+
+    const row = coordinate.getRow()
+    const column = coordinate.getColumn()
+
+    const drawX = (perColumnMovementRight * column) + (perRowMovementRight * row) + horizontalOffset
+    const drawY = (row * perRowMovementDown) + verticalOffset
+    return [drawX, drawY]
   }
 }

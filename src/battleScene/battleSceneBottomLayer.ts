@@ -4,6 +4,7 @@ import {Coordinate} from "../mapMeasurement";
 import {Squaddie} from "../squaddie";
 import {GraphicAssets} from "../assetMapping/graphicAssets";
 import Image = Phaser.GameObjects.Image;
+import {BattleMapGraphicState} from "./battleMapGraphicState";
 
 export class BattleSceneBottomLayer {
   BACKGROUND_LAYER_DEPTH = -10
@@ -13,13 +14,16 @@ export class BattleSceneBottomLayer {
   tileWidth = 64
   scene: Phaser.Scene
   mainLayerBounds = {x: 0, y: 0, width: 800, height: 600}
-  battleMap: BattleMap
   squaddieSpriteNameByID: Map<string, string>
   imageAssets: GraphicAssets
 
   backgroundImage: Image
   squaddieSpritesByKey: Map<string, Image>
   mapTilesByKey: Map<string, Image>
+
+
+  battleMap: BattleMap
+  battleMapGraphicState: BattleMapGraphicState
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
@@ -31,6 +35,7 @@ export class BattleSceneBottomLayer {
         ['1', 'X', '1', '1'],
           ['3', '3', 'S', 'X'],
     ]))
+    this.battleMapGraphicState = new BattleMapGraphicState({battleMap: this.battleMap, tileSize: this.tileWidth})
 
     this.squaddieSpriteNameByID = new Map<string, string>()
 
@@ -89,7 +94,7 @@ export class BattleSceneBottomLayer {
 
     coordinatesOfAllSquaddiesByID.forEach((squaddieCoordinate, squaddieId) => {
       const spriteToDraw = this.squaddieSpriteNameByID.get(squaddieId)
-      const coordinatesToDrawSquaddieAt = this.getPixelCoordinates(squaddieCoordinate.getRow(), squaddieCoordinate.getColumn())
+      const coordinatesToDrawSquaddieAt = this.battleMapGraphicState.getPixelCoordinates(squaddieCoordinate)
 
       const squaddieSprite = this.scene.physics.add.image(coordinatesToDrawSquaddieAt[0], coordinatesToDrawSquaddieAt[1], spriteToDraw)
       squaddieSprite.setDepth(this.SQUADDIE_LAYER_DEPTH)
@@ -104,7 +109,7 @@ export class BattleSceneBottomLayer {
     const coordinateAndTilePair = this.battleMap.terrain.getTilesOrderedByCoordinates()
     coordinateAndTilePair.forEach((coordinateAndTile) => {
       const coordinateToDraw = Coordinate.newFromLocationKey(coordinateAndTile.locationKey)
-      const pixelCoordinates = this.getPixelCoordinates(coordinateToDraw.getRow(), coordinateToDraw.getColumn())
+      const pixelCoordinates = this.battleMapGraphicState.getPixelCoordinates(coordinateToDraw)
 
       const terrainTypeToTexture = {
         "sand": "sand_tile",
@@ -124,6 +129,18 @@ export class BattleSceneBottomLayer {
     })
   }
 
+  setupCamera() {
+    this.scene.cameras.main.setScroll(0, 0)
+    this.scene.cameras.main.setZoom(1.0)
+
+    this.scene.cameras.main.setBounds(
+      this.mainLayerBounds.x,
+      this.mainLayerBounds.y,
+      this.mainLayerBounds.width,
+      this.mainLayerBounds.height
+    )
+  }
+
   update(time: number, delta: number): void {
     this.drawBackgroundLayer()
     this.drawAllSquaddies()
@@ -139,18 +156,6 @@ export class BattleSceneBottomLayer {
     graphics.strokeLineShape(new Phaser.Geom.Line(0,  0, 800, 0))
   }
 
-  setupCamera() {
-    this.scene.cameras.main.setScroll(0, 0)
-    this.scene.cameras.main.setZoom(1.0)
-
-    this.scene.cameras.main.setBounds(
-      this.mainLayerBounds.x,
-      this.mainLayerBounds.y,
-      this.mainLayerBounds.width,
-      this.mainLayerBounds.height
-    )
-  }
-
   private drawAllSquaddies() {
     const coordinatesOfAllSquaddiesByID = this.battleMap.getCoordinatesOfAllSquaddiesByID()
 
@@ -161,16 +166,9 @@ export class BattleSceneBottomLayer {
   }
 
   private drawSquaddie(squaddie: Squaddie, row: number, column: number) {
-    const coordinates = this.getPixelCoordinates(row, column)
+    const coordinates = this.battleMapGraphicState.getPixelCoordinates(new Coordinate(row, column))
     const squaddieSprite = this.squaddieSpritesByKey.get(squaddie.getId())
     squaddieSprite.x = coordinates[0]
     squaddieSprite.y = coordinates[1]
-  }
-
-  private getPixelCoordinates(row: number, column: number): number[] {
-    const distanceFromCenterToCorner = this.tileWidth / Math.sqrt(3);
-    const drawX = distanceFromCenterToCorner * (Math.sqrt(3) * column  +  Math.sqrt(3)/2 * row) + this.tileWidth / 2
-    const drawY = (row * this.tileWidth / 4.0 * 3)  + this.tileWidth / 2
-    return [drawX, drawY]
   }
 }

@@ -39,8 +39,9 @@ describe("clicking on a map", () => {
   })
 })
 
-describe("Can look at lines", () => {
+describe("Positions based on coordinate", () => {
   let battleMapGraphicState
+  let tileSize
 
   beforeEach(() => {
     const battleMap = new BattleMap(new MapTerrain([
@@ -49,9 +50,30 @@ describe("Can look at lines", () => {
       ['3', '3', 'S', 'X'],
     ]))
 
+    tileSize = 64
     battleMapGraphicState = new BattleMapGraphicState({
       battleMap: battleMap,
-      tileSize: 64
+      tileSize: tileSize
     })
+  })
+
+  it("Knows the center of tile positions", () => {
+    const distanceFromCenterToCorner = tileSize / Math.sqrt(3);
+    const perRowMovementDown = 3 * distanceFromCenterToCorner / 2
+    const perRowMovementRight = tileSize / 2.0
+    const perColumnMovementRight = tileSize
+
+    expect(battleMapGraphicState.getPixelCoordinates(new Coordinate(0, 0))).to.eql([
+      tileSize / 2.0,
+      tileSize / 2.0
+    ])
+    expect(battleMapGraphicState.getPixelCoordinates(new Coordinate(0, 1))).to.eql([
+      perColumnMovementRight + tileSize / 2.0,
+      tileSize / 2.0
+    ])
+    expect(battleMapGraphicState.getPixelCoordinates(new Coordinate(1, 0))).to.eql([
+      perRowMovementRight + tileSize / 2.0,
+      perRowMovementDown + tileSize / 2.0
+    ])
   })
 })
