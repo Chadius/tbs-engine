@@ -21,7 +21,6 @@ export class BattleSceneBottomLayer {
   squaddieSpritesByKey: Map<string, Image>
   mapTilesByKey: Map<string, Image>
 
-
   battleMap: BattleMap
   battleMapGraphicState: BattleMapGraphicState
 
@@ -35,7 +34,7 @@ export class BattleSceneBottomLayer {
         ['1', 'X', '1', '1'],
           ['3', '3', 'S', 'X'],
     ]))
-    this.battleMapGraphicState = new BattleMapGraphicState({battleMap: this.battleMap, tileSize: this.tileWidth})
+    this.battleMapGraphicState = new BattleMapGraphicState({battleMap: this.battleMap, tileWidth: this.tileWidth})
 
     this.squaddieSpriteNameByID = new Map<string, string>()
 

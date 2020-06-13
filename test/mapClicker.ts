@@ -16,7 +16,7 @@ describe("clicking on a map", () => {
 
     battleMapGraphicState = new BattleMapGraphicState({
       battleMap: battleMap,
-      tileSize: 64
+      tileWidth: 64
     })
   })
 
@@ -27,7 +27,7 @@ describe("clicking on a map", () => {
     expect(battleMapGraphicState.getTileCoordinateAtWorldLocation(0, 0)).to.be.undefined
   })
 
-  it('knows which tile you clicked on', () => {
+  it('knows you clicked on the origin tile', () => {
     expect(battleMapGraphicState.getTileCoordinateAtWorldLocation(32, 32)).to.eql(new Coordinate(0, 0))
     expect(battleMapGraphicState.getTileCoordinateAtWorldLocation(32, 31)).to.eql(new Coordinate(0, 0))
     expect(battleMapGraphicState.getTileCoordinateAtWorldLocation(32, 1)).to.eql(new Coordinate(0, 0))
@@ -37,11 +37,18 @@ describe("clicking on a map", () => {
     expect(battleMapGraphicState.getTileCoordinateAtWorldLocation(56, 46)).to.eql(new Coordinate(0, 0))
     expect(battleMapGraphicState.getTileCoordinateAtWorldLocation(56, 24)).to.eql(new Coordinate(0, 0))
   })
+
+  it('knows you clicked on other tiles', () => {
+    expect(battleMapGraphicState.getTileCoordinateAtWorldLocation(38, 90)).to.eql(new Coordinate(1, 0))
+    expect(battleMapGraphicState.getTileCoordinateAtWorldLocation(112, 55)).to.eql(new Coordinate(0, 1))
+    expect(battleMapGraphicState.getTileCoordinateAtWorldLocation(111, 106)).to.eql(new Coordinate(1, 1))
+    expect(battleMapGraphicState.getTileCoordinateAtWorldLocation(308, 164)).to.eql(new Coordinate(2, 3))
+  })
 })
 
 describe("Positions based on coordinate", () => {
   let battleMapGraphicState
-  let tileSize
+  let tileWidth
 
   beforeEach(() => {
     const battleMap = new BattleMap(new MapTerrain([
@@ -50,30 +57,30 @@ describe("Positions based on coordinate", () => {
       ['3', '3', 'S', 'X'],
     ]))
 
-    tileSize = 64
+    tileWidth = 64
     battleMapGraphicState = new BattleMapGraphicState({
       battleMap: battleMap,
-      tileSize: tileSize
+      tileWidth: tileWidth
     })
   })
 
   it("Knows the center of tile positions", () => {
-    const distanceFromCenterToCorner = tileSize / Math.sqrt(3);
+    const distanceFromCenterToCorner = tileWidth / Math.sqrt(3);
     const perRowMovementDown = 3 * distanceFromCenterToCorner / 2
-    const perRowMovementRight = tileSize / 2.0
-    const perColumnMovementRight = tileSize
+    const perRowMovementRight = tileWidth / 2.0
+    const perColumnMovementRight = tileWidth
 
     expect(battleMapGraphicState.getPixelCoordinates(new Coordinate(0, 0))).to.eql([
-      tileSize / 2.0,
-      tileSize / 2.0
+      tileWidth / 2.0,
+      tileWidth / 2.0
     ])
     expect(battleMapGraphicState.getPixelCoordinates(new Coordinate(0, 1))).to.eql([
-      perColumnMovementRight + tileSize / 2.0,
-      tileSize / 2.0
+      perColumnMovementRight + tileWidth / 2.0,
+      tileWidth / 2.0
     ])
     expect(battleMapGraphicState.getPixelCoordinates(new Coordinate(1, 0))).to.eql([
-      perRowMovementRight + tileSize / 2.0,
-      perRowMovementDown + tileSize / 2.0
+      perRowMovementRight + tileWidth / 2.0,
+      perRowMovementDown + tileWidth / 2.0
     ])
   })
 })

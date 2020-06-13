@@ -2,11 +2,11 @@ import {BattleMap} from "../battleMap";
 import {Coordinate} from "../mapMeasurement";
 
 export class BattleMapGraphicState {
-  tileSize: number
+  tileWidth: number
   battleMap: BattleMap
 
-  constructor(parameters: { tileSize: number; battleMap: BattleMap }) {
-    this.tileSize = parameters.tileSize
+  constructor(parameters: { tileWidth: number; battleMap: BattleMap }) {
+    this.tileWidth = parameters.tileWidth
     this.battleMap = parameters.battleMap
   }
 
@@ -18,14 +18,14 @@ export class BattleMapGraphicState {
     perRowMovementRight: number;
     perColumnMovementRight: number;
   } {
-    const distanceFromCenterToCorner = this.tileSize / Math.sqrt(3)
+    const distanceFromCenterToCorner = this.tileWidth / Math.sqrt(3)
     return {
-      horizontalOffset: this.tileSize / 2,
-      verticalOffset: this.tileSize / 2,
+      horizontalOffset: this.tileWidth / 2,
+      verticalOffset: this.tileWidth / 2,
       distanceFromCenterToCorner: distanceFromCenterToCorner,
       perRowMovementDown: 3 * distanceFromCenterToCorner / 2,
-      perRowMovementRight: this.tileSize / 2.0,
-      perColumnMovementRight: this.tileSize,
+      perRowMovementRight: this.tileWidth / 2.0,
+      perColumnMovementRight: this.tileWidth,
     }
   }
 
