@@ -6,6 +6,8 @@ export interface BaseCoordinate {
   getColumn(): number;
   getLocationKey(): string;
   toCubeCoordinates(): {x: number; y: number; z: number};
+  roundToNearestHexCoordinates(): BaseCoordinate;
+  roundToNearestCubeCoordinates(cube: {x: number; y: number; z: number}): {x: number; y: number; z: number};
 }
 
 export class Coordinate implements BaseCoordinate{
@@ -54,8 +56,16 @@ export class Coordinate implements BaseCoordinate{
   }
 
   static newFromCubeCoordinates(x: number, y: number, z: number): Coordinate {
-    const row = y
-    const column = x
+    let row = y
+    let column = x
+
+    if (row === -0) {
+      row = 0
+    }
+    if (column === -0) {
+      column = 0
+    }
+
     return new Coordinate(row,column)
   }
 
@@ -99,6 +109,34 @@ export class Coordinate implements BaseCoordinate{
     return [0,1,2,3,4,5].map((directionIndex) => {
       return this.add(axialDirections[directionIndex])
     })
+  }
+
+  roundToNearestHexCoordinates(): Coordinate {
+    const cubeCoords = this.toCubeCoordinates()
+    const roundedCubeCoords = this.roundToNearestCubeCoordinates(cubeCoords)
+    return Coordinate.newFromCubeCoordinates(roundedCubeCoords.x, roundedCubeCoords.y, roundedCubeCoords.z)
+  }
+
+  roundToNearestCubeCoordinates(cube: {x: number; y: number; z: number}): {x: number; y: number; z: number} {
+    let rx = Math.round(cube.x)
+    let ry = Math.round(cube.y)
+    let rz = Math.round(cube.z)
+
+    const xDiff = Math.abs(rx - cube.x)
+    const yDiff = Math.abs(ry - cube.y)
+    const zDiff= Math.abs(rz - cube.z)
+
+    if ((xDiff > yDiff) && (xDiff > zDiff)) {
+      rx = -ry - rz
+    }
+    else if (yDiff > zDiff) {
+      ry = -rx - rz
+    }
+    else {
+      rz = -rx - ry
+    }
+
+    return {x: rx, y: ry, z: rz}
   }
 }
 
