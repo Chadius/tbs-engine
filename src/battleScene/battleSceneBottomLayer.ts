@@ -24,6 +24,8 @@ export class BattleSceneBottomLayer {
   battleMap: BattleMap
   battleMapGraphicState: BattleMapGraphicState
 
+  terrainCameraBounds = {x: -205, y: 0, width: 200, height: 123, xMargin: 20, yMargin: 10, xPadding: 5, yPadding: 5}
+
   constructor(scene: Phaser.Scene) {
     this.scene = scene
   }
@@ -80,7 +82,7 @@ export class BattleSceneBottomLayer {
     this.createMapLayerToDrawWith()
     this.createSquaddieSprites()
     this.createBackgroundLayer()
-    this.setupCamera()
+    this.setupCameras()
   }
 
   createBackgroundLayer(): void {
@@ -128,7 +130,7 @@ export class BattleSceneBottomLayer {
     })
   }
 
-  setupCamera() {
+  setupCameras() {
     this.scene.cameras.main.setScroll(0, 0)
     this.scene.cameras.main.setZoom(1.0)
 
@@ -138,11 +140,14 @@ export class BattleSceneBottomLayer {
       this.mainLayerBounds.width,
       this.mainLayerBounds.height
     )
+
+    this.createTerrainWindowCamera()
   }
 
   update(time: number, delta: number): void {
     this.drawBackgroundLayer()
     this.drawAllSquaddies()
+    this.drawTerrainWindow()
   }
 
   drawBackgroundLayer() {
@@ -169,5 +174,32 @@ export class BattleSceneBottomLayer {
     const squaddieSprite = this.squaddieSpritesByKey.get(squaddie.getId())
     squaddieSprite.x = coordinates[0]
     squaddieSprite.y = coordinates[1]
+  }
+
+  private createTerrainWindowCamera() {
+    this.scene.cameras.add(
+      this.mainLayerBounds.width - this.terrainCameraBounds.width - this.terrainCameraBounds.xMargin,
+      this.mainLayerBounds.height - this.terrainCameraBounds.height - this.terrainCameraBounds.yMargin,
+      this.terrainCameraBounds.width,
+      this.terrainCameraBounds.height,
+      false,
+      "terrain window"
+    )
+    const cam = this.scene.cameras.getCamera("terrain window")
+    cam.setScroll(this.terrainCameraBounds.x, this.terrainCameraBounds.y)
+  }
+
+  private drawTerrainWindow() {
+    const graphics = this.scene.add.graphics({ lineStyle: { width: 40, color: 0x010101 } })
+    const left = this.terrainCameraBounds.x + this.terrainCameraBounds.xPadding
+    const width = this.terrainCameraBounds.width - (2 * this.terrainCameraBounds.xPadding)
+    const top = this.terrainCameraBounds.y + this.terrainCameraBounds.yPadding
+    const height = this.terrainCameraBounds.height - (2 * this.terrainCameraBounds.yPadding)
+
+    const rect = new Phaser.Geom.Rectangle(left, top, width, height)
+    graphics.fillStyle(0x8e8e8e, 1)
+    graphics.fillRectShape(rect);
+    graphics.lineStyle(1, 0x010101, 1)
+    graphics.strokeRectShape(rect);
   }
 }
