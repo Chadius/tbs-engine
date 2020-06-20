@@ -24,7 +24,12 @@ export class BattleSceneBottomLayer {
   battleMap: BattleMap
   battleMapGraphicState: BattleMapGraphicState
 
+  terrainCamera: Phaser.Cameras.Scene2D.Camera
   terrainCameraBounds = {x: -205, y: 0, width: 200, height: 123, xMargin: 20, yMargin: 10, xPadding: 5, yPadding: 5}
+  terrainCameraOrigin = {x: 600, y: 780}
+  terrainWindowTextGraphic: Phaser.GameObjects.Text
+  terrainWindowBackground: Phaser.GameObjects.Rectangle
+  terrainWindowText: string
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
@@ -60,6 +65,8 @@ export class BattleSceneBottomLayer {
       new Coordinate(1, 2)
     )
     this.squaddieSpriteNameByID.set('soldier2', 'blue_boy')
+
+    this.terrainWindowText = ""
   }
 
   preload(): void {
@@ -177,29 +184,72 @@ export class BattleSceneBottomLayer {
   }
 
   private createTerrainWindowCamera() {
-    this.scene.cameras.add(
-      this.mainLayerBounds.width - this.terrainCameraBounds.width - this.terrainCameraBounds.xMargin,
-      this.mainLayerBounds.height - this.terrainCameraBounds.height - this.terrainCameraBounds.yMargin,
+    this.terrainCameraOrigin.x = this.mainLayerBounds.width - this.terrainCameraBounds.width - this.terrainCameraBounds.xMargin
+    this.terrainCameraOrigin.y = this.mainLayerBounds.height - this.terrainCameraBounds.height - this.terrainCameraBounds.yMargin
+    this.terrainCamera = new Phaser.Cameras.Scene2D.Camera(
+      this.terrainCameraOrigin.x,
+      this.terrainCameraOrigin.y,
       this.terrainCameraBounds.width,
       this.terrainCameraBounds.height,
-      false,
-      "terrain window"
     )
-    const cam = this.scene.cameras.getCamera("terrain window")
-    cam.setScroll(this.terrainCameraBounds.x, this.terrainCameraBounds.y)
-  }
+    this.terrainCamera.name = "terrain window"
+    this.terrainCamera.setScroll(this.terrainCameraBounds.x, this.terrainCameraBounds.y)
+    this.terrainCamera.setViewport(this.terrainCameraBounds.x, this.terrainCameraBounds.y, this.terrainCameraBounds.width, this.terrainCameraBounds.height)
+    this.terrainCamera.setPosition(this.terrainCameraOrigin.x, this.terrainCameraOrigin.y)
+    this.scene.cameras.addExisting(this.terrainCamera, false)
 
-  private drawTerrainWindow() {
-    const graphics = this.scene.add.graphics({ lineStyle: { width: 40, color: 0x010101 } })
     const left = this.terrainCameraBounds.x + this.terrainCameraBounds.xPadding
     const width = this.terrainCameraBounds.width - (2 * this.terrainCameraBounds.xPadding)
+    const centerX = this.terrainCameraBounds.x + this.terrainCameraBounds.width / 2
+    const centerY = this.terrainCameraBounds.y + this.terrainCameraBounds.height / 2
     const top = this.terrainCameraBounds.y + this.terrainCameraBounds.yPadding
     const height = this.terrainCameraBounds.height - (2 * this.terrainCameraBounds.yPadding)
 
-    const rect = new Phaser.Geom.Rectangle(left, top, width, height)
-    graphics.fillStyle(0x8e8e8e, 1)
-    graphics.fillRectShape(rect);
-    graphics.lineStyle(1, 0x010101, 1)
-    graphics.strokeRectShape(rect);
+    this.terrainWindowBackground = new Phaser.GameObjects.Rectangle(this.scene, centerX, centerY, width, height, 0x8e8e8e, 1)
+    this.terrainWindowBackground.lineWidth = 4
+    this.terrainWindowBackground.strokeColor = 0x010101
+    this.terrainWindowBackground.strokeAlpha = 1
+    this.terrainWindowBackground.isStroked = true
+    this.terrainWindowBackground.setDepth(this.TERRAIN_LAYER_DEPTH)
+
+    this.terrainWindowTextGraphic = new Phaser.GameObjects.Text(this.scene, left, top, this.terrainWindowText, { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' })
+    this.terrainWindowTextGraphic.setDepth(this.TERRAIN_LAYER_DEPTH + 1)
+
+    this.scene.add.existing(this.terrainWindowBackground)
+    this.scene.add.existing(this.terrainWindowTextGraphic)
+  }
+
+  private drawTerrainWindow() {
+    if (this.terrainCamera.visible && !this.terrainWindowText) {
+      this.terrainCamera.setVisible(false)
+      this.terrainWindowText = "I LIVE"
+      return
+    }
+    else if(!this.terrainCamera.visible && this.terrainWindowText) {
+      this.terrainCamera.setVisible(true)
+      this.terrainWindowTextGraphic.setText(this.terrainWindowText)
+    }
+
+    const mouseX = this.scene.input.mousePointer.x
+    const mouseY = this.scene.input.mousePointer.y
+
+    const width = this.terrainCameraBounds.width - (2 * this.terrainCameraBounds.xPadding)
+    const height = this.terrainCameraBounds.height - (2 * this.terrainCameraBounds.yPadding)
+
+    if (
+      mouseX >= this.terrainCameraOrigin.x &&
+      mouseX <= this.terrainCameraOrigin.x + width &&
+      mouseY >= this.terrainCameraOrigin.y &&
+      mouseY <= this.terrainCameraOrigin.y + height
+    ) {
+      if (this.terrainCameraOrigin.x < 400) {
+        this.terrainCameraOrigin.x = this.mainLayerBounds.width - this.terrainCameraBounds.width - this.terrainCameraBounds.xMargin
+      }
+      else {
+        this.terrainCameraOrigin.x = 20
+      }
+
+      this.terrainCamera.setPosition(this.terrainCameraOrigin.x, this.terrainCameraOrigin.y)
+    }
   }
 }
