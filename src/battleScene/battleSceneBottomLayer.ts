@@ -220,18 +220,27 @@ export class BattleSceneBottomLayer {
   }
 
   private drawTerrainWindow() {
+    const mouseX = this.scene.input.mousePointer.x
+    const mouseY = this.scene.input.mousePointer.y
+    if (this.scene.input.activePointer.isDown) {
+      const clickedCoordinate = this.battleMapGraphicState.getTileCoordinateAtWorldLocation(mouseX, mouseY)
+      if (clickedCoordinate) {
+        this.terrainWindowText = `${clickedCoordinate.getRow()}, ${clickedCoordinate.getColumn()}`
+      }
+      else {
+        this.terrainWindowText = ""
+      }
+      this.terrainWindowTextGraphic.setText(this.terrainWindowText)
+    }
+
     if (this.terrainCamera.visible && !this.terrainWindowText) {
       this.terrainCamera.setVisible(false)
-      this.terrainWindowText = "I LIVE"
       return
     }
     else if(!this.terrainCamera.visible && this.terrainWindowText) {
       this.terrainCamera.setVisible(true)
       this.terrainWindowTextGraphic.setText(this.terrainWindowText)
     }
-
-    const mouseX = this.scene.input.mousePointer.x
-    const mouseY = this.scene.input.mousePointer.y
 
     const width = this.terrainCameraBounds.width - (2 * this.terrainCameraBounds.xPadding)
     const height = this.terrainCameraBounds.height - (2 * this.terrainCameraBounds.yPadding)
