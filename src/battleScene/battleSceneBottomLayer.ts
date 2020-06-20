@@ -5,6 +5,7 @@ import {Squaddie} from "../squaddie";
 import {GraphicAssets} from "../assetMapping/graphicAssets";
 import Image = Phaser.GameObjects.Image;
 import {BattleMapGraphicState} from "./battleMapGraphicState";
+import {TerrainWindow} from "./terrainWindow";
 
 export class BattleSceneBottomLayer {
   BACKGROUND_LAYER_DEPTH = -10
@@ -24,15 +25,11 @@ export class BattleSceneBottomLayer {
   battleMap: BattleMap
   battleMapGraphicState: BattleMapGraphicState
 
-  terrainCamera: Phaser.Cameras.Scene2D.Camera
-  terrainCameraBounds = {x: -205, y: 0, width: 200, height: 123, xMargin: 20, yMargin: 10, xPadding: 5, yPadding: 5}
-  terrainCameraOrigin = {x: 600, y: 780}
-  terrainWindowTextGraphic: Phaser.GameObjects.Text
-  terrainWindowBackground: Phaser.GameObjects.Rectangle
-  terrainWindowText: string
+  terrainWindow: TerrainWindow
 
   constructor(scene: Phaser.Scene) {
     this.scene = scene
+    this.terrainWindow = new TerrainWindow()
   }
 
   init(params: any): void {
@@ -66,7 +63,7 @@ export class BattleSceneBottomLayer {
     )
     this.squaddieSpriteNameByID.set('soldier2', 'blue_boy')
 
-    this.terrainWindowText = ""
+    this.terrainWindow.init(params)
   }
 
   preload(): void {
@@ -148,13 +145,21 @@ export class BattleSceneBottomLayer {
       this.mainLayerBounds.height
     )
 
-    this.createTerrainWindowCamera()
+    this.terrainWindow.createTerrainWindowCamera(this.mainLayerBounds, this.scene, this.TERRAIN_LAYER_DEPTH)
   }
 
   update(time: number, delta: number): void {
     this.drawBackgroundLayer()
     this.drawAllSquaddies()
-    this.drawTerrainWindow()
+    this.terrainWindow.drawTerrainWindow(
+      {
+        x: this.scene.input.mousePointer.x,
+        y: this.scene.input.mousePointer.y,
+        isDown: this.scene.input.activePointer.isDown
+      },
+      this.battleMapGraphicState,
+      this.mainLayerBounds.width
+    )
   }
 
   drawBackgroundLayer() {
@@ -181,84 +186,5 @@ export class BattleSceneBottomLayer {
     const squaddieSprite = this.squaddieSpritesByKey.get(squaddie.getId())
     squaddieSprite.x = coordinates[0]
     squaddieSprite.y = coordinates[1]
-  }
-
-  private createTerrainWindowCamera() {
-    this.terrainCameraOrigin.x = this.mainLayerBounds.width - this.terrainCameraBounds.width - this.terrainCameraBounds.xMargin
-    this.terrainCameraOrigin.y = this.mainLayerBounds.height - this.terrainCameraBounds.height - this.terrainCameraBounds.yMargin
-    this.terrainCamera = new Phaser.Cameras.Scene2D.Camera(
-      this.terrainCameraOrigin.x,
-      this.terrainCameraOrigin.y,
-      this.terrainCameraBounds.width,
-      this.terrainCameraBounds.height,
-    )
-    this.terrainCamera.name = "terrain window"
-    this.terrainCamera.setScroll(this.terrainCameraBounds.x, this.terrainCameraBounds.y)
-    this.terrainCamera.setViewport(this.terrainCameraBounds.x, this.terrainCameraBounds.y, this.terrainCameraBounds.width, this.terrainCameraBounds.height)
-    this.terrainCamera.setPosition(this.terrainCameraOrigin.x, this.terrainCameraOrigin.y)
-    this.scene.cameras.addExisting(this.terrainCamera, false)
-
-    const left = this.terrainCameraBounds.x + this.terrainCameraBounds.xPadding
-    const width = this.terrainCameraBounds.width - (2 * this.terrainCameraBounds.xPadding)
-    const centerX = this.terrainCameraBounds.x + this.terrainCameraBounds.width / 2
-    const centerY = this.terrainCameraBounds.y + this.terrainCameraBounds.height / 2
-    const top = this.terrainCameraBounds.y + this.terrainCameraBounds.yPadding
-    const height = this.terrainCameraBounds.height - (2 * this.terrainCameraBounds.yPadding)
-
-    this.terrainWindowBackground = new Phaser.GameObjects.Rectangle(this.scene, centerX, centerY, width, height, 0x8e8e8e, 1)
-    this.terrainWindowBackground.lineWidth = 4
-    this.terrainWindowBackground.strokeColor = 0x010101
-    this.terrainWindowBackground.strokeAlpha = 1
-    this.terrainWindowBackground.isStroked = true
-    this.terrainWindowBackground.setDepth(this.TERRAIN_LAYER_DEPTH)
-
-    this.terrainWindowTextGraphic = new Phaser.GameObjects.Text(this.scene, left, top, this.terrainWindowText, { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' })
-    this.terrainWindowTextGraphic.setDepth(this.TERRAIN_LAYER_DEPTH + 1)
-
-    this.scene.add.existing(this.terrainWindowBackground)
-    this.scene.add.existing(this.terrainWindowTextGraphic)
-  }
-
-  private drawTerrainWindow() {
-    const mouseX = this.scene.input.mousePointer.x
-    const mouseY = this.scene.input.mousePointer.y
-    if (this.scene.input.activePointer.isDown) {
-      const clickedCoordinate = this.battleMapGraphicState.getTileCoordinateAtWorldLocation(mouseX, mouseY)
-      if (clickedCoordinate) {
-        this.terrainWindowText = `${clickedCoordinate.getRow()}, ${clickedCoordinate.getColumn()}`
-      }
-      else {
-        this.terrainWindowText = ""
-      }
-      this.terrainWindowTextGraphic.setText(this.terrainWindowText)
-    }
-
-    if (this.terrainCamera.visible && !this.terrainWindowText) {
-      this.terrainCamera.setVisible(false)
-      return
-    }
-    else if(!this.terrainCamera.visible && this.terrainWindowText) {
-      this.terrainCamera.setVisible(true)
-      this.terrainWindowTextGraphic.setText(this.terrainWindowText)
-    }
-
-    const width = this.terrainCameraBounds.width - (2 * this.terrainCameraBounds.xPadding)
-    const height = this.terrainCameraBounds.height - (2 * this.terrainCameraBounds.yPadding)
-
-    if (
-      mouseX >= this.terrainCameraOrigin.x &&
-      mouseX <= this.terrainCameraOrigin.x + width &&
-      mouseY >= this.terrainCameraOrigin.y &&
-      mouseY <= this.terrainCameraOrigin.y + height
-    ) {
-      if (this.terrainCameraOrigin.x < 400) {
-        this.terrainCameraOrigin.x = this.mainLayerBounds.width - this.terrainCameraBounds.width - this.terrainCameraBounds.xMargin
-      }
-      else {
-        this.terrainCameraOrigin.x = 20
-      }
-
-      this.terrainCamera.setPosition(this.terrainCameraOrigin.x, this.terrainCameraOrigin.y)
-    }
   }
 }
