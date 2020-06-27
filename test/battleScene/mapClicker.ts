@@ -1,7 +1,7 @@
 import {expect} from 'chai'
-import {BattleMap, MapTerrain} from "../src/battleMap"
-import {BattleMapGraphicState} from "../src/battleScene/battleMapGraphicState"
-import {Coordinate} from "../src/mapMeasurement";
+import {BattleMap, MapTerrain} from "../../src/battleMap"
+import {BattleMapGraphicState} from "../../src/battleScene/battleMapGraphicState"
+import {Coordinate} from "../../src/mapMeasurement";
 
 describe("clicking on a map", () => {
   let battleMap

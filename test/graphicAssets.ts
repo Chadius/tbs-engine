@@ -7,34 +7,44 @@ describe("Graphic Assets", () => {
     gfxAssets.setAsset("sand", "assets/sand_image.png")
 
     const sandAssetName = gfxAssets.getAsset("sand")
-    expect(sandAssetName).to.equal("assets/sand_image.png")
+    expect(sandAssetName).to.eql("assets/sand_image.png")
   })
 
   it('Can be created with multiple assets', () => {
-    const gfxAssets = new GraphicAssets({
-      "sand": "assets/sand_image.png",
-      "sea": "assets/ocean.png",
-      "footstep": "assets/audio/running.mp3",
-    })
+    const gfxAssets = new GraphicAssets(
+      [
+        {
+          name: "sand",
+          location: "assets/sand_image.png",
+        },
+        {
+          name: "sea",
+          location: "assets/ocean.png",
+        },
+        {
+          name: "footstep",
+          location: "assets/audio/running.mp3",
+        }
+      ])
 
-    expect(gfxAssets.getAsset("sand")).to.equal("assets/sand_image.png")
-    expect(gfxAssets.getAsset("sea")).to.equal("assets/ocean.png")
-    expect(gfxAssets.getAsset("footstep")).to.equal("assets/audio/running.mp3")
+    expect(gfxAssets.getAsset("sand")).to.eql("assets/sand_image.png")
+    expect(gfxAssets.getAsset("sea")).to.eql("assets/ocean.png")
+    expect(gfxAssets.getAsset("footstep")).to.eql("assets/audio/running.mp3")
   })
 
   it('Will return undefined if there is no key', () => {
-    const gfxAssets = new GraphicAssets({
-      "sea": "assets/ocean.png"
-    })
+    const gfxAssets = new GraphicAssets([{
+      name: "sea", location: "assets/ocean.png"
+    }])
 
     expect(gfxAssets.getAsset("sand")).to.be.undefined
   })
 
   it('Will overwrite keys', () => {
-    const gfxAssets = new GraphicAssets({
-      "sea": "assets/ocean.png"
-    })
+    const gfxAssets = new GraphicAssets([{
+      name: "sea", location: "assets/ocean.png"
+    }])
     gfxAssets.setAsset("sea", "assets/water.jpg")
-    expect(gfxAssets.getAsset("sea")).to.equal("assets/water.jpg")
+    expect(gfxAssets.getAsset("sea")).to.eql("assets/water.jpg")
   })
 })

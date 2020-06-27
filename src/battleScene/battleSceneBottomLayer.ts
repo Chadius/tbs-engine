@@ -67,18 +67,27 @@ export class BattleSceneBottomLayer {
   }
 
   preload(): void {
-    const imagesByAssetName = {
-      "sand_tile": "assets/BrownSand.png",
-      "wall_tile": "assets/BlackWall.png",
-      "sky_tile": "assets/BlueSky.png",
-      "road_tile": "assets/GrayRoad.png",
-      "blue_boy": "assets/BlueBoy.png",
-      "orange_background": "assets/OrangeBackground.png",
-    }
+    const assetLocations = this.battleMapGraphicState.getAssetLocations()
+    assetLocations.push(
+      {
+        name: "blue_boy",
+        type: "image",
+        location: "assets/BlueBoy.png"
+      }
+    )
+    assetLocations.push(
+      {
+        name: "orange_background",
+        type: "image",
+        location: "assets/OrangeBackground.png"
+      }
+    )
 
-    this.imageAssets = new GraphicAssets(imagesByAssetName)
-    Object.entries(imagesByAssetName).forEach(pair => {
-      this.scene.load.image(pair[0], pair[1])
+    this.imageAssets = new GraphicAssets(assetLocations)
+
+    const assetIsAnImage = assetLocation => assetLocation.type === "image"
+    assetLocations.filter(assetIsAnImage).forEach(assetLocation => {
+      this.scene.load.image(assetLocation.name, assetLocation.location)
     })
   }
 
@@ -111,19 +120,22 @@ export class BattleSceneBottomLayer {
   }
 
   private createMapLayerToDrawWith(): void {
+    const assetByLocationKey = this.battleMapGraphicState.getAssetNamesOrderedByCoordinate()
+
     const coordinateAndTilePair = this.battleMap.terrain.getTilesOrderedByCoordinates()
     coordinateAndTilePair.forEach((coordinateAndTile) => {
       const coordinateToDraw = Coordinate.newFromLocationKey(coordinateAndTile.locationKey)
       const pixelCoordinates = this.battleMapGraphicState.getPixelCoordinates(coordinateToDraw)
 
-      const terrainTypeToTexture = {
-        "sand": "sand_tile",
-        "wall": "wall_tile",
-        "sky" : "sky_tile",
-        "road": "road_tile",
+      const assetInfo = assetByLocationKey.find(
+        locationKeyImagePair => locationKeyImagePair.locationKey === coordinateAndTile.locationKey
+      )
+
+      if (!assetInfo) {
+        return
       }
 
-      const textureToDraw = terrainTypeToTexture[coordinateAndTile.terrain.getName()] || "wall_tile"
+      const textureToDraw = assetInfo.image
       const tileKey = `mapTile${coordinateToDraw.getRow()} ${coordinateToDraw.getColumn()}`
       const mapTileImage = this.scene.physics.add.image(pixelCoordinates[0], pixelCoordinates[1], textureToDraw)
       mapTileImage.setDepth(this.TERRAIN_LAYER_DEPTH)

@@ -1,5 +1,5 @@
 import {expect} from 'chai'
-import {Coordinate, Path, SearchCoordinate} from "../src/mapMeasurement";
+import {Coordinate, SearchCoordinate} from "../src/mapMeasurement";
 import {PathMap} from "../src/pathMap";
 
 describe('PathMaps are created', () => {
