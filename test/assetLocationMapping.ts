@@ -1,9 +1,9 @@
 import {expect} from 'chai'
-import {GraphicAssets} from "../src/assetMapping/graphicAssets";
+import {AssetLocationMapping} from "../src/assetMapping/assetLocationMapping";
 
 describe("Graphic Assets", () => {
   it("Can look up assets", () => {
-    const gfxAssets = new GraphicAssets();
+    const gfxAssets = new AssetLocationMapping();
     gfxAssets.setAsset("sand", "assets/sand_image.png")
 
     const sandAssetName = gfxAssets.getAsset("sand")
@@ -11,7 +11,7 @@ describe("Graphic Assets", () => {
   })
 
   it('Can be created with multiple assets', () => {
-    const gfxAssets = new GraphicAssets(
+    const gfxAssets = new AssetLocationMapping(
       [
         {
           name: "sand",
@@ -33,7 +33,7 @@ describe("Graphic Assets", () => {
   })
 
   it('Will return undefined if there is no key', () => {
-    const gfxAssets = new GraphicAssets([{
+    const gfxAssets = new AssetLocationMapping([{
       name: "sea", location: "assets/ocean.png"
     }])
 
@@ -41,10 +41,32 @@ describe("Graphic Assets", () => {
   })
 
   it('Will overwrite keys', () => {
-    const gfxAssets = new GraphicAssets([{
+    const gfxAssets = new AssetLocationMapping([{
       name: "sea", location: "assets/ocean.png"
     }])
     gfxAssets.setAsset("sea", "assets/water.jpg")
     expect(gfxAssets.getAsset("sea")).to.eql("assets/water.jpg")
+  })
+
+  it('Returns all name locaiton pairs', () => {
+    const assets = new AssetLocationMapping([
+      {
+        name: "sea", location: "assets/ocean.png"
+      },
+      {
+        name: "footstep",
+        location: "assets/audio/running.mp3",
+      }
+    ])
+    expect(assets.getAssetNameLocaitonPairs()).to.eql([
+        {
+          name: "sea", location: "assets/ocean.png"
+        },
+        {
+          name: "footstep",
+          location: "assets/audio/running.mp3",
+        }
+      ]
+    )
   })
 })

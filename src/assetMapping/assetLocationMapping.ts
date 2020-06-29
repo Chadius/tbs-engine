@@ -1,4 +1,4 @@
-export class GraphicAssets {
+export class AssetLocationMapping {
   assetMapping: Map<string, string>
 
   constructor(assetNameLocationPairs?: Array<{name: string; location: string}>) {
@@ -17,5 +17,16 @@ export class GraphicAssets {
 
   getAsset(key: string): string {
     return this.assetMapping.get(key)
+  }
+
+  getAssetNameLocaitonPairs(): Array<{name: string; location: string}> {
+    const pairs = []
+    this.assetMapping.forEach((location: string, name: string) => {
+      pairs.push({
+        location: location,
+        name: name
+      })
+    })
+    return pairs
   }
 }

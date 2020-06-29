@@ -2,7 +2,7 @@ import "phaser";
 import {BattleMap, MapTerrain} from "../battleMap";
 import {Coordinate} from "../mapMeasurement";
 import {Squaddie} from "../squaddie";
-import {GraphicAssets} from "../assetMapping/graphicAssets";
+import {AssetLocationMapping} from "../assetMapping/assetLocationMapping";
 import Image = Phaser.GameObjects.Image;
 import {BattleMapGraphicState} from "./battleMapGraphicState";
 import {TerrainWindow} from "./terrainWindow";
@@ -16,7 +16,7 @@ export class BattleSceneBottomLayer {
   scene: Phaser.Scene
   mainLayerBounds = {x: 0, y: 0, width: 800, height: 600}
   squaddieSpriteNameByID: Map<string, string>
-  imageAssets: GraphicAssets
+  imageAssets: AssetLocationMapping
 
   backgroundImage: Image
   squaddieSpritesByKey: Map<string, Image>
@@ -67,15 +67,15 @@ export class BattleSceneBottomLayer {
   }
 
   preload(): void {
-    const assetLocations = this.battleMapGraphicState.getAssetLocations()
-    assetLocations.push(
+    const imageAssetLocations = this.battleMapGraphicState.getAssetLocations()
+    imageAssetLocations.push(
       {
         name: "blue_boy",
         type: "image",
         location: "assets/BlueBoy.png"
       }
     )
-    assetLocations.push(
+    imageAssetLocations.push(
       {
         name: "orange_background",
         type: "image",
@@ -83,10 +83,13 @@ export class BattleSceneBottomLayer {
       }
     )
 
-    this.imageAssets = new GraphicAssets(assetLocations)
+    this.imageAssets = new AssetLocationMapping(imageAssetLocations)
 
-    const assetIsAnImage = assetLocation => assetLocation.type === "image"
-    assetLocations.filter(assetIsAnImage).forEach(assetLocation => {
+    this.preloadImageAssets(this.imageAssets)
+  }
+
+  private preloadImageAssets(assetLocationMapping: AssetLocationMapping): void{
+    assetLocationMapping.getAssetNameLocaitonPairs().forEach(assetLocation => {
       this.scene.load.image(assetLocation.name, assetLocation.location)
     })
   }
