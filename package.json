@@ -4,7 +4,7 @@
   "description": "Turn based strategy engine",
   "main": "index.js",
   "scripts": {
-    "test": "ts-mocha test/**.ts test/battleScene/*.ts",
+    "test": "ts-mocha test/**.ts test/battleScene/*.ts test/gui/*.ts",
     "lint": "npx eslint --fix test/*.ts",
     "build": "webpack",
     "start": "webpack --watch & live-server --port=8085"
