@@ -1,9 +1,10 @@
 import "phaser";
 import {BattleMapGraphicState} from "./battleMapGraphicState";
+import {GuiBoxMeasurement} from "../gui/guiBoxMeasurement";
 
 export class TerrainWindow {
   camera: Phaser.Cameras.Scene2D.Camera
-  cameraScroll = {x: -205, y: 0}
+  cameraScroll = {x: -220, y: 0}
   cameraViewport = {x: 600, y: 780, width: 200, height: 123}
   windowMargin = {x: 20, y: 10}
   windowPadding = {x: 5, y: 5}
@@ -11,6 +12,7 @@ export class TerrainWindow {
   background: Phaser.GameObjects.Rectangle
   text: string
   borderWidth: number
+  guiElement: GuiBoxMeasurement
 
   init(params: any): void {
     this.borderWidth = 4
@@ -31,14 +33,55 @@ export class TerrainWindow {
     this.camera.setViewport(this.cameraViewport.x, this.cameraViewport.y, this.cameraViewport.width, this.cameraViewport.height)
     scene.cameras.addExisting(this.camera, false)
 
-    this.background = new Phaser.GameObjects.Rectangle(scene, this.getCenterX(), this.getCenterY(), this.getBoxContainerWidth(), this.getBoxContainerHeight(), 0x8e8e8e, 1)
+    this.guiElement = new GuiBoxMeasurement({
+      origin: {
+        left: this.cameraScroll.x,
+        width: this.cameraViewport.width,
+        top: this.cameraScroll.y,
+        height: this.cameraViewport.height,
+      },
+      border: {
+        top: 4,
+        right: 4,
+        bottom: 4,
+        left: 4,
+      },
+      margin: {
+        top: 10,
+        right: 20,
+        bottom: 10,
+        left: 20,
+      },
+      padding: {
+        top: 5,
+        right: 5,
+        bottom: 5,
+        left: 5,
+      }
+    })
+
+    this.background = new Phaser.GameObjects.Rectangle(
+      scene,
+      this.guiElement.getBorderCenterX(),
+      this.guiElement.getBorderCenterY(),
+      this.guiElement.getMarginWidth(),
+      this.guiElement.getMarginHeight(),
+      0x8e8e8e,
+      1,
+    )
     this.background.lineWidth = 4
     this.background.strokeColor = 0x010101
     this.background.strokeAlpha = 1
     this.background.isStroked = true
     this.background.setDepth(terrainLayerDepth)
 
-    this.textGraphic = new Phaser.GameObjects.Text(scene, this.getContentLeft(), this.getContentTop(), this.text, { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' })
+    this.textGraphic = new Phaser.GameObjects.Text(
+      scene,
+      this.guiElement.getContentLeft(),
+      this.guiElement.getContentTop(),
+      this.text,
+      { fontFamily: 'Georgia, "Goudy Bookletter 1911", Times, serif' }
+    )
     this.textGraphic.setDepth(terrainLayerDepth + 1)
 
     scene.add.existing(this.background)
@@ -56,8 +99,8 @@ export class TerrainWindow {
   ) {
     this.updateTextBasedOnMouseClick(mouse, battleMapGraphicState)
 
-    const width = this.getContentWidth()
-    const height = this.getContentHeight()
+    const width = this.guiElement.getContentWidth()
+    const height = this.guiElement.getContentHeight()
 
     if (
       mouse.x >= this.cameraViewport.x &&
@@ -107,39 +150,5 @@ export class TerrainWindow {
     else if(!this.camera.visible && this.text) {
       this.camera.setVisible(true)
     }
-  }
-
-  getContentWidth() {
-    return this.cameraViewport.width - (2 * this.windowMargin.x) - (2 * this.borderWidth) - (2 * this.windowPadding.x)
-  }
-  getContentHeight() {
-    return this.cameraViewport.height - (2 * this.windowPadding.y)
-  }
-
-  getContentX() {
-    return this.cameraScroll.x + this.windowMargin.x + this.borderWidth + this.windowPadding.x
-  }
-  getContentLeft() {
-    return this.getContentX()
-  }
-  getContentY() {
-    return this.cameraScroll.y + this.windowMargin.y + this.borderWidth + this.windowPadding.y
-  }
-  getContentTop() {
-    return this.getContentY()
-  }
-
-  getBoxContainerWidth() {
-    return this.cameraViewport.width - (2 * this.windowMargin.x) - (2 * this.borderWidth)
-  }
-  getBoxContainerHeight() {
-    return this.cameraViewport.height - (2 * this.windowMargin.y) - (2 * this.borderWidth)
-  }
-
-  getCenterX() {
-    return this.cameraScroll.x + (this.cameraViewport.width / 2)
-  }
-  getCenterY() {
-    return this.cameraScroll.y + (this.cameraViewport.height / 2)
   }
 }
