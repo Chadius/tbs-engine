@@ -18,7 +18,7 @@ describe('Create GUI Box Measurements', () => {
     margin = {
       top: 20,
       right: 10,
-      bottom: 15,
+      bottom: 16,
       left: 0,
     }
 
@@ -48,6 +48,9 @@ describe('Create GUI Box Measurements', () => {
     expect(window.getOriginHeight()).to.eql(120)
     expect(window.getOriginRight()).to.eql(300)
     expect(window.getOriginBottom()).to.eql(130)
+
+    expect(window.getOriginCenterX()).to.eql((100 + 200) / 2)
+    expect(window.getOriginCenterY()).to.eql((10 + 120) / 2)
   })
 
   it('Knows the margin', () => {
@@ -63,8 +66,11 @@ describe('Create GUI Box Measurements', () => {
 
     expect(window.getMarginTopEnd()).to.eql(30)
     expect(window.getMarginRightEnd()).to.eql(290)
-    expect(window.getMarginBottomEnd()).to.eql(115)
+    expect(window.getMarginBottomEnd()).to.eql(114)
     expect(window.getMarginLeftEnd()).to.eql(100)
+
+    expect(window.getMarginWidth()).to.eql( 290 - 100)
+    expect(window.getMarginHeight()).to.eql( 114 - 30)
   })
 
   it('Knows the border', () => {
@@ -81,8 +87,11 @@ describe('Create GUI Box Measurements', () => {
 
     expect(window.getBorderTopEnd()).to.eql(40)
     expect(window.getBorderRightEnd()).to.eql(280)
-    expect(window.getBorderBottomEnd()).to.eql(105)
+    expect(window.getBorderBottomEnd()).to.eql(104)
     expect(window.getBorderLeftEnd()).to.eql(110)
+
+    expect(window.getBorderCenterX()).to.eql( (280 + 110)/ 2)
+    expect(window.getBorderCenterY()).to.eql( (40 + 104)/ 2)
   })
 
   it('Knows the padding', () => {
@@ -100,7 +109,7 @@ describe('Create GUI Box Measurements', () => {
 
     expect(window.getPaddingTopEnd()).to.eql(60)
     expect(window.getPaddingRightEnd()).to.eql(260)
-    expect(window.getPaddingBottomEnd()).to.eql(85)
+    expect(window.getPaddingBottomEnd()).to.eql(84)
     expect(window.getPaddingLeftEnd()).to.eql(130)
   })
 
@@ -114,8 +123,14 @@ describe('Create GUI Box Measurements', () => {
 
     expect(window.getContentTop()).to.eql(60)
     expect(window.getContentRight()).to.eql(260)
-    expect(window.getContentBottom()).to.eql(85)
+    expect(window.getContentBottom()).to.eql(84)
     expect(window.getContentLeft()).to.eql(130)
+
+    expect(window.getContentCenterX()).to.eql((130 + 260) / 2)
+    expect(window.getContentCenterY()).to.eql((84 + 60) / 2)
+
+    expect(window.getContentWidth()).to.eql(260 - 130)
+    expect(window.getContentHeight()).to.eql(84 - 60)
   })
 })
 
@@ -213,6 +228,15 @@ describe("Change a GUI Box Measurements", () => {
   })
 
   it("Can change the border", () => {
+    window.setBorderTop(-20)
+    expect(window.getBorderTopValue()).to.eql(0)
+    window.setBorderBottom(-20)
+    expect(window.getBorderBottomValue()).to.eql(0)
+    window.setBorderLeft(-20)
+    expect(window.getBorderLeftValue()).to.eql(0)
+    window.setBorderRight(-20)
+    expect(window.getBorderRightValue()).to.eql(0)
+
     window.setBorderTop(20)
     expect(window.getBorderTopEnd()).to.eql(30)
 

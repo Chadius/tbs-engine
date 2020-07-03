@@ -105,6 +105,13 @@ export class GuiBoxMeasurement {
     return this.getOriginTop() + this.getOriginHeight()
   }
 
+  getOriginCenterX(): number {
+    return (this.getOriginLeft() + this.getOriginWidth()) / 2
+  }
+  getOriginCenterY(): number {
+    return (this.getOriginTop() + this.getOriginHeight()) / 2
+  }
+
   setOriginLeft(left: number) {
     this.origin.left = left
   }
@@ -162,6 +169,13 @@ export class GuiBoxMeasurement {
     return this.getOriginLeft() + this.getMarginLeftValue()
   }
 
+  getMarginWidth(): number {
+    return this.getMarginRightEnd() - this.getMarginLeftEnd()
+  }
+  getMarginHeight(): number {
+    return this.getMarginBottomEnd() - this.getMarginTopEnd()
+  }
+
   setMarginTop(top: number) {
     this.margin.top = top
   }
@@ -201,17 +215,29 @@ export class GuiBoxMeasurement {
     return this.getMarginLeftEnd() + this.getBorderLeftValue()
   }
 
+  getBorderCenterX(): number {
+    return (this.getBorderLeftEnd() + this.getBorderRightEnd()) / 2.0
+  }
+
+  getBorderCenterY(): number {
+    return (this.getBorderTopEnd() + this.getBorderBottomEnd()) / 2.0
+  }
+
   setBorderTop(top: number) {
-    this.border.top = top
+    const newValue = top >= 0 ? top : 0
+    this.border.top = newValue
   }
   setBorderRight(right: number) {
-    this.border.right = right
+    const newValue = right >= 0 ? right : 0
+    this.border.right = newValue
   }
   setBorderBottom(bottom: number) {
-    this.border.bottom = bottom
+    const newValue = bottom >= 0 ? bottom : 0
+    this.border.bottom = newValue
   }
   setBorderLeft(left: number) {
-    this.border.left = left
+    const newValue = left >= 0 ? left : 0
+    this.border.left = newValue
   }
 
   getPaddingTopValue(): number {
@@ -264,5 +290,19 @@ export class GuiBoxMeasurement {
   }
   getContentLeft(): number {
     return this.getPaddingLeftEnd()
+  }
+
+  getContentCenterX(): number {
+    return (this.getContentLeft() + this.getContentRight()) / 2.0
+  }
+  getContentCenterY(): number {
+    return (this.getContentTop() + this.getContentBottom()) / 2.0
+  }
+
+  getContentWidth(): number {
+    return (this.getContentRight() - this.getContentLeft())
+  }
+  getContentHeight(): number {
+    return (this.getContentBottom() - this.getContentTop())
   }
 }
