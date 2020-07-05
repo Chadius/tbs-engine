@@ -6,6 +6,7 @@ import {AssetLocationMapping} from "../assetMapping/assetLocationMapping";
 import Image = Phaser.GameObjects.Image;
 import {BattleMapGraphicState} from "./battleMapGraphicState";
 import {TerrainWindow} from "./terrainWindow";
+import {GuiBoxMeasurement} from "../gui/guiBoxMeasurement";
 
 export class BattleSceneBottomLayer {
   BACKGROUND_LAYER_DEPTH = -10
@@ -14,7 +15,7 @@ export class BattleSceneBottomLayer {
 
   tileWidth = 64
   scene: Phaser.Scene
-  mainLayerBounds = {x: 0, y: 0, width: 800, height: 600}
+  mainLayerBounds: GuiBoxMeasurement
   squaddieSpriteNameByID: Map<string, string>
   imageAssets: AssetLocationMapping
 
@@ -28,23 +29,35 @@ export class BattleSceneBottomLayer {
   terrainWindow: TerrainWindow
 
   constructor(scene: Phaser.Scene) {
-    this.scene = scene
     this.terrainWindow = new TerrainWindow()
+    this.scene = scene
   }
 
   init(params: any): void {
+    this.squaddieSpriteNameByID = new Map<string, string>()
+    this.squaddieSpritesByKey = new Map<string, Image>()
+    this.mapTilesByKey = new Map<string, Image>()
+    this.initScreenResolution()
+
     this.battleMap = new BattleMap(new MapTerrain([
       ['1', '1', '1', '1'],
         ['1', 'X', '1', '1'],
           ['3', '3', 'S', 'X'],
     ]))
     this.battleMapGraphicState = new BattleMapGraphicState({battleMap: this.battleMap, tileWidth: this.tileWidth})
+    this.addSquaddiesToMap();
+    this.terrainWindow.init({parentWindow: this.mainLayerBounds})
+  }
 
-    this.squaddieSpriteNameByID = new Map<string, string>()
+  private initScreenResolution(): void {
+    this.mainLayerBounds = new GuiBoxMeasurement({
+      origin: {
+        left: 0, top: 0, width: 480, height: 270
+      }
+    })
+  }
 
-    this.squaddieSpritesByKey = new Map<string, Image>()
-    this.mapTilesByKey = new Map<string, Image>()
-
+  private addSquaddiesToMap(): void {
     this.battleMap.addSquaddie(
       new Squaddie('soldier0', 5),
       new Coordinate(0, 1)
@@ -62,8 +75,6 @@ export class BattleSceneBottomLayer {
       new Coordinate(1, 2)
     )
     this.squaddieSpriteNameByID.set('soldier2', 'blue_boy')
-
-    this.terrainWindow.init(params)
   }
 
   preload(): void {
@@ -101,12 +112,16 @@ export class BattleSceneBottomLayer {
     this.setupCameras()
   }
 
-  createBackgroundLayer(): void {
-    this.backgroundImage = this.scene.physics.add.image(400, 300, "orange_background")
+  private createBackgroundLayer(): void {
+    this.backgroundImage = this.scene.physics.add.image(
+      this.mainLayerBounds.getOriginCenterX(),
+      this.mainLayerBounds.getOriginCenterY(),
+      "orange_background"
+    )
     this.backgroundImage.setDepth(this.BACKGROUND_LAYER_DEPTH)
   }
 
-  createSquaddieSprites(): void {
+  private createSquaddieSprites(): void {
     const coordinatesOfAllSquaddiesByID = this.battleMap.getCoordinatesOfAllSquaddiesByID()
 
     coordinatesOfAllSquaddiesByID.forEach((squaddieCoordinate, squaddieId) => {
@@ -149,18 +164,18 @@ export class BattleSceneBottomLayer {
     })
   }
 
-  setupCameras() {
+  private setupCameras() {
     this.scene.cameras.main.setScroll(0, 0)
     this.scene.cameras.main.setZoom(1.0)
 
     this.scene.cameras.main.setBounds(
-      this.mainLayerBounds.x,
-      this.mainLayerBounds.y,
-      this.mainLayerBounds.width,
-      this.mainLayerBounds.height
+      this.mainLayerBounds.getOriginLeft(),
+      this.mainLayerBounds.getOriginTop(),
+      this.mainLayerBounds.getOriginWidth(),
+      this.mainLayerBounds.getOriginHeight()
     )
 
-    this.terrainWindow.createTerrainWindowCamera(this.mainLayerBounds, this.scene, this.TERRAIN_LAYER_DEPTH)
+    this.terrainWindow.createTerrainWindowCamera(this.scene, this.TERRAIN_LAYER_DEPTH)
   }
 
   update(time: number, delta: number): void {
@@ -172,19 +187,23 @@ export class BattleSceneBottomLayer {
         y: this.scene.input.mousePointer.y,
         isDown: this.scene.input.activePointer.isDown
       },
-      this.battleMapGraphicState,
-      this.mainLayerBounds.width
+      this.battleMapGraphicState
     )
   }
 
-  drawBackgroundLayer() {
-    this.backgroundImage.setDisplaySize(800, 600)
+  private drawBackgroundLayer() {
+    this.backgroundImage.setDisplaySize(this.mainLayerBounds.getOriginWidth(), this.mainLayerBounds.getOriginHeight())
+
+    const top = this.mainLayerBounds.getOriginTop()
+    const left = this.mainLayerBounds.getOriginLeft()
+    const bottom = this.mainLayerBounds.getOriginBottom()
+    const right = this.mainLayerBounds.getOriginRight()
 
     const graphics = this.scene.add.graphics({ lineStyle: { width: 4, color: 0x010101 } })
-    graphics.strokeLineShape(new Phaser.Geom.Line(0, 600, 0, 0))
-    graphics.strokeLineShape(new Phaser.Geom.Line(0, 600, 800, 600))
-    graphics.strokeLineShape(new Phaser.Geom.Line(800, 600, 800, 0))
-    graphics.strokeLineShape(new Phaser.Geom.Line(0,  0, 800, 0))
+    graphics.strokeLineShape(new Phaser.Geom.Line(left, top, right, top))
+    graphics.strokeLineShape(new Phaser.Geom.Line(right, bottom, right, top))
+    graphics.strokeLineShape(new Phaser.Geom.Line(left, bottom, right, bottom))
+    graphics.strokeLineShape(new Phaser.Geom.Line(left, bottom, left, top))
   }
 
   private drawAllSquaddies() {

@@ -7,21 +7,23 @@ export class TerrainWindow {
   cameraScroll = {x: -220, y: 0}
   cameraViewport = {x: 600, y: 780, width: 200, height: 123}
   windowMargin = {x: 20, y: 10}
-  windowPadding = {x: 5, y: 5}
   textGraphic: Phaser.GameObjects.Text
   background: Phaser.GameObjects.Rectangle
   text: string
-  borderWidth: number
   guiElement: GuiBoxMeasurement
+  parentWindow: GuiBoxMeasurement
 
-  init(params: any): void {
-    this.borderWidth = 4
+  init(params: {parentWindow: GuiBoxMeasurement}): void {
+    this.parentWindow = params.parentWindow
     this.text = "Click on a tile"
   }
 
-  createTerrainWindowCamera(parentWindow: {x: number; y: number; width: number; height: number}, scene: Phaser.Scene, terrainLayerDepth: number) {
-    this.cameraViewport.x = parentWindow.width - this.cameraViewport.width - this.windowMargin.x
-    this.cameraViewport.y = parentWindow.height - this.cameraViewport.height - this.windowMargin.x
+  createTerrainWindowCamera(
+    scene: Phaser.Scene,
+    terrainLayerDepth: number
+  ) {
+    this.cameraViewport.x = this.parentWindow.getOriginWidth() - this.cameraViewport.width - this.windowMargin.x
+    this.cameraViewport.y = this.parentWindow.getOriginHeight() - this.cameraViewport.height - this.windowMargin.x
     this.camera = new Phaser.Cameras.Scene2D.Camera(
       this.cameraViewport.x,
       this.cameraViewport.y,
@@ -94,11 +96,13 @@ export class TerrainWindow {
       y: number;
       isDown: boolean;
     },
-    battleMapGraphicState: BattleMapGraphicState,
-    parentWindowWidth: number
+    battleMapGraphicState: BattleMapGraphicState
   ) {
     this.updateTextBasedOnMouseClick(mouse, battleMapGraphicState)
+    this.moveWindowBasedOnMouseMovement(mouse);
+  }
 
+  private moveWindowBasedOnMouseMovement(mouse: { x: number; y: number; isDown: boolean }) {
     const width = this.guiElement.getContentWidth()
     const height = this.guiElement.getContentHeight()
 
@@ -108,10 +112,9 @@ export class TerrainWindow {
       mouse.y >= this.cameraViewport.y &&
       mouse.y <= this.cameraViewport.y + height
     ) {
-      if (this.cameraViewport.x < 400) {
-        this.cameraViewport.x = parentWindowWidth - this.cameraViewport.width - this.windowMargin.x
-      }
-      else {
+      if (this.cameraViewport.x < this.parentWindow.getOriginCenterX()) {
+        this.cameraViewport.x = this.parentWindow.getOriginWidth() - this.cameraViewport.width - this.windowMargin.x
+      } else {
         this.cameraViewport.x = 20
       }
 
