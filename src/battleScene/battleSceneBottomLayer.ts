@@ -7,6 +7,7 @@ import Image = Phaser.GameObjects.Image;
 import {BattleMapGraphicState} from "./battleMapGraphicState";
 import {TerrainWindow} from "./terrainWindow";
 import {GuiBoxMeasurement} from "../gui/guiBoxMeasurement";
+import {SquaddieOnMap} from "./squaddieOnMap";
 
 export class BattleSceneBottomLayer {
   BACKGROUND_LAYER_DEPTH = -10
@@ -16,11 +17,11 @@ export class BattleSceneBottomLayer {
   tileWidth = 64
   scene: Phaser.Scene
   mainLayerBounds: GuiBoxMeasurement
-  squaddieSpriteNameByID: Map<string, string>
+  squaddieOnMapNameByID: Map<string, SquaddieOnMap>
+
   imageAssets: AssetLocationMapping
 
   backgroundImage: Image
-  squaddieSpritesByKey: Map<string, Image>
   mapTilesByKey: Map<string, Image>
 
   battleMap: BattleMap
@@ -34,9 +35,8 @@ export class BattleSceneBottomLayer {
   }
 
   init(params: any): void {
-    this.squaddieSpriteNameByID = new Map<string, string>()
-    this.squaddieSpritesByKey = new Map<string, Image>()
     this.mapTilesByKey = new Map<string, Image>()
+    this.squaddieOnMapNameByID = new Map<string, SquaddieOnMap> ()
     this.initScreenResolution()
 
     this.battleMap = new BattleMap(new MapTerrain([
@@ -58,34 +58,53 @@ export class BattleSceneBottomLayer {
   }
 
   private addSquaddiesToMap(): void {
-    this.battleMap.addSquaddie(
-      new Squaddie('soldier0', 5),
-      new Coordinate(0, 1)
-    )
-    this.squaddieSpriteNameByID.set('soldier0', 'blue_boy')
 
-    this.battleMap.addSquaddie(
-      new Squaddie('soldier1', 5),
-      new Coordinate(2, 3)
-    )
-    this.squaddieSpriteNameByID.set('soldier1', 'blue_boy')
+    const squaddieCreationInfo = [
+      {
+        squaddieId: "soldier0",
+        row: 0,
+        column: 1
+      },
+      {
+        squaddieId: "soldier1",
+        row: 2,
+        column: 3
+      },
+      {
+        squaddieId: "soldier2",
+        row: 1,
+        column: 2
+      },
+    ]
 
-    this.battleMap.addSquaddie(
-      new Squaddie('soldier2', 5),
-      new Coordinate(1, 2)
-    )
-    this.squaddieSpriteNameByID.set('soldier2', 'blue_boy')
+    squaddieCreationInfo.forEach(info => {
+      const newSoldier = new Squaddie(info.squaddieId, 5)
+      this.battleMap.addSquaddie(
+        newSoldier,
+        new Coordinate(info.row, info.column)
+      )
+      this.squaddieOnMapNameByID.set(info.squaddieId, new SquaddieOnMap({
+        squaddie: newSoldier,
+        spriteName: 'blue_boy',
+        spriteLocation: "assets/BlueBoy.png",
+        battleMapGraphicState: this.battleMapGraphicState,
+      }))
+    })
   }
 
   preload(): void {
     const imageAssetLocations = this.battleMapGraphicState.getAssetLocations()
-    imageAssetLocations.push(
-      {
-        name: "blue_boy",
-        type: "image",
-        location: "assets/BlueBoy.png"
-      }
-    )
+
+    this.squaddieOnMapNameByID.forEach((squaddieOnMap) => {
+      imageAssetLocations.push(
+        {
+          name: squaddieOnMap.getSpriteName(),
+          type: "image",
+          location: squaddieOnMap.getSpriteLocation(),
+        }
+      )
+    })
+
     imageAssetLocations.push(
       {
         name: "orange_background",
@@ -125,15 +144,14 @@ export class BattleSceneBottomLayer {
     const coordinatesOfAllSquaddiesByID = this.battleMap.getCoordinatesOfAllSquaddiesByID()
 
     coordinatesOfAllSquaddiesByID.forEach((squaddieCoordinate, squaddieId) => {
-      const spriteToDraw = this.squaddieSpriteNameByID.get(squaddieId)
+      const spriteToDraw = this.squaddieOnMapNameByID.get(squaddieId).getSpriteName()
+
       const coordinatesToDrawSquaddieAt = this.battleMapGraphicState.getPixelCoordinates(squaddieCoordinate)
 
       const squaddieSprite = this.scene.physics.add.image(coordinatesToDrawSquaddieAt[0], coordinatesToDrawSquaddieAt[1], spriteToDraw)
       squaddieSprite.setDepth(this.SQUADDIE_LAYER_DEPTH)
-      this.squaddieSpritesByKey.set(
-        squaddieId,
-        squaddieSprite
-      )
+
+      this.squaddieOnMapNameByID.get(squaddieId).setSprite(squaddieSprite)
     })
   }
 
@@ -210,15 +228,11 @@ export class BattleSceneBottomLayer {
     const coordinatesOfAllSquaddiesByID = this.battleMap.getCoordinatesOfAllSquaddiesByID()
 
     coordinatesOfAllSquaddiesByID.forEach((squaddieCoordinate, squaddieId) => {
-      const squaddieToDraw = this.battleMap.getSquaddieById(squaddieId)
-      this.drawSquaddie(squaddieToDraw, squaddieCoordinate.getRow(),squaddieCoordinate.getColumn())
+      const squaddieToDraw = this.squaddieOnMapNameByID.get(squaddieId)
+      squaddieToDraw.drawSquaddie(
+        squaddieCoordinate.getRow(),
+        squaddieCoordinate.getColumn()
+      )
     })
-  }
-
-  private drawSquaddie(squaddie: Squaddie, row: number, column: number) {
-    const coordinates = this.battleMapGraphicState.getPixelCoordinates(new Coordinate(row, column))
-    const squaddieSprite = this.squaddieSpritesByKey.get(squaddie.getId())
-    squaddieSprite.x = coordinates[0]
-    squaddieSprite.y = coordinates[1]
   }
 }
