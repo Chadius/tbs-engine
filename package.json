@@ -21,12 +21,12 @@
     "eslint-config-google": "^0.14.0",
     "live-server": "^1.2.1",
     "mocha": "^7.2.0",
-    "phaser": "^3.23.0",
-    "ts-loader": "^6.2.2",
+    "phaser": "^3.55.2",
+    "ts-loader": "^9.4.2",
     "ts-mocha": "^6.0.0",
     "typescript": "^3.9.5",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
     "websocket-extensions": ">=0.1.4"
   },
   "dependencies": {
